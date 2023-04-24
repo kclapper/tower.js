@@ -1,0 +1,13 @@
+{
+  "name": "js-numbers",
+  "version": "0.1.1",
+  "description": "A Javascript implementation of the Scheme number library.",
+  "main": "src/js-numbers.js",
+  "repository": "github:kclapper/tower.js",
+  "files": ["src/js-numbers.js"],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dyoo",
+  "license": "MIT"
+}
