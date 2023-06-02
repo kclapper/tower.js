@@ -8,7 +8,9 @@
   "compilerOptions": {
     "outDir": "build",
     "noEmitOnError": true,
-    "module": "es2015",
-    "sourceMap": true
+    "module": "es2020",
+    "target": "es2020",
+    "sourceMap": true,
+    "declaration": true
   }
 }

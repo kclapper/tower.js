@@ -2177,17 +2177,17 @@ if (typeof(exports) !== 'undefined') {
 	    c = other.r;
 	    d = other.i;
 	    if (lessThanOrEqual(abs(d), abs(c))) {
-		r = divide(d, c);
-		x = divide(add(a, multiply(b, r)),
-			   add(c, multiply(d, r)));
-		y = divide(subtract(b, multiply(a, r)),
-			   add(c, multiply(d, r)));
+		    r = divide(d, c);
+		    x = divide(add(a, multiply(b, r)),
+			           add(c, multiply(d, r)));
+		    y = divide(subtract(b, multiply(a, r)),
+			           add(c, multiply(d, r)));
 	    } else {
-		r = divide(c, d);
-		x = divide(add(multiply(a, r), b),
-			   add(multiply(c, r), d));
-		y = divide(subtract(multiply(b, r), a),
-			   add(multiply(c, r), d));
+		    r = divide(c, d);
+		    x = divide(add(multiply(a, r), b),
+			           add(multiply(c, r), d));
+		    y = divide(subtract(multiply(b, r), a),
+			           add(multiply(c, r), d));
 	    }
 	    return Complex.makeInstance(x, y);
 	} else {
@@ -2198,8 +2198,8 @@ if (typeof(exports) !== 'undefined') {
 	    var down = realPart(multiply(other, con));
 
 	    var result = Complex.makeInstance(
-		divide(realPart(up), down),
-		divide(imaginaryPart(up), down));
+		    divide(realPart(up), down),
+		    divide(imaginaryPart(up), down));
 	    return result;
 	}
     };
@@ -2320,21 +2320,21 @@ if (typeof(exports) !== 'undefined') {
 
 
     Complex.prototype.expt = function(y){
-	if (isExactInteger(y) && greaterThanOrEqual(y, 0)) {
-	    return fastExpt(this, y);
-	}
-	var expo = multiply(y, this.log());
-	return exp(expo);
+	    if (isExactInteger(y) && greaterThanOrEqual(y, 0)) {
+	        return fastExpt(this, y);
+	    }
+	    var expo = multiply(y, this.log());
+	    return exp(expo);
     };
 
     Complex.prototype.exp = function(){
-	var r = exp(this.r);
-	var cos_a = cos(this.i);
-	var sin_a = sin(this.i);
+	    var r = exp(this.r);
+	    var cos_a = cos(this.i);
+	    var sin_a = sin(this.i);
 
-	return multiply(
-	    r,
-	    add(cos_a, timesI(sin_a)));
+	    return multiply(
+	        r,
+	        add(cos_a, timesI(sin_a)));
     };
 
     Complex.prototype.acos = function(){

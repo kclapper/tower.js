@@ -1,8 +1,12 @@
 {
   "name": "tower.js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A JS implementation of the Scheme numeric tower.",
   "main": "build/tower.js",
+  "files": [
+    "build/tower.js",
+    "build/*.d.ts"
+  ],
   "scripts": {
     "test": "npm run build && jest",
     "build": "webpack"
@@ -17,8 +21,7 @@
     "numbers"
   ],
   "author": [
-    "kclapper",
-    "dyoo"
+    "kclapper"
   ],
   "license": "MIT",
   "bugs": {
