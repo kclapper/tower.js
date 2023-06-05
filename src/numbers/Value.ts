@@ -903,3 +903,5 @@ export class BigExactNumber extends ExactNumber {
         return this.toSmallExact().asin();
     }
 }
+
+const EXACT_ZERO = new SmallExactNumber(0);

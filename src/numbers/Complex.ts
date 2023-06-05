@@ -14,6 +14,7 @@ import {
     isJSNumber,
 } from './main';
 import { Integer } from './Integer';
+import { Rational } from './Rational';
 import { Real } from './Real';
 import {
     ZERO_VAL,
@@ -35,8 +36,8 @@ import {
 export class Complex {
     public readonly level: Level;
 
-    protected readonly real: Value;
-    protected readonly imag: Value;
+    public readonly real: Value;
+    public readonly imag: Value;
 
     constructor(real: Value, imag?: Value) {
         this.level = Level.COMPLEX;
@@ -117,7 +118,7 @@ export class Complex {
     }
 
     public liftTo(other: TowerNumber): Complex {
-        if (isJSNumber(other)) {
+        if (isJSInteger(other)) {
             throw new TypeError("Cannot lift to lower level.")
         }
 
@@ -139,13 +140,13 @@ export class Complex {
     public isFinite(): boolean {
         return this.real.isFinite() && this.imag.isFinite();
     }
-    public isInteger(): boolean {
+    public isInteger(): this is Integer {
         return this.real.isInteger() && this.imag.isInteger();
     }
-    public isRational(): boolean {
+    public isRational(): this is Rational {
         return this.isFinite();
     }
-    public isReal(): boolean {
+    public isReal(): this is Real {
         return this.imag.isZero();
     }
     public isExact(): boolean {
@@ -254,18 +255,18 @@ export class Complex {
         if (!this.isReal()) {
             throw new Error("Numerator not defined for complex numbers.");
         }
-        return new Complex(this.real.numerator());
+        return new Real(this.real.numerator());
     }
     public denominator(): Real {
         if (!this.isReal()) {
             throw new Error("Denominator not defined for complex numbers.");
         }
-        return new Complex(this.real.denominator());
+        return new Real(this.real.denominator());
     }
 
     public integerSqrt(): Integer {
         if (this.isInteger()) {
-            return new Complex(this.real.integerSqrt());
+            return new Integer(this.real.integerSqrt());
         } else {
             throw new Error("IntegerSqrt only defined for integers.");
         }
@@ -350,7 +351,7 @@ export class Complex {
         let expo = power.multiply(this.log());
         return expo.exp();
     }
-    public exp(): Real {
+    public exp(): Complex {
         let r = new Complex(this.real.exp());
         let cos_a = new Complex(this.imag.cos());
         let sin_a = new Complex(this.imag.sin());
