@@ -264,6 +264,7 @@ function isSafeInteger(n: bigint): boolean {
     return n < max && n > min;
 }
 
+// TODO: Jump too BigExactNumber as necessary
 export class SmallExactNumber extends ExactNumber {
     public readonly num: number;
     public readonly den: number;
@@ -586,6 +587,7 @@ export class SmallExactNumber extends ExactNumber {
     }
 }
 
+// TODO: Drop down to SmallExactNumber as Necessary
 export class BigExactNumber extends ExactNumber {
     public readonly num: bigint;
     public readonly den: bigint;

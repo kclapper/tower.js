@@ -10,52 +10,74 @@ import {
 } from './Value';
 import {
     RacketNumber,
-    BoxedNumber,
     JSInteger,
+    JSNumber,
     Level,
 } from './main';
 import {
     ZERO_VAL,
-    ONE_VAL,
     TWO_VAL,
     ZERO,
     ONE,
     TWO,
-    HALF,
     NEG_ONE,
+    HALF,
     PI,
     I,
     NEG_I,
-    INF,
     NEG_INF
 } from './constants';
-import { Integer } from './Integer';
-import { Rational } from './Rational';
-import { Real } from './Real';
 
-// TODO: Maybe I just need one class called BoxedNumber?
-export class Complex {
+export class BoxedNumber {
     public readonly level: Level;
 
     public readonly real: Value;
     public readonly imag: Value;
 
     constructor(real: Value, imag?: Value) {
-        this.level = Level.COMPLEX;
         this.real = real;
 
         if (imag === undefined) {
-            this.imag = this.real.multiply(ZERO_VAL);
+            this.imag = ZERO_VAL;
         } else {
             this.imag = imag;
         }
+
+        let level;
+        if (this.isInteger()) {
+            level = Level.INTEGER;
+        } else if (this.isRational()) {
+            level = Level.RATIONAL;
+        } else if (this.isReal()) {
+            level = Level.REAL;
+        } else {
+            level = Level.COMPLEX;
+        }
+        this.level = level;
     }
 
-    public static makeInstance(real: bigint, imag: bigint): Complex;
-    public static makeInstance(real: number, imag: number): Complex;
-    public static makeInstance(real: bigint, imag: bigint, realDen: bigint, imagDen: bigint): Complex;
-    public static makeInstance(real: number, imag: number, realDen: number, imagDen: number): Complex;
-    public static makeInstance(real: JSInteger, imag: JSInteger, realDen?: JSInteger, imagDen?: JSInteger): Complex {
+    // TODO: imaginary part should be optional
+    public static makeInstance(real: JSNumber): BoxedNumber;
+
+    public static makeInstance(real: bigint, imag: bigint): BoxedNumber;
+    public static makeInstance(real: bigint, realDen: bigint): BoxedNumber;
+    public static makeInstance(real: bigint, realDen: bigint, imag: bigint, imagDen: bigint): BoxedNumber;
+
+    public static makeInstance(real: number, imag: number): BoxedNumber;
+    public static makeInstance(real: number, realDen: number): BoxedNumber;
+    public static makeInstance(real: number, realDen: number, imag: number,  imagDen: number): BoxedNumber;
+
+    public static makeInstance(real: JSNumber, realDen?: JSInteger, imag?: JSNumber, imagDen?: JSInteger): BoxedNumber {
+        let isReal = imag === undefined;
+        if (isReal && imagDen !== undefined) {
+           throw new Error("Must specify both a numerator and denominator.");
+        }
+        if (typeof real === 'number') {
+            imag = 0;
+        } else {
+            imag = 0n;
+        }
+
         let denominatorsExist = realDen !== undefined && imagDen !== undefined;
         if (!denominatorsExist && (realDen !== undefined || imagDen !== undefined)) {
             throw new Error("Real and imaginary part must be the same exactness.")
@@ -111,47 +133,55 @@ export class Complex {
             }
         }
 
-        return new Complex(realVal, imagVal);
+        return new BoxedNumber(realVal, imagVal);
     }
 
     public toString(): string {
-        return this.real.toString() + this.imag.toSignedString() + "i";
+        if (this.isReal()) {
+            return this.real.toString();
+        } else {
+            return this.real.toString() + this.imag.toSignedString() + "i";
+        }
     }
 
     public liftTo(other: BoxedNumber): BoxedNumber {
-        switch (other.level) {
-            case Level.INTEGER:
-                throw new TypeError("Cannot lift to lower level.")
-            case Level.RATIONAL:
-                throw new TypeError("Cannot lift to lower level.")
-            case Level.REAL:
-                throw new TypeError("Cannot lift to lower level.")
-            case Level.COMPLEX:
-                return this;
-            default:
-                let _exaustiveSearch: never = other.level;
-                return other;
-        }
+        return this;
+      // switch (other.level) {
+            // case Level.INTEGER:
+                // throw new TypeError("Cannot lift to lower level.")
+            // case Level.RATIONAL:
+                // throw new TypeError("Cannot lift to lower level.")
+            // case Level.REAL:
+                // throw new TypeError("Cannot lift to lower level.")
+            // case Level.COMPLEX:
+                // return this;
+            // default:
+                // let _exaustiveSearch: never = other.level;
+                // return other;
+        // }
     }
-    protected static matchLevel(first: BoxedNumber, second: BoxedNumber): BoxedNumber[] {
-        if (first.level === second.level) {
-            return [second, second];
-        } else if (first.level > second.level) {
+    // protected static matchLevel(first: BoxedNumber, second: BoxedNumber): BoxedNumber[] {
+        // if (first.level === second.level) {
+            // return [second, second];
+        // } else if (first.level > second.level) {
+//
+        // }
+    // }
 
-        }
+    public isInteger(): boolean {
+        return this.real.isInteger() && this.imag.isInteger();
     }
-
+    public isRational(): boolean {
+        return this.isFinite();
+    }
     public isFinite(): boolean {
         return this.real.isFinite() && this.imag.isFinite();
     }
-    public isInteger(): this is Integer {
-        return this.real.isInteger() && this.imag.isInteger();
+    public isReal(): boolean {
+        return this.imag.isZero() && this.imag.isExact();
     }
-    public isRational(): this is Rational {
-        return this.isFinite();
-    }
-    public isReal(): this is Real {
-        return this.imag.isZero();
+    public isComplex(): boolean {
+        return true;
     }
     public isExact(): boolean {
         return this.real.isExact() && this.imag.isExact();
@@ -160,17 +190,17 @@ export class Complex {
         return !this.isExact();
     }
     public isPositive(): boolean {
-        if (this.imag.isZero()) {
+        if (!this.isReal()) {
             throw new TypeError("Not defined for complex numbers.");
         }
         return this.real.isPositive();
     }
-    public canBeFixnum(): boolean {
-        return this.isReal() && this.isInteger() && this.isExact();
-    }
+    // public canBeFixnum(): boolean {
+        // return this.isReal() && this.isInteger() && this.isExact();
+    // }
 
-    public toExact(): Complex {
-        return new Complex(this.real.toExact(), this.imag.toExact());
+    public toExact(): BoxedNumber {
+        return new BoxedNumber(this.real.toExact(), this.imag.toExact());
     }
     public toFixnum(): JSInteger {
         if (!this.isReal()) {
@@ -179,55 +209,54 @@ export class Complex {
         return this.real.toFixnum();
     }
 
-    public greaterThan(other: Complex): boolean {
+    public greaterThan(other: BoxedNumber): boolean {
         if (!this.isReal() || !other.isReal()) {
             throw new Error("Greater than not defined for complex numbers.");
         }
         return this.real.greaterThan(other.real);
     }
-    public greaterThanOrEqual(other: Complex): boolean {
+    public greaterThanOrEqual(other: BoxedNumber): boolean {
         if (!this.isReal() || !other.isReal()) {
             throw new Error("Greater than or equal not defined for complex numbers.");
         }
         return this.real.greaterThanOrEqual(other.real);
     }
-    public lessThan(other: Complex): boolean {
+    public lessThan(other: BoxedNumber): boolean {
         if (!this.isReal() || !other.isReal()) {
             throw new Error("Less than not defined for complex numbers.");
         }
         return this.real.lessThan(other.real);
     }
-    public lessThanOrEqual(other: Complex): boolean {
+    public lessThanOrEqual(other: BoxedNumber): boolean {
         if (!this.isReal() || !other.isReal()) {
             throw new Error("Less than or equal not defined for complex numbers.");
         }
         return this.real.lessThanOrEqual(other.real);
     }
-    public equals(other: Complex): boolean {
+    public equals(other: BoxedNumber): boolean {
         return this.real.equals(other.real) && this.imag.equals(other.imag);
     }
 
-    public add(other: Complex): Complex {
-        return new Complex(this.real.add(other.real), this.imag.add(other.imag));
+    public add(other: BoxedNumber): BoxedNumber {
+        return new BoxedNumber(this.real.add(other.real), this.imag.add(other.imag));
     }
-    public subtract(other: Complex): Complex {
-        return new Complex(this.real.subtract(other.real), this.imag.subtract(other.imag));
+    public subtract(other: BoxedNumber): BoxedNumber {
+        return new BoxedNumber(this.real.subtract(other.real), this.imag.subtract(other.imag));
     }
-    public multiply(other: Complex): Complex {
+    public multiply(other: BoxedNumber): BoxedNumber {
         let real = this.real.multiply(other.real).subtract(this.imag.multiply(other.imag));
         let imag = this.real.multiply(other.imag).add(this.imag.multiply(other.real));
-        return new Complex(real, imag);
+        return new BoxedNumber(real, imag);
     }
-    public divide(other: Complex): Complex {
-        let a, b, c, d, r, x, y;
-
+    public divide(other: BoxedNumber): BoxedNumber {
         // If the other value is real, just do primitive division
         if (other.isReal()) {
             let real = this.real.divide(other.real);
             let imag = this.imag.divide(other.real);
-            return new Complex(real, imag);
+            return new BoxedNumber(real, imag);
         }
 
+        let a, b, c, d, r, x, y;
         if (this.isInexact() || other.isInexact()) {
             // http://portal.acm.org/citation.cfm?id=1039814
             // We currently use Smith's method, though we should
@@ -245,7 +274,7 @@ export class Complex {
                 x = a.multiply(r).add(b).divide(c.multiply(r).add(d));
                 y = b.multiply(r).subtract(a).divide(c.multiply(r).add(d));
             }
-            return new Complex(x, y);
+            return new BoxedNumber(x, y);
         } else {
             var con = other.conjugate();
             var up = this.multiply(con);
@@ -255,33 +284,33 @@ export class Complex {
 
             let real = up.realPart().divide(down).real;
             let imag = up.imaginaryPart().divide(down).real;
-            return new Complex(real, imag);
+            return new BoxedNumber(real, imag);
         }
     }
 
-    public numerator(): Real {
+    public numerator(): BoxedNumber {
         if (!this.isReal()) {
             throw new Error("Numerator not defined for complex numbers.");
         }
-        return new Real(this.real.numerator());
+        return new BoxedNumber(this.real.numerator());
     }
-    public denominator(): Real {
+    public denominator(): BoxedNumber {
         if (!this.isReal()) {
             throw new Error("Denominator not defined for complex numbers.");
         }
-        return new Real(this.real.denominator());
+        return new BoxedNumber(this.real.denominator());
     }
 
-    public integerSqrt(): Integer {
+    public integerSqrt(): BoxedNumber {
         if (this.isInteger()) {
-            return new Integer(this.real.integerSqrt());
+            return new BoxedNumber(this.real.integerSqrt());
         } else {
             throw new Error("IntegerSqrt only defined for integers.");
         }
     }
-    public sqrt(): Complex {
+    public sqrt(): BoxedNumber {
         if (this.isReal()) {
-            return new Complex(this.real.sqrt());
+            return new BoxedNumber(this.real.sqrt());
         }
 
         // http://en.wikipedia.org/wiki/Square_root#Square_roots_of_negative_and_complex_numbers
@@ -291,56 +320,56 @@ export class Complex {
         let real = r_plus_x.divide(new SmallExactNumber(2)).sqrt();
         let imag = this.imag.divide(r_plus_x.multiply(new SmallExactNumber(2)).sqrt());
 
-        return new Complex(real, imag);
+        return new BoxedNumber(real, imag);
     }
-    public abs(): Real {
+    public abs(): BoxedNumber {
         if (!this.isReal()) {
             throw new Error("abs is not defined for complex numbers.");
         }
-        return new Real(this.real.abs());
+        return new BoxedNumber(this.real.abs());
     }
-    public floor(): Real {
+    public floor(): BoxedNumber {
         if (!this.isReal()) {
             throw new Error("floor is not defined for complex numbers.");
         }
-        return new Real(this.real.floor());
+        return new BoxedNumber(this.real.floor());
     }
-    public ceiling(): Real {
+    public ceiling(): BoxedNumber {
         if (!this.isReal()) {
             throw new Error("ceiling is not defined for complex numbers.");
         }
-        return new Real(this.real.ceiling());
+        return new BoxedNumber(this.real.ceiling());
     }
-    public round(): Real {
+    public round(): BoxedNumber {
         if (!this.isReal()) {
             throw new Error("round is not defined for complex numbers.");
         }
-        return new Real(this.real.round());
+        return new BoxedNumber(this.real.round());
     }
 
-    public conjugate(): Complex {
-        return new Complex(this.real, new SmallExactNumber(0).subtract(this.imag));
+    public conjugate(): BoxedNumber {
+        return new BoxedNumber(this.real, new SmallExactNumber(0).subtract(this.imag));
     }
-    public magnitude(): Real {
+    public magnitude(): BoxedNumber {
         let realSqr = this.real.multiply(this.real);
         let imagSqr = this.imag.multiply(this.imag);
         let sum = realSqr.add(imagSqr);
-        return new Real(sum.sqrt());
+        return new BoxedNumber(sum.sqrt());
     }
-    public realPart(): Real {
-        return new Real(this.real);
+    public realPart(): BoxedNumber {
+        return new BoxedNumber(this.real);
     }
-    public imaginaryPart(): Real {
-        return new Real(this.imag);
+    public imaginaryPart(): BoxedNumber {
+        return new BoxedNumber(this.imag);
     }
 
-    public log(): Complex {
+    public log(): BoxedNumber {
         let mag = this.magnitude();
         let theta = this.angle();
 
         return mag.log().add(theta.multiply(I));
     }
-    public expt(power: Complex): Complex {
+    public expt(power: BoxedNumber): BoxedNumber {
         if (this.isExact() && this.isInteger() && power.greaterThanOrEqual(ZERO)) {
             let n = this.real.toFixnum();
             let k = power.real.toFixnum();
@@ -353,23 +382,23 @@ export class Complex {
                 resultValue = new BigExactNumber(result);
             }
 
-            return new Integer(resultValue);
+            return new BoxedNumber(resultValue);
         }
 
         let expo = power.multiply(this.log());
         return expo.exp();
     }
-    public exp(): Complex {
-        let r = new Complex(this.real.exp());
-        let cos_a = new Complex(this.imag.cos());
-        let sin_a = new Complex(this.imag.sin());
+    public exp(): BoxedNumber {
+        let r = new BoxedNumber(this.real.exp());
+        let cos_a = new BoxedNumber(this.imag.cos());
+        let sin_a = new BoxedNumber(this.imag.sin());
 
         return r.multiply(cos_a.add(sin_a.multiply(I)));
     }
 
-    public angle(): Real {
+    public angle(): BoxedNumber {
         if (this.isReal()) {
-            return new Real(this.real.angle());
+            return new BoxedNumber(this.real.angle());
         }
         if (this.real.equals(ZERO_VAL)) {
             let halfPI = PI.divide(TWO);
@@ -395,34 +424,34 @@ export class Complex {
             }
         }
     }
-    public atan(): Complex {
+    public atan(): BoxedNumber {
         if (this.equals(I) || this.equals(NEG_I)) {
             return NEG_INF;
         }
         return I.multiply(HALF.multiply(I.add(this).divide(I.add(ZERO.subtract(this))).log()));
     }
-    public cos(): Complex {
+    public cos(): BoxedNumber {
         if (this.isReal()) {
-            return new Real(this.real.cos());
+            return new BoxedNumber(this.real.cos());
         }
         let iz = this.multiply(I);
         let iz_negate = iz.multiply(NEG_ONE);
         return iz.exp().add(iz_negate.exp()).divide(TWO);
     }
-    public sin(): Complex {
+    public sin(): BoxedNumber {
         if (this.isReal()) {
-            return new Real(this.real.sin());
+            return new BoxedNumber(this.real.sin());
         }
         let iz = this.multiply(I);
         let iz_negate = iz.multiply(NEG_ONE);
-        let z2 = new Complex(ZERO_VAL, TWO_VAL);
+        let z2 = new BoxedNumber(ZERO_VAL, TWO_VAL);
         let exp_negate = iz.exp().subtract(iz_negate.exp());
         let result = exp_negate.divide(z2);
         return result;
     }
-    public acos(): Complex {
+    public acos(): BoxedNumber {
         if (this.isReal()) {
-            return new Real(this.real.acos());
+            return new BoxedNumber(this.real.acos());
         }
         let pi_half = PI.divide(TWO);
         let iz = this.multiply(I);
@@ -430,9 +459,9 @@ export class Complex {
         let l = iz.add(root).log().multiply(I);
         return pi_half.add(l);
     }
-    public asin(): Complex {
+    public asin(): BoxedNumber {
         if (this.isReal()) {
-            return new Real(this.real.asin());
+            return new BoxedNumber(this.real.asin());
         }
         let oneNegateThisSq = ONE.subtract(this.multiply(this));
         let sqrtOneNegateThisSq = oneNegateThisSq.sqrt();

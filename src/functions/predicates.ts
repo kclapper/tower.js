@@ -1,4 +1,4 @@
-import { TowerNumber } from "./numbers/main";
+import { TowerNumber } from "../numbers/main";
 
 export function isNumber(v: any): boolean {
     return false;
