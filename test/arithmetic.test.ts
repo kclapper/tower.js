@@ -6,11 +6,22 @@ import {
     multiply,
     divide,
     quotient,
+    remainder,
+    modulo,
+    sqr,
+    sqrt,
+    integerSqrt,
+    expt,
+    abs,
+    floor,
+    ceiling,
+    round
 } from '../src/tower';
 
 const makeInstance = BoxedNumber.makeInstance;
 
 const ExactZero = makeInstance({num: 0, den: 1});
+const ExactHalf = makeInstance({num: 1, den: 2});
 const ExactOne = makeInstance({num: 1, den: 1});
 const ExactTwo = makeInstance({num: 1, den: 1});
 test('Exact constants are exact', () => {
@@ -19,6 +30,7 @@ test('Exact constants are exact', () => {
 });
 
 const InexactZero = makeInstance({num: 0});
+const InexactHalf = makeInstance({num: 0.5});
 const InexactOne = makeInstance({num: 1});
 const InexactTwo = makeInstance({num: 2});
 test('Inexact constants are inexact', () => {
@@ -26,12 +38,16 @@ test('Inexact constants are inexact', () => {
     expect(InexactOne.isReal()).toBe(true);
 });
 
-const ExactI = makeInstance({num: 0, den: 0, imagNum: 1, imagDen: 0});
+const ExactI = makeInstance({num: 0, den: 1, imagNum: 1, imagDen: 1});
 test('Complex numbers are complex', () => {
     expect(ExactI.isComplex()).toBe(true);
     expect(ExactI.isReal()).toBe(false);
     expect(ExactI.isExact()).toBe(true);
 });
+
+const INF = makeInstance({num: Number.POSITIVE_INFINITY});
+const NEG_INF = makeInstance({num: Number.NEGATIVE_INFINITY});
+const NAN = makeInstance({num: Number.NaN});
 
 describe('+ operator', () => {
     test('no arguments', () => {
@@ -82,7 +98,7 @@ describe('+ operator', () => {
     test('big numbers: boxed', () => {
         expect(add(makeInstance({num: Number.MAX_SAFE_INTEGER, den: 1}),
                    2))
-            .toEqual(makeInstance({num: BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2), den: BigInt(1)}));
+            .toBe(BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2));
     });
 
     test('complex numbers', () => {
@@ -145,7 +161,7 @@ describe('- operator', () => {
     test('big numbers: boxed', () => {
         expect(subtract(makeInstance({num: Number.MIN_SAFE_INTEGER, den: 1}),
                    2))
-            .toEqual(makeInstance({num: BigInt(Number.MIN_SAFE_INTEGER) - BigInt(2), den: BigInt(1)}));
+            .toBe(BigInt(Number.MIN_SAFE_INTEGER) - BigInt(2));
     })
 
     test('complex numbers', () => {
@@ -210,7 +226,7 @@ describe('* operator', () => {
     test('big numbers: boxed', () => {
         expect(multiply(makeInstance({num: Number.MAX_SAFE_INTEGER, den: 1}),
                         2))
-            .toEqual(makeInstance({num: BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2), den: BigInt(1)}));
+            .toEqual(BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2));
     })
 
     test('complex numbers', () => {
@@ -327,4 +343,522 @@ describe('quotient', () => {
     })
 });
 
-// TODO: Continue here and move on to modulo
+describe('remainder', () => {
+    test('racket docs tests', () => {
+       expect(remainder(10, 3)).toBe(1);
+       expect(remainder(-10, 3)).toBe(-1);
+       expect(remainder(10, -3)).toBe(1);
+       expect(remainder(-10, -3)).toBe(-1);
+    });
+    test('exact numbers', () => {
+        expect(remainder(ExactOne, ExactOne)).toBe(0);
+        expect(remainder(makeInstance({num: 3, den: 2}),
+                      ExactOne))
+            .toEqual(makeInstance({num: 1, den: 2}));
+    });
+    test('fixnums', () => {
+        expect(remainder(1, 2)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(remainder(InexactOne, InexactOne)).toEqual(InexactZero);
+    });
+    test('inexact decimals', () => {
+        expect(remainder(makeInstance({num: 2.5}),
+                      InexactOne))
+            .toEqual(makeInstance({num: 0.5}));
+    });
+
+    test('Mixed precision: boxed', () => {
+        expect(remainder(ExactOne, InexactOne)).toEqual(InexactZero);
+    });
+    test('Mixed precision: with fixnums', () => {
+        expect(remainder(1, InexactOne)).toEqual(InexactZero);
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        expect(remainder(arg, 2))
+            .toBe(1);
+    })
+    test('big numbers: boxed', () => {
+        let bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect(remainder(arg, 2))
+            .toBe(1);
+    })
+    test('big numbers: negative boxed', () => {
+        let bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect(remainder(arg, 2))
+            .toBe(-1);
+    })
+});
+
+describe('modulo', () => {
+    test('racket docs tests', () => {
+       expect(modulo(10, 3)).toBe(1);
+       expect(modulo(-10, 3)).toBe(2);
+       expect(modulo(10, -3)).toBe(-2);
+       expect(modulo(-10, -3)).toBe(-1);
+    });
+    test('exact numbers', () => {
+        expect(modulo(ExactOne, ExactOne)).toBe(0);
+        expect(modulo(makeInstance({num: 3, den: 2}),
+                      ExactOne))
+            .toEqual(makeInstance({num: 1, den: 2}));
+    });
+    test('fixnums', () => {
+        expect(modulo(1, 2)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(modulo(InexactOne, InexactOne)).toEqual(InexactZero);
+    });
+    test('inexact decimals', () => {
+        expect(modulo(makeInstance({num: 2.5}),
+                      InexactOne))
+            .toEqual(makeInstance({num: 0.5}));
+    });
+
+    test('Mixed precision: boxed', () => {
+        expect(modulo(ExactOne, InexactOne)).toEqual(InexactZero);
+    });
+    test('Mixed precision: with fixnums', () => {
+        expect(modulo(1, InexactOne)).toEqual(InexactZero);
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        expect(modulo(arg, 2))
+            .toBe(1);
+    })
+    test('big numbers: boxed', () => {
+        let bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect(modulo(arg, 2))
+            .toBe(1);
+    })
+    test('big numbers: negative boxed', () => {
+        let bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect(modulo(arg, 2))
+            .toBe(1);
+    })
+});
+
+describe('sqr', () => {
+    test('racket docs tests', () => {
+       expect(remainder(10, 3)).toBe(1);
+       expect(remainder(-10, 3)).toBe(-1);
+       expect(remainder(10, -3)).toBe(1);
+       expect(remainder(-10, -3)).toBe(-1);
+    });
+    test('exact numbers', () => {
+        expect(remainder(ExactOne, ExactOne)).toBe(0);
+        expect(remainder(makeInstance({num: 3, den: 2}),
+                      ExactOne))
+            .toEqual(makeInstance({num: 1, den: 2}));
+    });
+    test('fixnums', () => {
+        expect(remainder(1, 2)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(remainder(InexactOne, InexactOne)).toEqual(InexactZero);
+    });
+    test('inexact decimals', () => {
+        expect(remainder(makeInstance({num: 2.5}),
+                      InexactOne))
+            .toEqual(makeInstance({num: 0.5}));
+    });
+
+    test('Mixed precision: boxed', () => {
+        expect(remainder(ExactOne, InexactOne)).toEqual(InexactZero);
+    });
+    test('Mixed precision: with fixnums', () => {
+        expect(remainder(1, InexactOne)).toEqual(InexactZero);
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        expect(remainder(arg, 2))
+            .toBe(1);
+    })
+    test('big numbers: boxed', () => {
+        let bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect(remainder(arg, 2))
+            .toBe(1);
+    })
+    test('big numbers: negative boxed', () => {
+        let bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect(remainder(arg, 2))
+            .toBe(-1);
+    })
+});
+
+describe('sqr', () => {
+    test('exact numbers', () => {
+        expect(sqr(ExactOne)).toBe(1);
+        expect(sqr(makeInstance({num: 3, den: 2})))
+            .toEqual(makeInstance({num: 9, den: 4}));
+    });
+    test('fixnums', () => {
+        expect(sqr(2)).toBe(4);
+        expect(sqr(-1)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(sqr(InexactOne)).toEqual(InexactOne);
+    });
+    test('inexact decimals', () => {
+        expect(sqr(makeInstance({num: 2.5})))
+            .toEqual(makeInstance({num: 2.5 * 2.5}));
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        expect(sqr(arg))
+            .toBe(arg * arg);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect((sqr(arg)))
+            .toBe((bignumber * bignumber));
+    });
+
+    test('complex numbers', () => {
+        expect(sqr(ExactI)).toEqual(-1);
+    })
+});
+
+describe('sqrt', () => {
+    test('exact numbers', () => {
+        expect(sqrt(ExactOne)).toBe(1);
+        expect(sqrt(makeInstance({num: 3, den: 2})))
+            .toEqual(makeInstance({num: Math.sqrt(3 / 2)}));
+    });
+    test('fixnums', () => {
+        expect(sqrt(4)).toBe(2);
+        expect(sqrt(-1)).toEqual(ExactI);
+    });
+
+    test('inexact integers', () => {
+        expect(sqrt(InexactOne)).toEqual(InexactOne);
+    });
+    test('inexact decimals', () => {
+        expect(sqrt(makeInstance({num: 2.5})))
+            .toEqual(makeInstance({num: Math.sqrt(2.5)}));
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        expect(sqrt(arg * arg))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect((sqrt(arg.multiply(arg))))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+
+    test('complex numbers', () => {
+        expect(sqrt(ExactI))
+            .toEqual(makeInstance({
+                num: 0.7071067811865475,
+                imagNum: 0.7071067811865475
+            }));
+    });
+});
+
+describe('sqrt', () => {
+    test('exact numbers', () => {
+        expect(sqrt(ExactOne)).toBe(1);
+        expect(sqrt(makeInstance({num: 3, den: 2})))
+            .toEqual(makeInstance({num: Math.sqrt(3 / 2)}));
+    });
+    test('fixnums', () => {
+        expect(sqrt(4)).toBe(2);
+        expect(sqrt(-1)).toEqual(ExactI);
+    });
+
+    test('inexact integers', () => {
+        expect(sqrt(InexactOne)).toEqual(InexactOne);
+    });
+    test('inexact decimals', () => {
+        expect(sqrt(makeInstance({num: 2.5})))
+            .toEqual(makeInstance({num: Math.sqrt(2.5)}));
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        expect(sqrt(arg * arg))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect((sqrt(arg.multiply(arg))))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+
+    test('complex numbers', () => {
+        expect(sqrt(ExactI))
+            .toEqual(makeInstance({
+                num: 0.7071067811865475,
+                imagNum: 0.7071067811865475
+            }));
+    });
+});
+
+describe('integer-sqrt', () => {
+    test('racket docs examples', () => {
+       expect(integerSqrt(makeInstance({num: 4.0})))
+        .toEqual(makeInstance({num: 2.0}));
+       expect(integerSqrt(makeInstance({num: -4.0})))
+        .toEqual(makeInstance({num: 0.0, imagNum: 2.0}));
+       expect(integerSqrt(-4))
+        .toEqual(makeInstance({num: 0, den: 1, imagNum: 2, imagDen: 1}));
+       expect(integerSqrt(5))
+        .toBe(2);
+    });
+    test('exact numbers', () => {
+        expect(integerSqrt(makeInstance({num: 4, den: 1}))).toBe(2);
+    });
+    test('fixnums', () => {
+        expect(integerSqrt(4)).toBe(2);
+        expect(integerSqrt(-1)).toEqual(ExactI);
+        expect(integerSqrt(101)).toBe(10);
+    });
+
+    test('inexact integers', () => {
+        expect(integerSqrt(InexactOne)).toEqual(InexactOne);
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        expect(integerSqrt((arg * arg) + BigInt(1)))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect((integerSqrt(arg.multiply(arg).add(ExactOne))))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+});
+
+describe('expt', () => {
+    test('racket docs examples', () => {
+        expect(expt(0, 0)).toBe(1);
+        expect(expt(0, InexactZero))
+            .toEqual(InexactOne);
+        expect(expt(0, NAN))
+            .toEqual(NAN);
+        expect(expt(0, 5)).toBe(0);
+
+        expect(expt(9, ExactHalf)).toBe(3);
+        expect(expt(9, InexactHalf))
+            .toEqual(makeInstance({num: 3}));
+        expect(expt(16, makeInstance({num: 1, den: 4})))
+            .toEqual(makeInstance({num: 2}));
+        expect(expt(16, makeInstance({num: 0.25})))
+            .toEqual(makeInstance({num: 2}));
+
+        expect(expt(InexactZero, 1))
+            .toEqual(InexactZero);
+        expect(expt(InexactZero, -1))
+            .toEqual(INF);
+
+        expect(expt(makeInstance({num: -0.0}), -1))
+            .toEqual(NEG_INF);
+        expect(expt(makeInstance({num: -0.0}), -3))
+            .toEqual(NEG_INF);
+        expect(expt(makeInstance({num: -0.0}), -2))
+            .toEqual(INF);
+        expect(expt(makeInstance({num: -0.0}), 1))
+            .toEqual(makeInstance({num: -0.0}));
+        expect(expt(makeInstance({num: -0.0}), 3))
+            .toEqual(makeInstance({num: -0.0}));
+        expect(expt(makeInstance({num: -0.0}), 2))
+            .toEqual(InexactZero);
+
+        expect(expt(ExactTwo, NEG_INF))
+            .toEqual(InexactZero);
+        expect(expt(makeInstance({num: 0.5}), NEG_INF))
+            .toEqual(INF);
+
+        expect(expt(ExactTwo, INF))
+            .toEqual(INF);
+        expect(expt(makeInstance({num: 0.5}), INF))
+            .toEqual(InexactZero);
+
+        expect(expt(NEG_INF, -1))
+            .toEqual(makeInstance({num: -0}));
+        expect(expt(NEG_INF, -2))
+            .toEqual(makeInstance({num: 0}));
+        expect(expt(NEG_INF, 1))
+            .toEqual(NEG_INF);
+        expect(expt(NEG_INF, 2))
+            .toEqual(INF);
+
+        expect(expt(INF, -1))
+            .toEqual(InexactZero);
+        expect(expt(INF, 2))
+            .toEqual(INF);
+
+        expect(expt(2, 3)).toBe(8);
+        expect(expt(4, makeInstance({num: 0.5})))
+            .toEqual(InexactTwo);
+        expect(expt(INF, ExactZero))
+            .toBe(1);
+    });
+    // TODO: Continue here. Add more tests for expt to
+    // exercise the the various data types.
+});
+
+// TODO: Fill in functions above this point
+
+describe('abs', () => {
+    test('exact numbers', () => {
+        expect(abs(ExactOne)).toBe(1);
+        expect(abs(makeInstance({num: -1, den: 1})))
+            .toBe(1);
+        expect(abs(makeInstance({num: 3, den: 2})))
+            .toEqual(makeInstance({num: 3, den: 2}));
+    });
+    test('fixnums', () => {
+        expect(abs(-2)).toBe(2);
+        expect(abs(1)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(abs(makeInstance({num: -1})))
+            .toEqual(InexactOne);
+    });
+    test('inexact decimals', () => {
+        expect(abs(makeInstance({num: -2.5})))
+            .toEqual(makeInstance({num: 2.5}));
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MIN_SAFE_INTEGER);
+        expect(abs(arg))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MIN_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        expect(abs(arg))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+});
+
+describe('floor', () => {
+    test('exact numbers', () => {
+        expect(floor(ExactOne)).toBe(1);
+        expect(floor(makeInstance({num: -1, den: 1})))
+            .toBe(-1);
+        expect(floor(makeInstance({num: 3, den: 2})))
+            .toEqual(1);
+    });
+    test('fixnums', () => {
+        expect(floor(-2)).toBe(-2);
+        expect(floor(1)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(floor(InexactOne))
+            .toEqual(InexactOne);
+    });
+    test('inexact decimals', () => {
+        expect(floor(makeInstance({num: -2.5})))
+            .toEqual(makeInstance({num: -3}));
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        expect(floor(arg))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(2)});
+        expect(floor(arg))
+            .toBe(4503599627370495);
+    });
+});
+
+describe('ceiling', () => {
+    test('exact numbers', () => {
+        expect(ceiling(ExactOne)).toBe(1);
+        expect(ceiling(makeInstance({num: -1, den: 1})))
+            .toBe(-1);
+        expect(ceiling(makeInstance({num: 3, den: 2})))
+            .toEqual(2);
+    });
+    test('fixnums', () => {
+        expect(ceiling(-2)).toBe(-2);
+        expect(ceiling(1)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(ceiling(InexactOne))
+            .toEqual(InexactOne);
+    });
+    test('inexact decimals', () => {
+        expect(ceiling(makeInstance({num: -2.5})))
+            .toEqual(makeInstance({num: -2}));
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        expect(ceiling(arg))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(2)});
+        expect(ceiling(arg))
+            .toBe(4503599627370496);
+    });
+});
+
+describe('round', () => {
+    test('exact numbers', () => {
+        expect(round(ExactOne)).toBe(1);
+        expect(round(makeInstance({num: -1, den: 1})))
+            .toBe(-1);
+        expect(round(makeInstance({num: 3, den: 2})))
+            .toEqual(2);
+    });
+    test('fixnums', () => {
+        expect(round(-2)).toBe(-2);
+        expect(round(1)).toBe(1);
+    });
+
+    test('inexact integers', () => {
+        expect(round(InexactOne))
+            .toEqual(InexactOne);
+    });
+    test('inexact decimals', () => {
+        expect(round(makeInstance({num: -2.5})))
+            .toEqual(makeInstance({num: -2}));
+    });
+
+    test('big numbers: unboxed', () => {
+        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        expect(round(arg))
+            .toBe(Number.MAX_SAFE_INTEGER);
+    });
+    test('big numbers: boxed', () => {
+        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        let arg = makeInstance({num: bignumber, den: BigInt(2)});
+        expect(round(arg))
+            .toBe(4503599627370496);
+    });
+});

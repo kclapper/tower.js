@@ -2,7 +2,8 @@ import {
     BoxedNumber
 } from '../numbers/BoxedNumber';
 import {
-    ONE
+    ONE,
+    I
 } from '../numbers/constants';
 import {
     RacketNumber,
@@ -12,6 +13,11 @@ import {
     normalize,
     matchTypes
 } from './util';
+import {
+    isNegative,
+    isPositive,
+    isExact
+} from './predicates';
 
 export function add(...nums: RacketNumber[]): RacketNumber {
     const adder = makeMultiArity(
@@ -118,27 +124,97 @@ export function quotient(n: RacketNumber, k: RacketNumber): RacketNumber {
     return normalize(result);
 }
 
-export function modulo(n: RacketNumber, k: RacketNumber): RacketNumber {
-    return ONE;
+export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
+    [n, k] = matchTypes(n, k);
+
+    let result;
+    if (n instanceof BoxedNumber) {
+        let quotient = n.divide(k as BoxedNumber).floor();
+        result = n.subtract((k as BoxedNumber).multiply(quotient));
+    } else if (typeof n === 'number') {
+        result = n % (k as number);
+    } else {
+        result = n % (k as bigint);
+    }
+
+    return normalize(result);
 }
 
-export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
-    return ONE;
+export function modulo(n: RacketNumber, k: RacketNumber): RacketNumber {
+    [n, k] = matchTypes(n, k);
+
+    let result = remainder(n, k);
+    let negn = isNegative(n);
+    let negk = isNegative(k);
+
+    if (negk) {
+        if (isPositive(result)) {
+            result = add(result, k);
+        }
+    } else {
+        if (isNegative(result)) {
+            result = add(result, k);
+        }
+    }
+
+    return normalize(result);
 }
 
 export function sqr(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (n instanceof BoxedNumber) {
+        return normalize(n.multiply(n));
+    } else if (typeof n === 'number') {
+        return normalize(n * n);
+    } else {
+        return normalize(n * n);
+    }
 }
 
 export function sqrt(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (n instanceof BoxedNumber) {
+        return normalize(n.sqrt());
+
+    } else if (typeof n === 'number') {
+        if (n < 0) {
+            n = -n;
+            let result = Math.sqrt(n);
+            if (Number.isInteger(result)) {
+                return BoxedNumber.makeInstance({num: 0, den: 1, imagNum: result, imagDen: 1});
+            } else {
+                return BoxedNumber.makeInstance({num: 0, imagNum: result});
+            }
+        } else {
+            let result = Math.sqrt(n);
+            if (Number.isInteger(result)) {
+                return result;
+            } else {
+                return BoxedNumber.makeInstance({num: result});
+            }
+        }
+
+    } else {
+        return normalize(BoxedNumber.makeInstance({num: n, den: 1n}).sqrt());
+    }
 }
 
 export function integerSqrt(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (isNegative(n)) {
+        let result = integerSqrt(multiply(n, -1));
+        if (isExact(result)) {
+            return multiply(result, I);
+        } else {
+            return multiply(result, BoxedNumber.makeInstance({num: 0, imagNum: 1}));
+        }
+    }
+    let result = floor(sqrt(n));
+    if (isExact(n) && result instanceof BoxedNumber) {
+        return result.toFixnum();
+    } else {
+        return result;
+    }
 }
 
-export function expt(n: RacketNumber, k: RacketNumber): RacketNumber {
+export function expt(z: RacketNumber, w: RacketNumber): RacketNumber {
     return ONE;
 }
 
@@ -167,17 +243,43 @@ export function lcm(n: RacketNumber): RacketNumber {
 }
 
 export function abs(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (n instanceof BoxedNumber) {
+        return normalize(n.abs());
+    } else if (typeof n === 'number') {
+        return Math.abs(n);
+    } else if (typeof n === 'bigint' && n >= 0n) {
+        return normalize(n);
+    } else {
+        return normalize(n * -1n);
+    }
 }
 
 export function floor(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (n instanceof BoxedNumber) {
+        return normalize(n.floor());
+    } else if (typeof n === 'bigint') {
+        return normalize(n);
+    } else {
+        return n;
+    }
 }
 
 export function ceiling(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (n instanceof BoxedNumber) {
+        return normalize(n.ceiling());
+    } else if (typeof n === 'bigint') {
+        return normalize(n);
+    } else {
+        return n;
+    }
 }
 
 export function round(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (n instanceof BoxedNumber) {
+        return normalize(n.round());
+    } else if (typeof n === 'bigint') {
+        return normalize(n);
+    } else {
+        return n;
+    }
 }

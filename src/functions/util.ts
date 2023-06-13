@@ -55,8 +55,7 @@ export function normalize(x: RacketNumber): RacketNumber {
     if (x instanceof BoxedNumber
         && x.isReal()
         && x.isInteger()
-        && x.isExact()
-        && isSafeInteger(x.toFixnum())) {
+        && x.isExact()) {
 
         x = x.toFixnum();
     }

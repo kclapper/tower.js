@@ -363,7 +363,7 @@ export class SmallExactNumber extends ExactNumber {
             return this.toBigExact().greaterThan(other);
         } else {
             let thisVal = this.num * (other.den as number);
-            let otherVal = this.den * (other.den as number);
+            let otherVal = this.den * (other.num as number);
             return thisVal > otherVal;
         }
     }
@@ -374,7 +374,7 @@ export class SmallExactNumber extends ExactNumber {
             return this.toBigExact().greaterThanOrEqual(other);
         } else {
             let thisVal = this.num * (other.den as number);
-            let otherVal = this.den * (other.den as number);
+            let otherVal = this.den * (other.num as number);
             return thisVal >= otherVal;
         }
     }
@@ -385,7 +385,7 @@ export class SmallExactNumber extends ExactNumber {
             return this.toBigExact().lessThan(other);
         } else {
             let thisVal = this.num * (other.den as number);
-            let otherVal = this.den * (other.den as number);
+            let otherVal = this.den * (other.num as number);
             return thisVal < otherVal;
         }
     }
@@ -396,7 +396,7 @@ export class SmallExactNumber extends ExactNumber {
             return this.toBigExact().lessThanOrEqual(other);
         } else {
             let thisVal = this.num * (other.den as number);
-            let otherVal = this.den * (other.den as number);
+            let otherVal = this.den * (other.num as number);
             return thisVal <= otherVal;
         }
     }
@@ -407,7 +407,7 @@ export class SmallExactNumber extends ExactNumber {
             return this.toBigExact().equals(other);
         } else {
             let thisVal = this.num * (other.den as number);
-            let otherVal = this.den * (other.den as number);
+            let otherVal = this.den * (other.num as number);
             return thisVal === otherVal;
         }
     }
@@ -675,7 +675,7 @@ export class BigExactNumber extends ExactNumber {
         return new SmallExactNumber(Number(this.num), Number(this.den));
     }
     toFixnum(): JSInteger {
-        return this.toInexact().toFixnum();
+        return this.num / this.den;
     }
 
     toString(): string {
@@ -784,7 +784,7 @@ export class BigExactNumber extends ExactNumber {
             let den = this.den * other.den;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return this.toSmallExact().add(other.toSmallExact());
+                return new SmallExactNumber(Number(num), Number(den));
             }
 
             return new BigExactNumber(num, den);
@@ -802,7 +802,7 @@ export class BigExactNumber extends ExactNumber {
             let den = this.den * other.den;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return this.toSmallExact().subtract(other.toSmallExact());
+                return new SmallExactNumber(Number(num), Number(den));
             }
 
             return new BigExactNumber(num, den);
@@ -824,7 +824,7 @@ export class BigExactNumber extends ExactNumber {
             let den = this.den * other.den;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return this.toSmallExact().multiply(other.toSmallExact());
+                return new SmallExactNumber(Number(num), Number(den));
             }
 
             return new BigExactNumber(num, den);
@@ -846,7 +846,7 @@ export class BigExactNumber extends ExactNumber {
             let den = this.den * other.num;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return this.toSmallExact().divide(other.toSmallExact());
+                return new SmallExactNumber(Number(num), Number(den));
             }
 
             return new BigExactNumber(num, den);
@@ -894,12 +894,12 @@ export class BigExactNumber extends ExactNumber {
             return this;
         } else {
             let floor = this.floor();
-            let floordiff = this.subtract(floor);
+            let floordiff = this.subtract(floor).abs();
 
             let ceil = this.ceiling();
-            let ceildiff = ceil.subtract(this);
+            let ceildiff = ceil.subtract(this).abs();
 
-            if (ceildiff.greaterThan(floordiff)) {
+            if (ceildiff.greaterThanOrEqual(floordiff)) {
                 return ceil;
             } else {
                 return floor;

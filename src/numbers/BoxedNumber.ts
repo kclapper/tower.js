@@ -149,30 +149,6 @@ export class BoxedNumber {
         }
     }
 
-    public liftTo(other: BoxedNumber): BoxedNumber {
-        return this;
-      // switch (other.level) {
-            // case Level.INTEGER:
-                // throw new TypeError("Cannot lift to lower level.")
-            // case Level.RATIONAL:
-                // throw new TypeError("Cannot lift to lower level.")
-            // case Level.REAL:
-                // throw new TypeError("Cannot lift to lower level.")
-            // case Level.COMPLEX:
-                // return this;
-            // default:
-                // let _exaustiveSearch: never = other.level;
-                // return other;
-        // }
-    }
-    // protected static matchLevel(first: BoxedNumber, second: BoxedNumber): BoxedNumber[] {
-        // if (first.level === second.level) {
-            // return [second, second];
-        // } else if (first.level > second.level) {
-//
-        // }
-    // }
-
     public isInteger(): boolean {
         return this.isRational() && this.real.isInteger();
     }
@@ -215,9 +191,6 @@ export class BoxedNumber {
         }
         return this.real.isEven();
     }
-    // public canBeFixnum(): boolean {
-        // return this.isReal() && this.isInteger() && this.isExact();
-    // }
 
     public toExact(): BoxedNumber {
         return new BoxedNumber(this.real.toExact(), this.imag.toExact());
@@ -330,15 +303,22 @@ export class BoxedNumber {
     }
     public sqrt(): BoxedNumber {
         if (this.isReal()) {
-            return new BoxedNumber(this.real.sqrt());
+            if (this.isNegative()) {
+                let imag = this.real.multiply(NEG_ONE_VAL).sqrt();
+                let real = this.isExact() ? ZERO_VAL : new InexactNumber(0);
+                return new BoxedNumber(real, imag);
+            } else {
+                return new BoxedNumber(this.real.sqrt());
+            }
         }
 
         // http://en.wikipedia.org/wiki/Square_root#Square_roots_of_negative_and_complex_numbers
         let mag = this.magnitude().real;
         let r_plus_x = mag.add(this.real);
+        let r_minus_x = mag.subtract(this.real);
 
         let real = r_plus_x.divide(new SmallExactNumber(2)).sqrt();
-        let imag = this.imag.divide(r_plus_x.multiply(new SmallExactNumber(2)).sqrt());
+        let imag = r_minus_x.divide(new SmallExactNumber(2)).sqrt();
 
         return new BoxedNumber(real, imag);
     }
