@@ -56,3 +56,5 @@ export function fastExpt(n: JSInteger, k: JSInteger): JSInteger {
         }
     }
 }
+
+export * from '../util';

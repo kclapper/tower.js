@@ -1,28 +1,28 @@
 import {
     ONE
-} from './numbers/constants';
-import { TowerNumber } from './numbers/main';
+} from '../numbers/constants';
+import { RacketNumber } from '../numbers/main';
 
-export function makePolar(r: TowerNumber, theta: TowerNumber): TowerNumber {
+export function makePolar(r: RacketNumber, theta: RacketNumber): RacketNumber {
     return ONE;
 }
 
-export function magnitude(n: TowerNumber): TowerNumber {
+export function magnitude(n: RacketNumber): RacketNumber {
     return ONE;
 }
 
-export function angle(n: TowerNumber): TowerNumber {
+export function angle(n: RacketNumber): RacketNumber {
     return ONE;
 }
 
-export function realPart(n: TowerNumber): TowerNumber {
+export function realPart(n: RacketNumber): RacketNumber {
     return ONE;
 }
 
-export function imaginaryPart(n: TowerNumber): TowerNumber {
+export function imaginaryPart(n: RacketNumber): RacketNumber {
     return ONE;
 }
 
-export function conjugate(n: TowerNumber): TowerNumber {
+export function conjugate(n: RacketNumber): RacketNumber {
     return ONE;
 }

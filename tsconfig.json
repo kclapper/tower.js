@@ -2,12 +2,13 @@
   "extends": "@tsconfig/recommended/tsconfig.json",
 
   "include": [
-    "src/**/*"
+    "src/tower.ts"
   ],
 
   "compilerOptions": {
     "outDir": "build",
     "noEmitOnError": true,
+    "moduleResolution": "nodenext",
     "module": "es2020",
     "target": "es2020",
     "sourceMap": true,

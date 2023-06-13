@@ -1,18 +1,13 @@
-import { BoxedNumber } from './BoxedNumber';
-
-export type RacketNumber = JSInteger | BoxedNumber;
-
-export type JSNumber = number | bigint;
-
-export type JSInteger = JSNumber;
-
-export enum Level {
-    INTEGER,
-    RATIONAL,
-    REAL,
-    COMPLEX
-}
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Level = void 0;
+var Level;
+(function (Level) {
+    Level[Level["INTEGER"] = 0] = "INTEGER";
+    Level[Level["RATIONAL"] = 1] = "RATIONAL";
+    Level[Level["REAL"] = 2] = "REAL";
+    Level[Level["COMPLEX"] = 3] = "COMPLEX";
+})(Level || (exports.Level = Level = {}));
 // export abstract class BoxedNumber {
 //     abstract readonly level: Level;
 //

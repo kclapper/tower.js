@@ -1,7 +1,6 @@
 import {
     InexactNumber,
     SmallExactNumber,
-    BigExactNumber
 } from './Value';
 import { BoxedNumber } from './BoxedNumber';
 

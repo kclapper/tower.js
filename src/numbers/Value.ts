@@ -1,4 +1,7 @@
 import {
+    isSafeInteger
+} from '../util';
+import {
     JSInteger,
 } from "./main";
 
@@ -26,6 +29,7 @@ abstract class AbstractNumber {
     abstract isZero(): boolean;
     abstract isPositive(): boolean;
     abstract isNegative(): boolean;
+    abstract isEven(): boolean;
 
     abstract add(other: Value): Value;
     abstract subtract(other: Value): Value;
@@ -60,6 +64,9 @@ export class InexactNumber extends AbstractNumber {
     constructor(num: number) {
         super();
         this.num = num;
+
+        // Make it immutable
+        Object.freeze(this);
     }
 
     isFinite(): boolean {
@@ -147,6 +154,9 @@ export class InexactNumber extends AbstractNumber {
     isNegative(): boolean {
         return this.num < 0;
     }
+    isEven(): boolean {
+        return this.num % 2 === 0;
+    }
 
     add(other: Value): Value {
         if (other instanceof ExactNumber) {
@@ -162,11 +172,17 @@ export class InexactNumber extends AbstractNumber {
     }
     multiply(other: Value): Value {
         if (other instanceof ExactNumber) {
+            if (other.isZero()) {
+                return ZERO_VAL;
+            }
             return this.multiply(other.toInexact());
         }
         return new InexactNumber(this.num * other.num);
     }
     divide(other: Value): Value {
+        if (this.isZero()) {
+            return this;
+        }
         if (other instanceof ExactNumber) {
             return this.divide(other.toInexact());
         }
@@ -241,6 +257,7 @@ export abstract class ExactNumber extends AbstractNumber {
     abstract readonly num: JSInteger;
     abstract readonly den: JSInteger;
 
+    // TODO: Does this ever get used? Can I remove it?
     static makeInstance(num: number, den: number): ExactNumber;
     static makeInstance(num: bigint, den: bigint): ExactNumber;
     static makeInstance(num: JSInteger, den: JSInteger): ExactNumber {
@@ -252,16 +269,6 @@ export abstract class ExactNumber extends AbstractNumber {
            throw new TypeError(`Numberator and denominator types must match, given ${typeof num} and ${typeof den}`)
        }
     }
-}
-
-function isUnsafeInteger(n: number): boolean {
-    return n > Number.MAX_SAFE_INTEGER || n < Number.MIN_SAFE_INTEGER;
-}
-
-function isSafeInteger(n: bigint): boolean {
-    let max = BigInt(Number.MAX_SAFE_INTEGER);
-    let min = BigInt(Number.MIN_SAFE_INTEGER);
-    return n < max && n > min;
 }
 
 // TODO: Jump too BigExactNumber as necessary
@@ -289,6 +296,9 @@ export class SmallExactNumber extends ExactNumber {
         } else {
             throw new TypeError("Exact value numerator and denominator types must match")
         }
+
+        // Make it immutable
+        Object.freeze(this);
     }
 
     private gcd(a: number, b: number): number {
@@ -411,6 +421,9 @@ export class SmallExactNumber extends ExactNumber {
     isNegative(): boolean {
         return this.num < 0;
     }
+    isEven(): boolean {
+        return this.den === 1 && this.num % 2 === 0;
+    }
 
     add(other: Value): Value {
         if (other instanceof InexactNumber) {
@@ -421,7 +434,7 @@ export class SmallExactNumber extends ExactNumber {
             let num = (this.num * other.den) + (other.num * this.den);
             let den = this.den * other.den;
 
-            if (isUnsafeInteger(num) || isUnsafeInteger(den)) {
+            if (!isSafeInteger(num) || !isSafeInteger(den)) {
                 return this.toBigExact().add(other.toBigExact());
             }
 
@@ -439,7 +452,7 @@ export class SmallExactNumber extends ExactNumber {
             let num = (this.num * other.den) - (other.num * this.den);
             let den = this.den * other.den;
 
-            if (isUnsafeInteger(num) || isUnsafeInteger(den)) {
+            if (!isSafeInteger(num) || !isSafeInteger(den)) {
                 return this.toBigExact().subtract(other.toBigExact());
             }
 
@@ -449,6 +462,10 @@ export class SmallExactNumber extends ExactNumber {
         }
     }
     multiply(other: Value): Value {
+        if ((other.isExact() && other.isZero()) || this.isZero()) {
+            return ZERO_VAL;
+        }
+
         if (other instanceof InexactNumber) {
             return this.toInexact().multiply(other);
         } else if (other instanceof BigExactNumber) {
@@ -457,7 +474,7 @@ export class SmallExactNumber extends ExactNumber {
             let num = this.num * other.num;
             let den = this.den * other.den;
 
-            if (isUnsafeInteger(num) || isUnsafeInteger(den)) {
+            if (!isSafeInteger(num) || !isSafeInteger(den)) {
                 return this.toBigExact().multiply(other.toBigExact());
             }
 
@@ -467,6 +484,10 @@ export class SmallExactNumber extends ExactNumber {
         }
     }
     divide(other: Value): Value {
+        if (this.isZero()) {
+            return this;
+        }
+
         if (other instanceof InexactNumber) {
             return this.toInexact().multiply(other);
         } else if (other instanceof BigExactNumber) {
@@ -477,7 +498,7 @@ export class SmallExactNumber extends ExactNumber {
             let num = this.num * other.den;
             let den = this.den * other.num;
 
-            if (isUnsafeInteger(num) || isUnsafeInteger(den)) {
+            if (!isSafeInteger(num) || !isSafeInteger(den)) {
                 return this.toBigExact().divide(other.toBigExact());
             }
 
@@ -550,7 +571,7 @@ export class SmallExactNumber extends ExactNumber {
             let num = Math.pow(this.num, exp);
             let den = Math.pow(this.den, exp);
 
-            if (isUnsafeInteger(num) || isUnsafeInteger(den)) {
+            if (!isSafeInteger(num) || !isSafeInteger(den)) {
                 return this.toBigExact().expt(power);
             }
 
@@ -608,6 +629,9 @@ export class BigExactNumber extends ExactNumber {
         } else {
             throw new TypeError("Exact value numerator and denominator types must match")
         }
+
+        // Make it immutable
+        Object.freeze(this);
     }
 
     private gcd(a: bigint, b: bigint): bigint {
@@ -655,9 +679,14 @@ export class BigExactNumber extends ExactNumber {
     }
 
     toString(): string {
-        let num = this.bigintAbs(this.num as bigint).toString().slice(0, -1);
-        let den = this.bigintAbs(this.den as bigint).toString().slice(0, -1);
-        return `${num}/${den}`;
+        let numStr = this.bigintAbs(this.num as bigint).toString().slice(0, -1);
+        let denStr = this.bigintAbs(this.den as bigint).toString().slice(0, -1);
+
+        if (this.den === 1n) {
+            return numStr;
+        }
+
+        return `${numStr}/${denStr}`;
     }
     toSignedString(): string {
         if (this.isNegative()) {
@@ -741,6 +770,9 @@ export class BigExactNumber extends ExactNumber {
     isNegative(): boolean {
         return this.num < 0n;
     }
+    isEven(): boolean {
+        return this.den === 1n && this.num % 2n === 0n;
+    }
 
     add(other: Value): Value {
         if (other instanceof InexactNumber) {
@@ -762,9 +794,9 @@ export class BigExactNumber extends ExactNumber {
     }
     subtract(other: Value): Value {
         if (other instanceof InexactNumber) {
-            return this.toInexact().add(other);
+            return this.toInexact().subtract(other);
         } else if (other instanceof SmallExactNumber) {
-            return this.add(other.toBigExact());
+            return this.subtract(other.toBigExact());
         } else if (other instanceof BigExactNumber) {
             let num = (this.num * other.den) - (other.num * this.den);
             let den = this.den * other.den;
@@ -779,10 +811,14 @@ export class BigExactNumber extends ExactNumber {
         }
     }
     multiply(other: Value): Value {
+        if ((other.isExact() && other.isZero()) || this.isZero()) {
+            return ZERO_VAL;
+        }
+
         if (other instanceof InexactNumber) {
-            return this.toInexact().add(other);
+            return this.toInexact().multiply(other);
         } else if (other instanceof SmallExactNumber) {
-            return this.add(other.toBigExact());
+            return this.multiply(other.toBigExact());
         } else if (other instanceof BigExactNumber) {
             let num = this.num * other.num;
             let den = this.den * other.den;
@@ -797,10 +833,14 @@ export class BigExactNumber extends ExactNumber {
         }
     }
     divide(other: Value): Value {
+        if (this.isZero()) {
+            return ZERO_VAL;
+        }
+
         if (other instanceof InexactNumber) {
-            return this.toInexact().add(other);
+            return this.toInexact().divide(other);
         } else if (other instanceof SmallExactNumber) {
-            return this.add(other.toBigExact());
+            return this.divide(other.toBigExact());
         } else if (other instanceof BigExactNumber) {
             let num = this.num * other.den;
             let den = this.den * other.num;
@@ -873,6 +913,7 @@ export class BigExactNumber extends ExactNumber {
     expt(power: Value): Value {
         power = power.toInexact();
         if (power.isInteger()) {
+            // TODO: This should be computed using squares
             let exp = power.num;
             let result = this;
             for (let i = 1; i < exp; i++) {
@@ -907,3 +948,17 @@ export class BigExactNumber extends ExactNumber {
 }
 
 const EXACT_ZERO = new SmallExactNumber(0);
+
+
+/////////////////////// Constants ///////////////////////
+export const ZERO_VAL = new SmallExactNumber(0);
+export const ONE_VAL = new SmallExactNumber(1);
+export const TWO_VAL = new SmallExactNumber(2);
+
+export const NEG_ONE_VAL = new SmallExactNumber(-1);
+
+export const PI_VAL = new InexactNumber(Math.PI);
+
+export const INF_VAL = new InexactNumber(Number.POSITIVE_INFINITY);
+export const NEG_INF_VAL = new InexactNumber(Number.NEGATIVE_INFINITY);
+export const NAN_VAL = new InexactNumber(Number.NaN);

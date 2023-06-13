@@ -7,26 +7,20 @@ import {
     SmallExactNumber,
     BigExactNumber,
     Value,
+    ZERO_VAL,
+    ONE_VAL,
+    TWO_VAL,
+    NEG_ONE_VAL,
+    PI_VAL,
+    INF_VAL,
+    NEG_INF_VAL,
+    NAN_VAL
 } from './Value';
 import {
-    RacketNumber,
     JSInteger,
     JSNumber,
     Level,
 } from './main';
-import {
-    ZERO_VAL,
-    TWO_VAL,
-    ZERO,
-    ONE,
-    TWO,
-    NEG_ONE,
-    HALF,
-    PI,
-    I,
-    NEG_I,
-    NEG_INF
-} from './constants';
 
 export class BoxedNumber {
     public readonly level: Level;
@@ -54,83 +48,94 @@ export class BoxedNumber {
             level = Level.COMPLEX;
         }
         this.level = level;
+
+        // Make it immutable
+        Object.freeze(this);
     }
 
-    // TODO: imaginary part should be optional
-    public static makeInstance(real: JSNumber): BoxedNumber;
+    public static makeInstance({num}: {num: JSNumber}): BoxedNumber;
 
-    public static makeInstance(real: bigint, imag: bigint): BoxedNumber;
-    public static makeInstance(real: bigint, realDen: bigint): BoxedNumber;
-    public static makeInstance(real: bigint, realDen: bigint, imag: bigint, imagDen: bigint): BoxedNumber;
+    public static makeInstance({num, imagNum}: {num: bigint, imagNum: bigint}): BoxedNumber;
+    public static makeInstance({num, den}: {num: bigint, den: bigint}): BoxedNumber;
+    public static makeInstance({num, den, imagNum, imagDen}:
+                               {num: bigint, den: bigint, imagNum: bigint, imagDen: bigint}): BoxedNumber;
 
-    public static makeInstance(real: number, imag: number): BoxedNumber;
-    public static makeInstance(real: number, realDen: number): BoxedNumber;
-    public static makeInstance(real: number, realDen: number, imag: number,  imagDen: number): BoxedNumber;
+    public static makeInstance({num, imagNum}: {num: number, imagNum: number}): BoxedNumber;
+    public static makeInstance({num, den}: {num: number, den: number}): BoxedNumber;
+    public static makeInstance({num, den, imagNum,  imagDen}:
+                               {num: number, den: number, imagNum: number, imagDen: number}): BoxedNumber;
 
-    public static makeInstance(real: JSNumber, realDen?: JSInteger, imag?: JSNumber, imagDen?: JSInteger): BoxedNumber {
-        let isReal = imag === undefined;
+    public static makeInstance({num, den, imagNum, imagDen}:
+                               {num: JSNumber, den?: JSInteger, imagNum?: JSNumber, imagDen?: JSInteger}): BoxedNumber {
+        let isReal = imagNum === undefined;
         if (isReal && imagDen !== undefined) {
            throw new Error("Must specify both a numerator and denominator.");
         }
-        if (typeof real === 'number') {
-            imag = 0;
-        } else {
-            imag = 0n;
+        if (imagNum === undefined && typeof num === 'number') {
+            imagNum = 0;
+        } else if (imagNum === undefined && typeof num === 'bigint') {
+            imagNum = 0n;
         }
 
-        let denominatorsExist = realDen !== undefined && imagDen !== undefined;
-        if (!denominatorsExist && (realDen !== undefined || imagDen !== undefined)) {
+        let denominatorsExist = den !== undefined && imagDen !== undefined;
+        if (!isReal && !denominatorsExist && (den !== undefined || imagDen !== undefined)) {
             throw new Error("Real and imaginary part must be the same exactness.")
         }
 
-        let componentsAreIntegers;
-        if (denominatorsExist) {
-            componentsAreIntegers = isJSInteger(real)
-                && isJSInteger(imag)
-                && isJSInteger(realDen)
-                && isJSInteger(imagDen);
+        let isExact;
+        if (isReal) {
+            isExact = den !== undefined
+                && isJSInteger(num)
+                && isJSInteger(den);
         } else {
-            componentsAreIntegers = isJSInteger(real)
-                && isJSInteger(imag);
+            isExact = den !== undefined
+                && isJSInteger(num)
+                && isJSInteger(den)
+                && imagDen != undefined
+                && isJSInteger(imagNum)
+                && isJSInteger(imagDen);
         }
 
-
         let typesAreSame;
-        if (denominatorsExist) {
-            typesAreSame = typeof real === typeof imag
-                && typeof realDen === typeof imagDen
-                && typeof real === typeof realDen;
+        if (isReal && isExact) {
+            typesAreSame = typeof num === typeof den;
+        } else if (isReal && !isExact) {
+            typesAreSame = true;
+        } else if (!isReal && isExact) {
+            typesAreSame = typeof num === typeof imagNum
+                && typeof den === typeof imagDen
+                && typeof num === typeof den;
         } else {
-            typesAreSame = typeof real === typeof imag;
+            typesAreSame = typeof num === typeof imagNum;
         }
         if (!typesAreSame) {
             throw new TypeError("All makeInstance arguments must be the same type.")
         }
 
-        let isBig = typeof real === 'bigint';
+        let isBig = typeof num === 'bigint';
 
         let realVal, imagVal;
-        if (denominatorsExist) {
-            if (componentsAreIntegers && isBig) {
-                realVal = new BigExactNumber(real as bigint, realDen as bigint);
-                imagVal = new BigExactNumber(imag as bigint, imagDen as bigint);
-            } else if (componentsAreIntegers) {
-                realVal = new SmallExactNumber(real as number, realDen as number);
-                imagVal = new SmallExactNumber(imag as number, imagDen as number);
-            } else {
-                throw new TypeError("Numerator and denominator must be integers.")
-            }
+        if (isReal && isExact && isBig) {
+            realVal = new BigExactNumber(num as bigint, den as bigint);
+            imagVal = ZERO_VAL;
+        } else if (isReal && isExact && !isBig) {
+            realVal = new SmallExactNumber(num as number, den as number);
+            imagVal = ZERO_VAL;
+        } else if (isReal && !isExact) {
+            realVal = new InexactNumber(num as number);
+            imagVal = ZERO_VAL;
+        } else if (!isReal && isExact && isBig) {
+            realVal = new BigExactNumber(num as bigint, den as bigint);
+            imagVal = new BigExactNumber(imagNum as bigint, imagDen as bigint);
+        } else if (!isReal && isExact && !isBig) {
+            realVal = new SmallExactNumber(num as number, den as number);
+            imagVal = new SmallExactNumber(imagNum as number, imagDen as number);
+        } else if (!isReal && !isExact && !isBig) {
+            realVal = new InexactNumber(num as number);
+            imagVal = new InexactNumber(imagNum as number);
         } else {
-            if (componentsAreIntegers && isBig) {
-                realVal = new BigExactNumber(real as bigint);
-                imagVal = new BigExactNumber(imag as bigint);
-            } else if (componentsAreIntegers) {
-                realVal = new SmallExactNumber(real as number);
-                imagVal = new SmallExactNumber(imag as number);
-            } else {
-                realVal = new InexactNumber(real as number);
-                imagVal = new InexactNumber(imag as number);
-            }
+            // Should never get here
+            throw new Error(`Error creating BoxedNumber`);
         }
 
         return new BoxedNumber(realVal, imagVal);
@@ -169,10 +174,10 @@ export class BoxedNumber {
     // }
 
     public isInteger(): boolean {
-        return this.real.isInteger() && this.imag.isInteger();
+        return this.isRational() && this.real.isInteger();
     }
     public isRational(): boolean {
-        return this.isFinite();
+        return this.isReal() && this.isFinite();
     }
     public isFinite(): boolean {
         return this.real.isFinite() && this.imag.isFinite();
@@ -189,11 +194,26 @@ export class BoxedNumber {
     public isInexact(): boolean {
         return !this.isExact();
     }
+    public isZero(): boolean {
+        return this.real.isZero() && this.imag.isZero();
+    }
     public isPositive(): boolean {
         if (!this.isReal()) {
             throw new TypeError("Not defined for complex numbers.");
         }
         return this.real.isPositive();
+    }
+    public isNegative(): boolean {
+        if (!this.isReal()) {
+            throw new TypeError("Not defined for complex numbers.");
+        }
+        return this.real.isNegative();
+    }
+    public isEven(): boolean {
+        if (!this.isInteger()) {
+            throw new TypeError("Only defined for Integers.")
+        }
+        return this.real.isEven();
     }
     // public canBeFixnum(): boolean {
         // return this.isReal() && this.isInteger() && this.isExact();
@@ -468,3 +488,21 @@ export class BoxedNumber {
         return TWO.multiply(this.divide(ONE.add(sqrtOneNegateThisSq)).atan());
     }
 }
+
+/////////////////////// Constants ///////////////////////
+export const ZERO = new BoxedNumber(ZERO_VAL);
+export const ONE = new BoxedNumber(ONE_VAL);
+export const TWO = new BoxedNumber(TWO_VAL);
+
+export const HALF = ONE.divide(TWO);
+
+export const NEG_ONE = new BoxedNumber(NEG_ONE_VAL);
+
+export const I = new BoxedNumber(ZERO_VAL, ONE_VAL);
+export const NEG_I = new BoxedNumber(ZERO_VAL, NEG_ONE_VAL);
+
+export const PI = new BoxedNumber(PI_VAL);
+
+export const INF = new BoxedNumber(INF_VAL);
+export const NEG_INF = new BoxedNumber(NEG_INF_VAL);
+export const NAN = new BoxedNumber(NAN_VAL);

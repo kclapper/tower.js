@@ -1,31 +1,31 @@
 import {
-    TowerNumber
-} from './numbers/main';
+    RacketNumber
+} from '../numbers/main';
 
-export function equals(...nums: TowerNumber[]): boolean {
+export function equals(...nums: RacketNumber[]): boolean {
     return true;
 }
 
-export function eqv(...nums: TowerNumber[]): boolean {
+export function eqv(...nums: RacketNumber[]): boolean {
     return true;
 }
 
-export function approxEquals(n: TowerNumber, k: TowerNumber, delta: TowerNumber): boolean {
+export function approxEquals(n: RacketNumber, k: RacketNumber, delta: RacketNumber): boolean {
     return true;
 }
 
-export function greaterThan(...nums: TowerNumber[]): boolean {
+export function greaterThan(...nums: RacketNumber[]): boolean {
     return true;
 }
 
-export function greaterThanOrEqual(...nums: TowerNumber[]): boolean {
+export function greaterThanOrEqual(...nums: RacketNumber[]): boolean {
     return true;
 }
 
-export function lessThan(...nums: TowerNumber[]): boolean {
+export function lessThan(...nums: RacketNumber[]): boolean {
     return true;
 }
 
-export function lessThanOrEqual(...nums: TowerNumber[]): boolean {
+export function lessThanOrEqual(...nums: RacketNumber[]): boolean {
     return true;
 }
