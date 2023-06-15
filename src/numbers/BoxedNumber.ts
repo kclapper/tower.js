@@ -148,6 +148,22 @@ export class BoxedNumber {
             return this.real.toString() + this.imag.toSignedString() + "i";
         }
     }
+    public [Symbol.toPrimitive](hint: string): number | bigint | string {
+        if (hint === 'string') {
+            return this.toString();
+        }
+
+        if (!this.isReal()) {
+            return Number.NaN;
+        }
+
+        let primitive = this.real[Symbol.toPrimitive](hint);
+        if (hint === 'number' && typeof primitive === 'bigint') {
+            return Number(primitive);
+        } else {
+            return primitive;
+        }
+    }
 
     public isInteger(): boolean {
         return this.isRational() && this.real.isInteger();
@@ -173,6 +189,9 @@ export class BoxedNumber {
     public isZero(): boolean {
         return this.real.isZero() && this.imag.isZero();
     }
+    public isNegativeZero(): boolean {
+        return this.isReal() && this.real.isNegativeZero();
+    }
     public isPositive(): boolean {
         if (!this.isReal()) {
             throw new TypeError("Not defined for complex numbers.");
@@ -190,6 +209,9 @@ export class BoxedNumber {
             throw new TypeError("Only defined for Integers.")
         }
         return this.real.isEven();
+    }
+    public isNaN(): boolean {
+        return this.real.isNaN() || this.imag.isNaN();
     }
 
     public toExact(): BoxedNumber {
@@ -364,31 +386,52 @@ export class BoxedNumber {
     }
 
     public log(): BoxedNumber {
-        let mag = this.magnitude();
+        if (this.isReal() && this.isPositive()) {
+            return new BoxedNumber(this.real.log());
+        }
+
+        let mag = this.magnitude().real;
+        let mag_log = new BoxedNumber(mag.log());
+
         let theta = this.angle();
 
-        return mag.log().add(theta.multiply(I));
+        return mag_log.add(theta.multiply(I));
     }
     public expt(power: BoxedNumber): BoxedNumber {
-        if (this.isExact() && this.isInteger() && power.greaterThanOrEqual(ZERO)) {
-            let n = this.real.toFixnum();
-            let k = power.real.toFixnum();
-            let result = fastExpt(n, k);
+        if (power.isExact() && power.isInteger() && power.greaterThanOrEqual(ZERO)) {
+            // HACK: k can be a bigint or a number so we need some gross casting.
+            let n: BoxedNumber = this;
+            let k: number = power.toFixnum() as number;
 
-            let resultValue;
-            if (typeof result === 'number') {
-                resultValue = new SmallExactNumber(result);
-            } else {
-                resultValue = new BigExactNumber(result);
+            let isNumber = typeof k === 'number';
+            let zero = (isNumber ? 0 : 0n) as number;
+            let one = (isNumber ? 1 : 1n) as number;
+            let two = (isNumber ? 2 : 2n) as number;
+
+            let acc: BoxedNumber = ONE;
+
+            while (true) {
+                if (k === zero) {
+                    return acc;
+                }
+                if (k % two === zero) {
+                    n = n.multiply(n);
+                    k = k / two;
+                } else {
+                    acc = acc.multiply(n);
+                    k = k - one;
+                }
             }
-
-            return new BoxedNumber(resultValue);
         }
 
         let expo = power.multiply(this.log());
         return expo.exp();
     }
     public exp(): BoxedNumber {
+        if (this.isReal()) {
+            return new BoxedNumber(this.real.exp());
+        }
+
         let r = new BoxedNumber(this.real.exp());
         let cos_a = new BoxedNumber(this.imag.cos());
         let sin_a = new BoxedNumber(this.imag.sin());
@@ -425,6 +468,12 @@ export class BoxedNumber {
         }
     }
     public atan(): BoxedNumber {
+        if (this.isZero()) {
+            return ZERO;
+        }
+        if (this.isReal()) {
+            return new BoxedNumber(this.real.atan());
+        }
         if (this.equals(I) || this.equals(NEG_I)) {
             return NEG_INF;
         }
@@ -470,19 +519,37 @@ export class BoxedNumber {
 }
 
 /////////////////////// Constants ///////////////////////
-export const ZERO = new BoxedNumber(ZERO_VAL);
-export const ONE = new BoxedNumber(ONE_VAL);
-export const TWO = new BoxedNumber(TWO_VAL);
 
-export const HALF = ONE.divide(TWO);
+// If you add any constants here, make sure to re-export them from
+// the constants.ts file as well.
 
-export const NEG_ONE = new BoxedNumber(NEG_ONE_VAL);
+export const EXACT_ZERO = BoxedNumber.makeInstance({num: 0, den: 1});
+export const EXACT_HALF = BoxedNumber.makeInstance({num: 1, den: 2});
+export const EXACT_ONE = BoxedNumber.makeInstance({num: 1, den: 1});
+export const EXACT_TWO = BoxedNumber.makeInstance({num: 2, den: 1});
+export const EXACT_NEG_ONE = BoxedNumber.makeInstance({num: -1, den: 1});
+export const EXACT_I = BoxedNumber.makeInstance({num: 0, den: 1, imagNum: 1, imagDen: 1});
+export const EXACT_NEG_I = BoxedNumber.makeInstance({num: 0, den: 1, imagNum: -1, imagDen: 1});
 
-export const I = new BoxedNumber(ZERO_VAL, ONE_VAL);
-export const NEG_I = new BoxedNumber(ZERO_VAL, NEG_ONE_VAL);
+export const INEXACT_ZERO = BoxedNumber.makeInstance({num: 0});
+export const INEXACT_HALF = BoxedNumber.makeInstance({num: 0.5});
+export const INEXACT_ONE = BoxedNumber.makeInstance({num: 1});
+export const INEXACT_TWO = BoxedNumber.makeInstance({num: 2});
+export const INEXACT_NEG_ONE = BoxedNumber.makeInstance({num: -1});
+export const INEXACT_I = BoxedNumber.makeInstance({num: 0, imagNum: 1});
+export const INEXACT_NEG_I = BoxedNumber.makeInstance({num: 0, imagNum: -1});
 
-export const PI = new BoxedNumber(PI_VAL);
+export const ZERO = EXACT_ZERO;
+export const ONE = EXACT_ONE;
+export const HALF = EXACT_HALF;
+export const TWO = EXACT_TWO;
+export const NEG_ONE = EXACT_NEG_ONE;
+export const I = EXACT_I
+export const NEG_I = EXACT_NEG_I;
 
-export const INF = new BoxedNumber(INF_VAL);
-export const NEG_INF = new BoxedNumber(NEG_INF_VAL);
-export const NAN = new BoxedNumber(NAN_VAL);
+export const PI = BoxedNumber.makeInstance({num: Math.PI});
+
+export const INF = BoxedNumber.makeInstance({num: Number.POSITIVE_INFINITY});
+export const NEG_INF = BoxedNumber.makeInstance({num: Number.NEGATIVE_INFINITY});
+
+export const NAN = BoxedNumber.makeInstance({num: Number.NaN});

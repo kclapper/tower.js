@@ -19,6 +19,7 @@ abstract class AbstractNumber {
 
     abstract toString(): string;
     abstract toSignedString(): string;
+    abstract [Symbol.toPrimitive](hint: string): number | bigint | string;
 
     abstract greaterThan(other: Value): boolean;
     abstract greaterThanOrEqual(other: Value): boolean;
@@ -27,9 +28,11 @@ abstract class AbstractNumber {
     abstract equals(other: Value): boolean;
 
     abstract isZero(): boolean;
+    abstract isNegativeZero(): boolean;
     abstract isPositive(): boolean;
     abstract isNegative(): boolean;
     abstract isEven(): boolean;
+    abstract isNaN(): boolean;
 
     abstract add(other: Value): Value;
     abstract subtract(other: Value): Value;
@@ -113,6 +116,13 @@ export class InexactNumber extends AbstractNumber {
         }
         return this.num.toString();
     }
+    [Symbol.toPrimitive](hint: string): number | string {
+        if (hint === 'string') {
+            return this.toString();
+        }
+
+        return this.num;
+    }
 
     greaterThan(other: Value): boolean {
         if (other instanceof ExactNumber) {
@@ -139,6 +149,12 @@ export class InexactNumber extends AbstractNumber {
         return this.num <= other.num;
     }
     equals(other: Value): boolean {
+        if (this.isNaN()) {
+            return false;
+        }
+        if (!this.isFinite()) {
+            return !(other instanceof ExactNumber) && this.num === other.num;
+        }
         if (other instanceof ExactNumber) {
             return this.toExact().equals(other);
         }
@@ -148,6 +164,9 @@ export class InexactNumber extends AbstractNumber {
     isZero(): boolean {
         return this.num === 0;
     }
+    isNegativeZero(): boolean {
+        return Object.is(this.num, -0);
+    }
     isPositive(): boolean {
         return this.num > 0;
     }
@@ -156,6 +175,9 @@ export class InexactNumber extends AbstractNumber {
     }
     isEven(): boolean {
         return this.num % 2 === 0;
+    }
+    isNaN(): boolean {
+        return Number.isNaN(this.num);
     }
 
     add(other: Value): Value {
@@ -190,10 +212,10 @@ export class InexactNumber extends AbstractNumber {
     }
 
     numerator(): Value {
-        return this.toExact().numerator();
+        return this.toExact().numerator().toInexact();
     }
     denominator(): Value {
-        return this.toExact().denominator();
+        return this.toExact().denominator().toInexact();
     }
 
     integerSqrt(): Value {
@@ -339,20 +361,24 @@ export class SmallExactNumber extends ExactNumber {
     }
 
     toString(): string {
-        let num = Math.abs(this.num as number).toString();
-        let den = Math.abs(this.den as number).toString();
-
-        if (this.isPositive() || this.isZero()) {
-            return `${num}/${den}`;
-        } else {
-            return `-${num}/${den}`;
+        if (this.den === 1) {
+            return this.num.toString();
         }
+
+        return `${this.num}/${this.den}`;
     }
     toSignedString(): string {
         if (this.isPositive() || this.isZero()) {
             return "+" + this.toString();
         }
         return this.toString();
+    }
+    [Symbol.toPrimitive](hint: string): number | string {
+        if (hint === 'string') {
+            return this.toString();
+        }
+
+        return this.num / this.den;
     }
 
 
@@ -415,6 +441,9 @@ export class SmallExactNumber extends ExactNumber {
     isZero(): boolean {
         return this.num === 0;
     }
+    isNegativeZero(): boolean {
+        return Object.is(this.num, -0);
+    }
     isPositive(): boolean {
         return this.num > 0;
     }
@@ -423,6 +452,9 @@ export class SmallExactNumber extends ExactNumber {
     }
     isEven(): boolean {
         return this.den === 1 && this.num % 2 === 0;
+    }
+    isNaN(): boolean {
+        return false;
     }
 
     add(other: Value): Value {
@@ -679,8 +711,8 @@ export class BigExactNumber extends ExactNumber {
     }
 
     toString(): string {
-        let numStr = this.bigintAbs(this.num as bigint).toString().slice(0, -1);
-        let denStr = this.bigintAbs(this.den as bigint).toString().slice(0, -1);
+        let numStr = this.num.toString().slice(0, -1);
+        let denStr = this.den.toString().slice(0, -1);
 
         if (this.den === 1n) {
             return numStr;
@@ -693,6 +725,17 @@ export class BigExactNumber extends ExactNumber {
             return this.toString();
         }
         return "+" + this.toString();
+    }
+    [Symbol.toPrimitive](hint: string): number | bigint | string {
+        if (hint === 'string') {
+            return this.toString();
+        }
+
+        if (this.den === 1n) {
+            return this.num;
+        }
+
+        return Number(this.num) / Number(this.den);
     }
 
     greaterThan(other: Value): boolean {
@@ -764,6 +807,9 @@ export class BigExactNumber extends ExactNumber {
     isZero(): boolean {
         return this.num === 0n;
     }
+    isNegativeZero(): boolean {
+        return false;
+    }
     isPositive(): boolean {
         return this.num > 0n;
     }
@@ -772,6 +818,9 @@ export class BigExactNumber extends ExactNumber {
     }
     isEven(): boolean {
         return this.den === 1n && this.num % 2n === 0n;
+    }
+    isNaN(): boolean {
+        return false;
     }
 
     add(other: Value): Value {
@@ -951,6 +1000,10 @@ const EXACT_ZERO = new SmallExactNumber(0);
 
 
 /////////////////////// Constants ///////////////////////
+
+// If you add any constants here, make sure to re-export them from
+// the constants.ts file as well.
+
 export const ZERO_VAL = new SmallExactNumber(0);
 export const ONE_VAL = new SmallExactNumber(1);
 export const TWO_VAL = new SmallExactNumber(2);
