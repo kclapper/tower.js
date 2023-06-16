@@ -914,32 +914,118 @@ describe('denominator', () => {
     });
 });
 
-// TODO: Continue from here...
-describe.skip('gcd', () => {
+describe('gcd', () => {
     test('racket docs examples', () => {
         expect(gcd(10)).toBe(10);
         expect(gcd(12, makeInstance({num: 81}))).toEqual(makeInstance({num: 3}));
         expect(gcd(makeInstance({num: 1, den: 2}), makeInstance({num: 1, den: 3})))
-            .toEqual(makeInstance({num: 3}));
+            .toEqual(makeInstance({num: 1, den: 6}));
     });
     test('fixnums', () => {
-        expect()
+        expect(gcd(4, 18)).toBe(2);
+        expect(gcd(7, 18)).toBe(1);
+        expect(gcd(-4, 18)).toBe(2);
+        expect(gcd(BigInt(4), BigInt(18))).toBe(2);
+        expect(gcd(BigInt(-4), BigInt(18))).toBe(2);
+        expect(gcd(BigInt(7), BigInt(18))).toBe(1);
     });
     test('boxed numbers: exact', () => {
+        expect(gcd(makeInstance({num: 4, den: 1}), makeInstance({num: 18, den: 1})))
+            .toBe(2);
+        expect(gcd(makeInstance({num: -4, den: 1}), makeInstance({num: 18, den: 1})))
+            .toBe(2);
+        expect(gcd(makeInstance({num: 7, den: 1}), makeInstance({num: 18, den: 1})))
+            .toBe(1);
+        expect(gcd(makeInstance({num: BigInt(4), den: BigInt(1)}), makeInstance({num: BigInt(18), den: BigInt(1)})))
+            .toBe(2);
 
+        expect(gcd(makeInstance({num: 4, den: 7}), makeInstance({num: 18, den: 41})))
+            .toEqual(makeInstance({num: 2, den: 287}));
+        expect(gcd(makeInstance({num: 4, den: 7}), makeInstance({num: 18, den: 1})))
+            .toEqual(makeInstance({num: 2, den: 7}));
     });
     test('boxed numbers: inexact', () => {
+        expect(gcd(makeInstance({num: 4}), makeInstance({num: 18})))
+            .toEqual(makeInstance({num: 2}));
+        expect(gcd(makeInstance({num: -4}), makeInstance({num: 18})))
+            .toEqual(makeInstance({num: 2}));
+        expect(gcd(makeInstance({num: 7}), makeInstance({num: 18})))
+            .toEqual(makeInstance({num: 1}));
 
+        expect(gcd(makeInstance({num: 0.125}), makeInstance({num: 0.5})))
+            .toEqual(makeInstance({num: 0.125}));
     });
     test('mixed exactness', () => {
-
+        expect(gcd(makeInstance({num: 4}), 18))
+            .toEqual(makeInstance({num: 2}));
+        expect(gcd(makeInstance({num: -4}), makeInstance({num: 18, den: 1})))
+            .toEqual(makeInstance({num: 2}));
     });
     test('multi-arity', () => {
-
+        expect(gcd()).toBe(0);
+        expect(gcd(makeInstance({num: 4}), 18, 36))
+            .toEqual(makeInstance({num: 2}));
+        expect(gcd(7, makeInstance({num: 14, den: 1}), 49))
+            .toBe(7);
     });
 });
 
-// TODO: Fill in functions above this point
+describe('lcm', () => {
+    test('racket docs examples', () => {
+        expect(lcm(10)).toBe(10);
+        expect(lcm(3, makeInstance({num: 4.0}))).toEqual(makeInstance({num: 12}));
+        expect(lcm(makeInstance({num: 1, den: 2}), makeInstance({num: 2, den: 3})))
+            .toEqual(2);
+    });
+    test('fixnums', () => {
+        expect(lcm(4, 18)).toBe(36);
+        expect(lcm(7, 18)).toBe(126);
+        expect(lcm(-4, 18)).toBe(36);
+        expect(lcm(BigInt(4), BigInt(18))).toBe(36);
+        expect(lcm(BigInt(-4), BigInt(18))).toBe(36);
+        expect(lcm(BigInt(7), BigInt(18))).toBe(126);
+    });
+    test('boxed numbers: exact', () => {
+        expect(lcm(makeInstance({num: 4, den: 1}), makeInstance({num: 18, den: 1})))
+            .toBe(36);
+        expect(lcm(makeInstance({num: -4, den: 1}), makeInstance({num: 18, den: 1})))
+            .toBe(36);
+        expect(lcm(makeInstance({num: 7, den: 1}), makeInstance({num: 18, den: 1})))
+            .toBe(126);
+        expect(lcm(makeInstance({num: BigInt(4), den: BigInt(1)}), makeInstance({num: BigInt(18), den: BigInt(1)})))
+            .toBe(36);
+
+        expect(lcm(makeInstance({num: 4, den: 7}), makeInstance({num: 18, den: 41})))
+            .toEqual(36);
+        expect(lcm(makeInstance({num: 4, den: 7}), makeInstance({num: 18, den: 1})))
+            .toEqual(36);
+    });
+    test('boxed numbers: inexact', () => {
+        expect(lcm(makeInstance({num: 4}), makeInstance({num: 18})))
+            .toEqual(makeInstance({num: 36}));
+        expect(lcm(makeInstance({num: -4}), makeInstance({num: 18})))
+            .toEqual(makeInstance({num: 36}));
+        expect(lcm(makeInstance({num: 7}), makeInstance({num: 18})))
+            .toEqual(makeInstance({num: 126}));
+
+        expect(lcm(makeInstance({num: 0.125}), makeInstance({num: 0.5})))
+            .toEqual(makeInstance({num: 0.5}));
+    });
+    test('mixed exactness', () => {
+        expect(lcm(makeInstance({num: 4}), 18))
+            .toEqual(makeInstance({num: 36}));
+        expect(lcm(makeInstance({num: -4}), makeInstance({num: 18, den: 1})))
+            .toEqual(makeInstance({num: 36}));
+    });
+    test('multi-arity', () => {
+        expect(lcm()).toBe(1);
+        expect(lcm(-10)).toBe(10);
+        expect(lcm(makeInstance({num: 4}), 18, 36))
+            .toEqual(makeInstance({num: 36}));
+        expect(lcm(7, makeInstance({num: 14, den: 1}), 49))
+            .toBe(98);
+    });
+});
 
 describe('abs', () => {
     test('exact numbers', () => {

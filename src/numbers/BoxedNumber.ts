@@ -214,6 +214,15 @@ export class BoxedNumber {
         return this.real.isNaN() || this.imag.isNaN();
     }
 
+    public toInexact(): BoxedNumber {
+        if (this.isInexact()) {
+            return this;
+        }
+        if (this.isReal()) {
+            return new BoxedNumber(this.real.toInexact());
+        }
+        return new BoxedNumber(this.real.toInexact(), this.imag.toInexact());
+    }
     public toExact(): BoxedNumber {
         return new BoxedNumber(this.real.toExact(), this.imag.toExact());
     }

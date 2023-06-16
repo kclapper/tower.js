@@ -1,9 +1,14 @@
 import {
-    BoxedNumber, EXACT_HALF, INF, NAN, NEG_INF,
+    BoxedNumber,
+    EXACT_HALF,
+    INF,
+    NAN,
+    NEG_INF,
 } from '../numbers/BoxedNumber';
 import {
     ONE,
     I,
+    EXACT_ZERO,
     INEXACT_ZERO,
     INEXACT_ONE,
 } from '../numbers/constants';
@@ -21,8 +26,12 @@ import {
 import {
     isNegative,
     isPositive,
-    isExact
+    isExact,
+    isZero
 } from './predicates';
+import {
+    exactToInexact
+} from './misc';
 
 export function add(...nums: RacketNumber[]): RacketNumber {
     const adder = makeMultiArity(
@@ -330,11 +339,92 @@ export function denominator(n: RacketNumber): RacketNumber {
 }
 
 export function gcd(...args: RacketNumber[]): RacketNumber {
-    return ONE;
+    if (args.length === 0) {
+        return 0;
+    }
+    if (args.length === 1) {
+        return args[0];
+    }
+
+    const gcder = makeMultiArity(
+        function(x: number, y: number): number {
+            let t;
+            while (y !== 0) {
+                t = x;
+                x = y;
+                y = t % y;
+            }
+            return x;
+        },
+        function(x: bigint, y: bigint): bigint {
+            let t;
+            while (y !== 0n) {
+                t = x;
+                x = y;
+                y = t % y;
+            }
+            return x;
+        },
+        function(x: BoxedNumber, y: BoxedNumber): RacketNumber {
+            let isExact = x.isExact() && y.isExact();
+
+            let an = numerator(x);
+            let ad = denominator(x);
+            if (an instanceof BoxedNumber) {
+                an = an.toFixnum();
+            }
+            if (ad instanceof BoxedNumber) {
+                ad = ad.toFixnum();
+            }
+
+            let bn = numerator(y);
+            let bd = denominator(y);
+            if (bn instanceof BoxedNumber) {
+                bn = bn.toFixnum();
+            }
+            if (bd instanceof BoxedNumber) {
+                bd = bd.toFixnum();
+            }
+
+
+            let num = gcd(an, bn);
+            let den = lcm(ad, bd);
+
+            let result = divide(num, den);
+
+            return isExact? result : exactToInexact(result);
+        }
+    );
+
+    return gcder(...args);
 }
 
 export function lcm(...args: RacketNumber[]): RacketNumber {
-    return ONE;
+    if (args.length === 0) {
+        return 1;
+    }
+
+    if (args.length === 1) {
+        return abs(args[0]);
+    }
+
+    for (let i = 0; i < args.length; i++) {
+        if (isZero(args[i])) {
+            if (isExact(args[i])) {
+                return EXACT_ZERO;
+            }
+            return INEXACT_ZERO;
+        }
+    }
+
+    const binopLcm = function(x: RacketNumber, y: RacketNumber): RacketNumber {
+        let product = multiply(x, y);
+        let den = gcd(x, y);
+        let result = abs(divide(product, den));
+        return result;
+    }
+
+    return lcm(binopLcm(args[0], args[1]), ...args.slice(2));
 }
 
 export function abs(n: RacketNumber): RacketNumber {
