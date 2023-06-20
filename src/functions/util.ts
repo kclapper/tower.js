@@ -1,9 +1,7 @@
 import {
+    RacketNumber,
     BoxedNumber
-} from '../numbers/BoxedNumber';
-import {
-    RacketNumber
-} from '../numbers/main';
+} from '../tower';
 import {
     isSafeInteger
 } from '../util';

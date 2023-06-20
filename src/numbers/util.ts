@@ -1,7 +1,7 @@
 import {
     JSInteger,
     JSNumber
-} from './main';
+} from './types';
 import {
     Value
 } from './Value';

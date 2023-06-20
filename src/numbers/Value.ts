@@ -1,9 +1,9 @@
 import {
-    isSafeInteger
-} from '../util';
-import {
     JSInteger,
-} from "./main";
+} from "./types";
+import {
+    isSafeInteger
+} from './util';
 
 export type Value = ExactNumber | InexactNumber;
 

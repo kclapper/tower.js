@@ -1,27 +1,21 @@
 import {
-    isJSInteger,
-    fastExpt,
-    matchExactness
-} from './util';
+    JSInteger,
+    JSNumber,
+    Level,
+} from './types';
 import {
     InexactNumber,
     SmallExactNumber,
     BigExactNumber,
     Value,
     ZERO_VAL,
-    ONE_VAL,
     TWO_VAL,
     NEG_ONE_VAL,
-    PI_VAL,
-    INF_VAL,
-    NEG_INF_VAL,
-    NAN_VAL
 } from './Value';
 import {
-    JSInteger,
-    JSNumber,
-    Level,
-} from './main';
+    isJSInteger,
+    matchExactness
+} from './util';
 
 export class BoxedNumber {
     public readonly level: Level;

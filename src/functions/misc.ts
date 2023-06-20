@@ -1,6 +1,6 @@
 import {
-    BoxedNumber,
-    RacketNumber
+    RacketNumber,
+    BoxedNumber
 } from '../tower';
 import {
     normalize

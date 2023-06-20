@@ -1,24 +1,20 @@
 import {
+    RacketNumber,
     BoxedNumber,
     EXACT_HALF,
     INF,
     NAN,
     NEG_INF,
-} from '../numbers/BoxedNumber';
-import {
     ONE,
     I,
     EXACT_ZERO,
     INEXACT_ZERO,
     INEXACT_ONE,
-} from '../numbers/constants';
-import {
-    RacketNumber,
-} from '../numbers/main';
+} from '../tower';
 import {
     normalize,
     matchTypes,
-    fastExpt,
+    bigExpt,
     shouldBeBigInt,
 } from './util';
 import {
@@ -309,8 +305,7 @@ export function expt(z: RacketNumber, w: RacketNumber): RacketNumber {
         return result;
 
     } else {
-        // TODO: Rename this function
-        return fastExpt(z, w as bigint);
+        return bigExpt(z, w as bigint);
     }
 }
 

@@ -1,5 +1,7 @@
-import { RacketNumber } from "../numbers/main";
-import { BoxedNumber } from "../numbers/BoxedNumber";
+import {
+    RacketNumber,
+    BoxedNumber
+} from "../tower";
 
 export function isNumber(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number' && Number.isInteger(x);
