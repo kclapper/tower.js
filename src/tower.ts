@@ -2,4 +2,8 @@ export * from './numbers/main';
 export * from './numbers/BoxedNumber';
 export * from './numbers/constants';
 export * from './functions/arithmetic';
+export * from './functions/comparison';
 export * from './functions/predicates';
+export * from './functions/misc';
+export * from './functions/complex';
+export * from './functions/trigonometry';

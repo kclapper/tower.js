@@ -1,6 +1,7 @@
 import {
     isJSInteger,
-    fastExpt
+    fastExpt,
+    matchExactness
 } from './util';
 import {
     InexactNumber,
@@ -53,7 +54,7 @@ export class BoxedNumber {
         Object.freeze(this);
     }
 
-    public static makeInstance({num}: {num: JSNumber}): BoxedNumber;
+    public static makeInstance({num}: {num: number}): BoxedNumber;
 
     public static makeInstance({num, imagNum}: {num: bigint, imagNum: bigint}): BoxedNumber;
     public static makeInstance({num, den}: {num: bigint, den: bigint}): BoxedNumber;
@@ -70,11 +71,6 @@ export class BoxedNumber {
         let isReal = imagNum === undefined;
         if (isReal && imagDen !== undefined) {
            throw new Error("Must specify both a numerator and denominator.");
-        }
-        if (imagNum === undefined && typeof num === 'number') {
-            imagNum = 0;
-        } else if (imagNum === undefined && typeof num === 'bigint') {
-            imagNum = 0n;
         }
 
         let denominatorsExist = den !== undefined && imagDen !== undefined;
@@ -94,6 +90,10 @@ export class BoxedNumber {
                 && imagDen != undefined
                 && isJSInteger(imagNum)
                 && isJSInteger(imagDen);
+        }
+
+        if (!isExact && typeof num === 'bigint') {
+            throw new TypeError("bigints can only be used with exact numbers");
         }
 
         let typesAreSame;
@@ -158,11 +158,16 @@ export class BoxedNumber {
         }
 
         let primitive = this.real[Symbol.toPrimitive](hint);
+
         if (hint === 'number' && typeof primitive === 'bigint') {
             return Number(primitive);
-        } else {
-            return primitive;
+        } else if (hint === 'default' && typeof primitive === 'bigint') {
+            return Number(primitive);
+        } else if (hint === 'bigint' && typeof primitive === 'number') {
+            return BigInt(primitive);
         }
+
+        return primitive;
     }
 
     public isInteger(): boolean {
@@ -262,14 +267,35 @@ export class BoxedNumber {
     }
 
     public add(other: BoxedNumber): BoxedNumber {
-        return new BoxedNumber(this.real.add(other.real), this.imag.add(other.imag));
+        if (this.isReal() && other.isReal()) {
+            return new BoxedNumber(this.real.add(other.real));
+        }
+
+        let real = this.real.add(other.real);
+        let imag = this.imag.add(other.imag);
+
+        [real, imag] = matchExactness(real, imag);
+
+        return new BoxedNumber(real, imag);
     }
     public subtract(other: BoxedNumber): BoxedNumber {
-        return new BoxedNumber(this.real.subtract(other.real), this.imag.subtract(other.imag));
+        if (this.isReal() && other.isReal()) {
+            return new BoxedNumber(this.real.subtract(other.real));
+        }
+
+        let real = this.real.subtract(other.real);
+        let imag = this.imag.subtract(other.imag);
+
+        [real, imag] = matchExactness(real, imag);
+
+        return new BoxedNumber(real, imag);
     }
     public multiply(other: BoxedNumber): BoxedNumber {
         let real = this.real.multiply(other.real).subtract(this.imag.multiply(other.imag));
         let imag = this.real.multiply(other.imag).add(this.imag.multiply(other.real));
+
+        real = !imag.isExact() ? real.toInexact() : real;
+
         return new BoxedNumber(real, imag);
     }
     public divide(other: BoxedNumber): BoxedNumber {
@@ -346,10 +372,9 @@ export class BoxedNumber {
         // http://en.wikipedia.org/wiki/Square_root#Square_roots_of_negative_and_complex_numbers
         let mag = this.magnitude().real;
         let r_plus_x = mag.add(this.real);
-        let r_minus_x = mag.subtract(this.real);
 
         let real = r_plus_x.divide(new SmallExactNumber(2)).sqrt();
-        let imag = r_minus_x.divide(new SmallExactNumber(2)).sqrt();
+        let imag = this.imag.divide(r_plus_x.multiply(TWO_VAL).sqrt());
 
         return new BoxedNumber(real, imag);
     }
@@ -452,9 +477,9 @@ export class BoxedNumber {
         if (this.isReal()) {
             return new BoxedNumber(this.real.angle());
         }
-        if (this.real.equals(ZERO_VAL)) {
+        if (this.real.isZero()) {
             let halfPI = PI.divide(TWO);
-            if (this.imag.greaterThan(ZERO_VAL)) {
+            if (this.imag.isPositive()) {
                 return halfPI;
             } else {
                 return halfPI.multiply(NEG_ONE);
@@ -462,31 +487,25 @@ export class BoxedNumber {
         }
 
         let tmp = this.imaginaryPart().abs().divide(this.realPart().abs()).atan();
-        if (this.realPart().greaterThan(ZERO)) {
-            if (this.imaginaryPart().greaterThan(ZERO)) {
+        if (this.real.isPositive()) {
+            if (this.imag.isPositive()) {
                 return tmp;
             } else {
                 return tmp.multiply(NEG_ONE);
             }
         } else {
-            if (this.imaginaryPart().greaterThan(ZERO)) {
+            if (this.imag.isPositive()) {
                 return PI.subtract(tmp);
             } else {
                 return tmp.subtract(PI);
             }
         }
     }
-    public atan(): BoxedNumber {
-        if (this.isZero()) {
-            return ZERO;
-        }
+    public tan(): BoxedNumber {
         if (this.isReal()) {
-            return new BoxedNumber(this.real.atan());
+            return new BoxedNumber(this.real.tan());
         }
-        if (this.equals(I) || this.equals(NEG_I)) {
-            return NEG_INF;
-        }
-        return I.multiply(HALF.multiply(I.add(this).divide(I.add(ZERO.subtract(this))).log()));
+        return this.sin().divide(this.cos());
     }
     public cos(): BoxedNumber {
         if (this.isReal()) {
@@ -507,8 +526,29 @@ export class BoxedNumber {
         let result = exp_negate.divide(z2);
         return result;
     }
-    public acos(): BoxedNumber {
+    public atan(): BoxedNumber {
+        if (this.isZero()) {
+            return ZERO;
+        }
         if (this.isReal()) {
+            return new BoxedNumber(this.real.atan());
+        }
+        if (this.equals(I) || this.equals(NEG_I)) {
+            return NEG_INF;
+        }
+
+        let result;
+        result = ZERO.subtract(this);
+        result = I.add(result);
+        result = I.add(this).divide(result);
+        result = result.log();
+        result = HALF.multiply(result);
+        result = I.multiply(result);
+
+        return result;
+    }
+    public acos(): BoxedNumber {
+        if (this.isReal() && this.greaterThanOrEqual(NEG_ONE) && this.lessThanOrEqual(ONE)) {
             return new BoxedNumber(this.real.acos());
         }
         let pi_half = PI.divide(TWO);
@@ -518,7 +558,7 @@ export class BoxedNumber {
         return pi_half.add(l);
     }
     public asin(): BoxedNumber {
-        if (this.isReal()) {
+        if (this.isReal() && this.greaterThanOrEqual(NEG_ONE) && this.lessThanOrEqual(ONE)) {
             return new BoxedNumber(this.real.asin());
         }
         let oneNegateThisSq = ONE.subtract(this.multiply(this));

@@ -17,5 +17,5 @@ export function exactToInexact(n: RacketNumber): RacketNumber {
     if (n instanceof BoxedNumber) {
         return n.toInexact();
     }
-    return BoxedNumber.makeInstance({num: n});
+    return BoxedNumber.makeInstance({num: Number(n)});
 }

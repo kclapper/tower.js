@@ -16,11 +16,9 @@ import {
     RacketNumber,
 } from '../numbers/main';
 import {
-    makeMultiArity,
     normalize,
     matchTypes,
     fastExpt,
-    isSafeInteger,
     shouldBeBigInt,
 } from './util';
 import {
@@ -32,6 +30,47 @@ import {
 import {
     exactToInexact
 } from './misc';
+
+type NumberBinop = (x: number, y: number) => RacketNumber;
+type BigIntBinop = (x: bigint, y: bigint) => RacketNumber;
+type BoxedNumberBinop = (x: BoxedNumber, y: BoxedNumber) => RacketNumber;
+
+/*
+ * Makes a function that operates on RacketNumbers. The function takes
+ * at least two arguments and folds the given binary operations from left to right.
+ */
+export function makeMultiArity(fnForNumbers: NumberBinop,
+                        fnForBigInts: BigIntBinop,
+                        fnForBoxedNumbers: BoxedNumberBinop) {
+    return function recur(...args: RacketNumber[]): RacketNumber {
+        if (args.length < 2) {
+            throw new Error("Must be called with at least two arguments.")
+        }
+
+        let x = args[0];
+        let y = args[1];
+
+        [x, y] = matchTypes(x, y);
+
+        let result;
+        if (typeof x === 'number') {
+            result = fnForNumbers(x, y as number);
+            if (!Number.isSafeInteger(result)) {
+                result = fnForBigInts(BigInt(x), BigInt(y as number));
+            }
+        } else if (typeof x === 'bigint') {
+            result = fnForBigInts(x, y as bigint);
+        } else {
+            result = fnForBoxedNumbers(x, y as BoxedNumber);
+        }
+
+        if (args.length === 2) {
+            return normalize(result);
+        } else {
+            return recur(result, ...args.slice(2));
+        }
+    }
+}
 
 export function add(...nums: RacketNumber[]): RacketNumber {
     const adder = makeMultiArity(

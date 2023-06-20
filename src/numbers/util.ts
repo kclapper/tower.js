@@ -2,6 +2,9 @@ import {
     JSInteger,
     JSNumber
 } from './main';
+import {
+    Value
+} from './Value';
 
 export function isJSNumber(n: any): n is JSNumber {
     return typeof n === 'number' || typeof n === 'bigint';
@@ -21,6 +24,12 @@ export function numberIsRational(n: JSNumber): boolean {
     let isBigInt = typeof n === 'bigint';
     let isRationalFloat = Number.isFinite(n) && !Number.isNaN(n);
     return isBigInt || isRationalFloat;
+}
+
+export function matchExactness(x: Value, y: Value): Value[] {
+    x = !y.isExact() ? x.toInexact() : x;
+    y = !x.isExact() ? y.toInexact() : y;
+    return [x, y];
 }
 
 

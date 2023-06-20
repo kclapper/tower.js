@@ -1,28 +1,114 @@
-import {
-    ONE
-} from '../numbers/constants';
 import { RacketNumber } from '../numbers/main';
+import {
+    BoxedNumber,
+    EXACT_ZERO,
+    INEXACT_ZERO,
+    EXACT_NEG_ONE,
+    EXACT_TWO,
+    PI,
+    EXACT_I,
+    EXACT_NEG_I,
+    INF,
+    NEG_INF,
+    isReal,
+    isZero,
+    isPositive,
+    equals,
+    add,
+    multiply,
+    divide,
+    abs,
+    sin,
+    cos
+} from '../tower'
+import {
+    normalize
+} from './util';
+
+export function makeRectangular(real: RacketNumber, imag: RacketNumber): RacketNumber {
+    return add(real, multiply(imag, EXACT_I));
+}
 
 export function makePolar(r: RacketNumber, theta: RacketNumber): RacketNumber {
-    return ONE;
+    return add(multiply(r, cos(theta)), multiply(r, sin(theta), EXACT_I));
 }
 
 export function magnitude(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (n instanceof BoxedNumber) {
+        if (containsInfinity(n)) {
+            return INF;
+        }
+        return normalize(n.magnitude());
+    }
+    return abs(n);
+}
+
+function containsInfinity(n: BoxedNumber): boolean {
+    let real = n.realPart();
+    let imag = n.imaginaryPart();
+    return real.equals(INF)
+        || real.equals(NEG_INF)
+        || imag.equals(INF)
+        || imag.equals(NEG_INF);
 }
 
 export function angle(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (isZero(n)) {
+        throw new Error("Divide by zero");
+    }
+
+    if (isReal(n)) {
+        return isPositive(n) ? 0 : PI;
+    }
+
+    // We know n is a boxed number if it's not real
+    n = n as BoxedNumber;
+    if (containsInfinity(n)) {
+        let real = n.realPart();
+        let imag = n.imaginaryPart();
+
+        if (real.equals(INF) && imag.equals(INF)) {
+            return divide(PI, 4);
+        } else if (real.equals(INF) && imag.equals(NEG_INF)) {
+            return multiply(-1, divide(PI, 4));
+        } else if (real.equals(NEG_INF) && imag.equals(NEG_INF)) {
+            return multiply(-3, divide(PI, 4));
+        } else if (real.equals(NEG_INF) && imag.equals(INF)) {
+            return multiply(3, divide(PI, 4));
+        }
+
+        // One of the two is not infinity
+        if (real.equals(INF)) {
+            return INEXACT_ZERO.multiply(imag);
+        } else if (real.equals(NEG_INF)) {
+            return imag.isPositive() ? PI : PI.multiply(EXACT_NEG_ONE);
+        } else if (imag.equals(INF)) {
+            return PI.divide(EXACT_TWO);
+        } else {
+            return PI.divide(EXACT_TWO).multiply(EXACT_NEG_ONE);
+        }
+    }
+
+    return normalize((n as BoxedNumber).angle());
 }
 
 export function realPart(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (isReal(n)) {
+        return normalize(n);
+    }
+    return normalize((n as BoxedNumber).realPart());
 }
 
 export function imaginaryPart(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (isReal(n)) {
+        return 0;
+    }
+    return normalize((n as BoxedNumber).imaginaryPart());
 }
 
 export function conjugate(n: RacketNumber): RacketNumber {
-    return ONE;
+    if (isReal(n)) {
+        return normalize(n);
+    }
+    return (n as BoxedNumber).conjugate();
 }

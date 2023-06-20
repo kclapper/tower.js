@@ -112,10 +112,16 @@ describe('+ operator', () => {
         let z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
         let w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
 
-        expect(add(x, y)).toEqual(makeInstance({num: 6, imagNum: 5}));
-        expect(add(z, w)).toEqual(makeInstance({num: 3, den: 1, imagNum: 6, imagDen: 1}));
-        expect(add(x, z)).toEqual(makeInstance({num: 2, imagNum: 5}));
-        expect(add(x, 1)).toEqual(makeInstance({num: 2, imagNum: 3}));
+        expect(add(x, y))
+            .toEqual(makeInstance({num: 6, imagNum: 5}));
+        expect(add(z, w))
+            .toEqual(makeInstance({num: 3, den: 1, imagNum: 6, imagDen: 1}));
+        expect(add(x, z))
+            .toEqual(makeInstance({num: 2, imagNum: 5}));
+        expect(add(x, 1))
+            .toEqual(makeInstance({num: 2, imagNum: 3}));
+        expect(add(INEXACT_ONE, EXACT_I))
+            .toEqual(makeInstance({num:1, imagNum: 1}));
     });
 });
 
@@ -179,6 +185,8 @@ describe('- operator', () => {
         expect(subtract(z, w)).toEqual(makeInstance({num: -1, den: 1, imagNum: -2, imagDen: 1}));
         expect(subtract(x, z)).toEqual(makeInstance({num: 0, imagNum: 1}));
         expect(subtract(x, 1)).toEqual(makeInstance({num: 0, imagNum: 3}));
+        expect(subtract(INEXACT_ONE, EXACT_I))
+            .toEqual(makeInstance({num:1, imagNum: -1}));
     });
 });
 
@@ -192,6 +200,7 @@ describe('* operator', () => {
 
     test('exact numbers', () => {
         expect(multiply(EXACT_ONE, EXACT_ONE)).toBe(1);
+        expect(multiply(EXACT_ONE, EXACT_I)).toEqual(EXACT_I);
     });
     test('fixnums', () => {
         expect(multiply(1, 2)).toBe(2);
@@ -206,13 +215,12 @@ describe('* operator', () => {
             .toEqual(makeInstance({num: 2.5}));
     });
 
-    test('Mixed precision: boxed', () => {
+    test('Mixed precision', () => {
         expect(multiply(EXACT_ONE, INEXACT_ONE)).toEqual(INEXACT_ONE);
-    });
-    test('Mixed precision: with fixnums', () => {
         expect(multiply(1, INEXACT_ONE)).toEqual(INEXACT_ONE);
+        expect(multiply(INEXACT_ZERO, 1)).toEqual(INEXACT_ZERO);
+        expect(multiply(EXACT_ZERO, 1)).toEqual(0);
     });
-
 
     test('Multi arity', () => {
         expect(multiply(1,
@@ -244,6 +252,10 @@ describe('* operator', () => {
         expect(multiply(z, w)).toEqual(makeInstance({num: -6, den: 1, imagNum: 8, imagDen: 1}));
         expect(multiply(x, z)).toEqual(makeInstance({num: -5, imagNum: 5}));
         expect(multiply(x, 1)).toEqual(makeInstance({num: 1, imagNum: 3}));
+        expect(multiply(makeInstance({num: 3}), EXACT_I)).toEqual(makeInstance({num: 0, imagNum: 3}));
+        expect(multiply(EXACT_ZERO, makeInstance({num: 0, imagNum: 1}))).toBe(0);
+        expect(multiply(EXACT_I, makeInstance({num: 0, imagNum: 1})))
+            .toEqual(makeInstance({num: -1, imagNum: 0}));
     });
 });
 
@@ -577,6 +589,8 @@ describe('sqrt', () => {
                 num: 0.7071067811865475,
                 imagNum: 0.7071067811865475
             }));
+        expect(sqrt(makeInstance({num: 25, imagNum: -10})))
+            .toEqual(makeInstance({num: 5.095381439876338, imagNum: -0.9812808047833506}));
     });
 });
 
@@ -845,6 +859,10 @@ describe('log', () => {
             .toEqual(makeInstance({num: 1.2824746787307684, imagNum: -0.982793723247329}));
         expect(log(makeInstance({num: 2, imagNum: -3}), 2))
             .toEqual(makeInstance({num: 1.850219859070546, imagNum: -1.417871630745722}));
+        expect(log(makeInstance({num: -25, den: 17, imagNum: -2, imagDen: 17})))
+            .toEqual(makeInstance({num: 0.3888522842940041, imagNum: -3.061762667877556}));
+        expect(log(makeInstance({num: -1.4705882352941178, imagNum: -0.11764705882352941})))
+            .toEqual(makeInstance({num: 0.38885228429400426, imagNum: -3.061762667877556}));
     });
     test('racket docs examples', () => {
         expect(log(exp(1)))
