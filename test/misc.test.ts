@@ -2,7 +2,7 @@ import {describe, expect, test} from '@jest/globals';
 import {
     BoxedNumber,
     inexactToExact,
-    exactToInexact
+    exactToInexact,
 } from '../src/tower';
 
 const makeInstance = BoxedNumber.makeInstance;

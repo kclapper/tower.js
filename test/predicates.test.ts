@@ -26,7 +26,8 @@ import {
     isEven,
     isOdd,
     isExact,
-    isInexact
+    isInexact,
+    isRacketNumber
 } from '../src/tower';
 
 const makeInstance = BoxedNumber.makeInstance;
@@ -650,4 +651,11 @@ describe('isInexact()', () => {
     test('Boxed number: Inxact Complex', () => {
         expect(isInexact(makeInstance({num: 0, imagNum: 1}))).toBe(true);
     });
+});
+
+test('isRacketNumber', () => {
+    expect(isRacketNumber(5)).toBe(true);
+    expect(isRacketNumber(ONE)).toBe(true);
+    expect(isRacketNumber(BigInt(5))).toBe(true);
+    expect(isRacketNumber(Math.PI)).toBe(false);
 });
