@@ -19,11 +19,7 @@ export function shouldBeBigInt(n: number): boolean {
 
 export function bigExpt(n: bigint, k: bigint): bigint {
     let acc = 1n;
-    while (true) {
-        if (k === 0n) {
-            return acc;
-        }
-
+    while (k !== 0n) {
         if (k % 2n === 0n) {
             n = n * n;
             k = k / 2n;
@@ -32,4 +28,5 @@ export function bigExpt(n: bigint, k: bigint): bigint {
             k = k - 1n;
         }
     }
+    return acc;
 }

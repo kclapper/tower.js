@@ -18,13 +18,6 @@ import {
     equals,
 } from "../tower";
 
-function isPi(n: RacketNumber): boolean {
-    if (n instanceof BoxedNumber) {
-        return n.equals(PI);
-    }
-    return Number(n) === Math.PI;
-}
-
 function isOne(n: RacketNumber): boolean {
     if (n instanceof BoxedNumber) {
         return n.equals(EXACT_ONE);
@@ -128,7 +121,7 @@ export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
     }
 
     // https://en.wikipedia.org/wiki/Atan2
-    let arg = divide(y, x);
+    const arg = divide(y, x);
 
     if (arg instanceof BoxedNumber && arg.isNaN()) {
         if (equals(y, INF) && equals(x, INF)) {

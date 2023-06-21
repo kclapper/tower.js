@@ -1,8 +1,6 @@
 import {describe, expect, test} from '@jest/globals';
 import {
     BoxedNumber,
-    EXACT_I,
-    EXACT_NEG_I,
     EXACT_ONE,
     EXACT_NEG_ONE,
     EXACT_HALF,
@@ -10,7 +8,6 @@ import {
     INEXACT_ONE,
     INEXACT_ZERO,
     PI,
-    NAN,
     INF,
     makeRectangular,
     makePolar,
@@ -37,7 +34,7 @@ describe('makeRectangular', () => {
         expect(makeRectangular(3, 0))
             .toBe(3);
 
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2);
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2);
         expect(makeRectangular(bignumber, bignumber))
             .toEqual(makeInstance({num: bignumber,
                                    den: BigInt(1),
@@ -87,7 +84,7 @@ describe('makeRectangular', () => {
         expect(makePolar(3, 0))
             .toBe(3);
 
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2);
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2);
         expect(makePolar(bignumber, bignumber))
             .toEqual(makeInstance({num: -4760410950687404.0,
                                    imagNum: -7646445317608838.0}));

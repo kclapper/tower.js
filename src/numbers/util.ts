@@ -15,14 +15,14 @@ export function isJSInteger(n: any): n is JSInteger {
 }
 
 export function integerIsOne(n: JSInteger): boolean {
-    let isInteger = isJSInteger(n);
-    let isOne = typeof n === 'bigint' ? n === 1n : n === 1;
+    const isInteger = isJSInteger(n);
+    const isOne = typeof n === 'bigint' ? n === 1n : n === 1;
     return isInteger && isOne;
 }
 
 export function numberIsRational(n: JSNumber): boolean {
-    let isBigInt = typeof n === 'bigint';
-    let isRationalFloat = Number.isFinite(n) && !Number.isNaN(n);
+    const isBigInt = typeof n === 'bigint';
+    const isRationalFloat = Number.isFinite(n) && !Number.isNaN(n);
     return isBigInt || isRationalFloat;
 }
 

@@ -1,17 +1,15 @@
+/* eslint @typescript-eslint/no-explicit-any: "off" */
+
 import {describe, expect, test} from '@jest/globals';
 import {
     BoxedNumber,
 } from '../src/tower';
 
-// Please forgive these helper functions for
+// Please forgive this helper function for
 // confusing the typechecker.
 
 const makeNumber = function(x: any): number {
     return BoxedNumber.makeInstance(x) as unknown as number;
-}
-
-const makeBigInt = function(x: any): bigint {
-    return BoxedNumber.makeInstance(x) as unknown as bigint;
 }
 
 describe('string', () => {

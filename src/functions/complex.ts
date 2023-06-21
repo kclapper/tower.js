@@ -41,8 +41,8 @@ export function magnitude(n: RacketNumber): RacketNumber {
 }
 
 function containsInfinity(n: BoxedNumber): boolean {
-    let real = n.realPart();
-    let imag = n.imaginaryPart();
+    const real = n.realPart();
+    const imag = n.imaginaryPart();
     return real.equals(INF)
         || real.equals(NEG_INF)
         || imag.equals(INF)
@@ -61,8 +61,8 @@ export function angle(n: RacketNumber): RacketNumber {
     // We know n is a boxed number if it's not real
     n = n as BoxedNumber;
     if (containsInfinity(n)) {
-        let real = n.realPart();
-        let imag = n.imaginaryPart();
+        const real = n.realPart();
+        const imag = n.imaginaryPart();
 
         if (real.equals(INF) && imag.equals(INF)) {
             return divide(PI, 4);

@@ -62,12 +62,12 @@ export class BoxedNumber {
 
     public static makeInstance({num, den, imagNum, imagDen}:
                                {num: JSNumber, den?: JSInteger, imagNum?: JSNumber, imagDen?: JSInteger}): BoxedNumber {
-        let isReal = imagNum === undefined;
+        const isReal = imagNum === undefined;
         if (isReal && imagDen !== undefined) {
            throw new Error("Must specify both a numerator and denominator.");
         }
 
-        let denominatorsExist = den !== undefined && imagDen !== undefined;
+        const denominatorsExist = den !== undefined && imagDen !== undefined;
         if (!isReal && !denominatorsExist && (den !== undefined || imagDen !== undefined)) {
             throw new Error("Real and imaginary part must be the same exactness.")
         }
@@ -106,7 +106,7 @@ export class BoxedNumber {
             throw new TypeError("All makeInstance arguments must be the same type.")
         }
 
-        let isBig = typeof num === 'bigint';
+        const isBig = typeof num === 'bigint';
 
         let realVal, imagVal;
         if (isReal && isExact && isBig) {
@@ -151,7 +151,7 @@ export class BoxedNumber {
             return Number.NaN;
         }
 
-        let primitive = this.real[Symbol.toPrimitive](hint);
+        const primitive = this.real[Symbol.toPrimitive](hint);
 
         if (hint === 'number' && typeof primitive === 'bigint') {
             return Number(primitive);
@@ -286,7 +286,7 @@ export class BoxedNumber {
     }
     public multiply(other: BoxedNumber): BoxedNumber {
         let real = this.real.multiply(other.real).subtract(this.imag.multiply(other.imag));
-        let imag = this.real.multiply(other.imag).add(this.imag.multiply(other.real));
+        const imag = this.real.multiply(other.imag).add(this.imag.multiply(other.real));
 
         real = !imag.isExact() ? real.toInexact() : real;
 
@@ -295,8 +295,8 @@ export class BoxedNumber {
     public divide(other: BoxedNumber): BoxedNumber {
         // If the other value is real, just do primitive division
         if (other.isReal()) {
-            let real = this.real.divide(other.real);
-            let imag = this.imag.divide(other.real);
+            const real = this.real.divide(other.real);
+            const imag = this.imag.divide(other.real);
             return new BoxedNumber(real, imag);
         }
 
@@ -320,14 +320,14 @@ export class BoxedNumber {
             }
             return new BoxedNumber(x, y);
         } else {
-            var con = other.conjugate();
-            var up = this.multiply(con);
+            const con = other.conjugate();
+            const up = this.multiply(con);
 
             // Down is guaranteed to be real by this point.
-            var down = other.multiply(con).realPart();
+            const down = other.multiply(con).realPart();
 
-            let real = up.realPart().divide(down).real;
-            let imag = up.imaginaryPart().divide(down).real;
+            const real = up.realPart().divide(down).real;
+            const imag = up.imaginaryPart().divide(down).real;
             return new BoxedNumber(real, imag);
         }
     }
@@ -355,8 +355,8 @@ export class BoxedNumber {
     public sqrt(): BoxedNumber {
         if (this.isReal()) {
             if (this.isNegative()) {
-                let imag = this.real.multiply(NEG_ONE_VAL).sqrt();
-                let real = this.isExact() ? ZERO_VAL : new InexactNumber(0);
+                const imag = this.real.multiply(NEG_ONE_VAL).sqrt();
+                const real = this.isExact() ? ZERO_VAL : new InexactNumber(0);
                 return new BoxedNumber(real, imag);
             } else {
                 return new BoxedNumber(this.real.sqrt());
@@ -364,11 +364,11 @@ export class BoxedNumber {
         }
 
         // http://en.wikipedia.org/wiki/Square_root#Square_roots_of_negative_and_complex_numbers
-        let mag = this.magnitude().real;
-        let r_plus_x = mag.add(this.real);
+        const mag = this.magnitude().real;
+        const r_plus_x = mag.add(this.real);
 
-        let real = r_plus_x.divide(new SmallExactNumber(2)).sqrt();
-        let imag = this.imag.divide(r_plus_x.multiply(TWO_VAL).sqrt());
+        const real = r_plus_x.divide(new SmallExactNumber(2)).sqrt();
+        const imag = this.imag.divide(r_plus_x.multiply(TWO_VAL).sqrt());
 
         return new BoxedNumber(real, imag);
     }
@@ -401,9 +401,9 @@ export class BoxedNumber {
         return new BoxedNumber(this.real, new SmallExactNumber(0).subtract(this.imag));
     }
     public magnitude(): BoxedNumber {
-        let realSqr = this.real.multiply(this.real);
-        let imagSqr = this.imag.multiply(this.imag);
-        let sum = realSqr.add(imagSqr);
+        const realSqr = this.real.multiply(this.real);
+        const imagSqr = this.imag.multiply(this.imag);
+        const sum = realSqr.add(imagSqr);
         return new BoxedNumber(sum.sqrt());
     }
     public realPart(): BoxedNumber {
@@ -418,10 +418,10 @@ export class BoxedNumber {
             return new BoxedNumber(this.real.log());
         }
 
-        let mag = this.magnitude().real;
-        let mag_log = new BoxedNumber(mag.log());
+        const mag = this.magnitude().real;
+        const mag_log = new BoxedNumber(mag.log());
 
-        let theta = this.angle();
+        const theta = this.angle();
 
         return mag_log.add(theta.multiply(I));
     }
@@ -431,17 +431,14 @@ export class BoxedNumber {
             let n: BoxedNumber = this;
             let k: number = power.toFixnum() as number;
 
-            let isNumber = typeof k === 'number';
-            let zero = (isNumber ? 0 : 0n) as number;
-            let one = (isNumber ? 1 : 1n) as number;
-            let two = (isNumber ? 2 : 2n) as number;
+            const isNumber = typeof k === 'number';
+            const zero = (isNumber ? 0 : 0n) as number;
+            const one = (isNumber ? 1 : 1n) as number;
+            const two = (isNumber ? 2 : 2n) as number;
 
             let acc: BoxedNumber = ONE;
 
-            while (true) {
-                if (k === zero) {
-                    return acc;
-                }
+            while (k !== zero) {
                 if (k % two === zero) {
                     n = n.multiply(n);
                     k = k / two;
@@ -450,9 +447,10 @@ export class BoxedNumber {
                     k = k - one;
                 }
             }
+            return acc;
         }
 
-        let expo = power.multiply(this.log());
+        const expo = power.multiply(this.log());
         return expo.exp();
     }
     public exp(): BoxedNumber {
@@ -460,9 +458,9 @@ export class BoxedNumber {
             return new BoxedNumber(this.real.exp());
         }
 
-        let r = new BoxedNumber(this.real.exp());
-        let cos_a = new BoxedNumber(this.imag.cos());
-        let sin_a = new BoxedNumber(this.imag.sin());
+        const r = new BoxedNumber(this.real.exp());
+        const cos_a = new BoxedNumber(this.imag.cos());
+        const sin_a = new BoxedNumber(this.imag.sin());
 
         return r.multiply(cos_a.add(sin_a.multiply(I)));
     }
@@ -472,7 +470,7 @@ export class BoxedNumber {
             return new BoxedNumber(this.real.angle());
         }
         if (this.real.isZero()) {
-            let halfPI = PI.divide(TWO);
+            const halfPI = PI.divide(TWO);
             if (this.imag.isPositive()) {
                 return halfPI;
             } else {
@@ -480,7 +478,7 @@ export class BoxedNumber {
             }
         }
 
-        let tmp = this.imaginaryPart().abs().divide(this.realPart().abs()).atan();
+        const tmp = this.imaginaryPart().abs().divide(this.realPart().abs()).atan();
         if (this.real.isPositive()) {
             if (this.imag.isPositive()) {
                 return tmp;
@@ -505,19 +503,19 @@ export class BoxedNumber {
         if (this.isReal()) {
             return new BoxedNumber(this.real.cos());
         }
-        let iz = this.multiply(I);
-        let iz_negate = iz.multiply(NEG_ONE);
+        const iz = this.multiply(I);
+        const iz_negate = iz.multiply(NEG_ONE);
         return iz.exp().add(iz_negate.exp()).divide(TWO);
     }
     public sin(): BoxedNumber {
         if (this.isReal()) {
             return new BoxedNumber(this.real.sin());
         }
-        let iz = this.multiply(I);
-        let iz_negate = iz.multiply(NEG_ONE);
-        let z2 = new BoxedNumber(ZERO_VAL, TWO_VAL);
-        let exp_negate = iz.exp().subtract(iz_negate.exp());
-        let result = exp_negate.divide(z2);
+        const iz = this.multiply(I);
+        const iz_negate = iz.multiply(NEG_ONE);
+        const z2 = new BoxedNumber(ZERO_VAL, TWO_VAL);
+        const exp_negate = iz.exp().subtract(iz_negate.exp());
+        const result = exp_negate.divide(z2);
         return result;
     }
     public atan(): BoxedNumber {
@@ -545,18 +543,18 @@ export class BoxedNumber {
         if (this.isReal() && this.greaterThanOrEqual(NEG_ONE) && this.lessThanOrEqual(ONE)) {
             return new BoxedNumber(this.real.acos());
         }
-        let pi_half = PI.divide(TWO);
-        let iz = this.multiply(I);
-        let root = ONE.subtract(this.multiply(this)).sqrt();
-        let l = iz.add(root).log().multiply(I);
+        const pi_half = PI.divide(TWO);
+        const iz = this.multiply(I);
+        const root = ONE.subtract(this.multiply(this)).sqrt();
+        const l = iz.add(root).log().multiply(I);
         return pi_half.add(l);
     }
     public asin(): BoxedNumber {
         if (this.isReal() && this.greaterThanOrEqual(NEG_ONE) && this.lessThanOrEqual(ONE)) {
             return new BoxedNumber(this.real.asin());
         }
-        let oneNegateThisSq = ONE.subtract(this.multiply(this));
-        let sqrtOneNegateThisSq = oneNegateThisSq.sqrt();
+        const oneNegateThisSq = ONE.subtract(this.multiply(this));
+        const sqrtOneNegateThisSq = oneNegateThisSq.sqrt();
         return TWO.multiply(this.divide(ONE.add(sqrtOneNegateThisSq)).atan());
     }
 }

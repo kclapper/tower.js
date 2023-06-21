@@ -1,3 +1,4 @@
+import { isJSInteger } from "../numbers/util";
 import {
     RacketNumber,
     BoxedNumber
@@ -110,3 +111,8 @@ export function isExact(n: RacketNumber): boolean {
 export function isInexact(n: RacketNumber): boolean {
     return n instanceof BoxedNumber && n.isInexact();
 }
+
+export function isRacketNumber(n: RacketNumber): boolean {
+    return n instanceof BoxedNumber || isJSInteger(n);
+}
+export const isSchemeNumber = isRacketNumber; // For backwards compatibility

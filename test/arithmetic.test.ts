@@ -107,10 +107,10 @@ describe('+ operator', () => {
     });
 
     test('complex numbers', () => {
-        let x = makeInstance({num: 1, imagNum: 3});
-        let y = makeInstance({num: 5, imagNum: 2});
-        let z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
-        let w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
+        const x = makeInstance({num: 1, imagNum: 3});
+        const y = makeInstance({num: 5, imagNum: 2});
+        const z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
+        const w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
 
         expect(add(x, y))
             .toEqual(makeInstance({num: 6, imagNum: 5}));
@@ -176,10 +176,10 @@ describe('- operator', () => {
     })
 
     test('complex numbers', () => {
-        let x = makeInstance({num: 1, imagNum: 3});
-        let y = makeInstance({num: 5, imagNum: 2});
-        let z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
-        let w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
+        const x = makeInstance({num: 1, imagNum: 3});
+        const y = makeInstance({num: 5, imagNum: 2});
+        const z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
+        const w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
 
         expect(subtract(x, y)).toEqual(makeInstance({num: -4, imagNum: 1}));
         expect(subtract(z, w)).toEqual(makeInstance({num: -1, den: 1, imagNum: -2, imagDen: 1}));
@@ -243,10 +243,10 @@ describe('* operator', () => {
     })
 
     test('complex numbers', () => {
-        let x = makeInstance({num: 1, imagNum: 3});
-        let y = makeInstance({num: 5, imagNum: 2});
-        let z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
-        let w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
+        const x = makeInstance({num: 1, imagNum: 3});
+        const y = makeInstance({num: 5, imagNum: 2});
+        const z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
+        const w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
 
         expect(multiply(x, y)).toEqual(makeInstance({num: -1, imagNum: 17}));
         expect(multiply(z, w)).toEqual(makeInstance({num: -6, den: 1, imagNum: 8, imagDen: 1}));
@@ -297,23 +297,23 @@ describe('/ operator', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2);
         expect(divide(arg, 2))
             .toBe(Number.MAX_SAFE_INTEGER);
     })
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(10);
-        let arg = makeInstance({num: bignumber, den: BigInt(3)});
-        let expected = makeInstance({num: bignumber, den: BigInt(6)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(10);
+        const arg = makeInstance({num: bignumber, den: BigInt(3)});
+        const expected = makeInstance({num: bignumber, den: BigInt(6)});
         expect(divide(arg, 2))
             .toEqual(expected);
     })
 
     test('complex numbers', () => {
-        let x = makeInstance({num: 1, imagNum: 3});
-        let y = makeInstance({num: 5, imagNum: 2});
-        let z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
-        let w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
+        const x = makeInstance({num: 1, imagNum: 3});
+        const y = makeInstance({num: 5, imagNum: 2});
+        const z = makeInstance({num: 1, den: 1, imagNum: 2, imagDen: 1});
+        const w = makeInstance({num: 2, den: 1, imagNum: 4, imagDen: 1});
 
         expect(divide(x, y)).toEqual(makeInstance({num: 0.37931034482758624, imagNum: 0.4482758620689655}));
         expect(divide(z, w)).toEqual(makeInstance({num: 1, den: 2, imagNum: 0, imagDen: 1}));
@@ -348,13 +348,13 @@ describe('quotient', () => {
 
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2);
         expect(quotient(arg, 2))
             .toBe(Number.MAX_SAFE_INTEGER);
     })
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(10);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(10);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(quotient(arg, 10))
             .toEqual(Number.MAX_SAFE_INTEGER);
     })
@@ -394,19 +394,19 @@ describe('remainder', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        const arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
         expect(remainder(arg, 2))
             .toBe(1);
     })
     test('big numbers: boxed', () => {
-        let bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(remainder(arg, 2))
             .toBe(1);
     })
     test('big numbers: negative boxed', () => {
-        let bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(remainder(arg, 2))
             .toBe(-1);
     })
@@ -446,19 +446,19 @@ describe('modulo', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        const arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
         expect(modulo(arg, 2))
             .toBe(1);
     })
     test('big numbers: boxed', () => {
-        let bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(modulo(arg, 2))
             .toBe(1);
     })
     test('big numbers: negative boxed', () => {
-        let bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(modulo(arg, 2))
             .toBe(1);
     })
@@ -498,19 +498,19 @@ describe('sqr', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        const arg = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
         expect(remainder(arg, 2))
             .toBe(1);
     })
     test('big numbers: boxed', () => {
-        let bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = (BigInt(Number.MAX_SAFE_INTEGER) * BigInt(2)) + BigInt(1);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(remainder(arg, 2))
             .toBe(1);
     })
     test('big numbers: negative boxed', () => {
-        let bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = (BigInt(Number.MIN_SAFE_INTEGER) * BigInt(2)) - BigInt(1);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(remainder(arg, 2))
             .toBe(-1);
     })
@@ -536,13 +536,13 @@ describe('sqr', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER);
         expect(sqr(arg))
             .toBe(arg * arg);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect((sqr(arg)))
             .toBe((bignumber * bignumber));
     });
@@ -572,13 +572,13 @@ describe('sqrt', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER);
         expect(sqrt(arg * arg))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect((sqrt(arg.multiply(arg))))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
@@ -614,13 +614,13 @@ describe('sqrt', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER);
         expect(sqrt(arg * arg))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect((sqrt(arg.multiply(arg))))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
@@ -659,19 +659,18 @@ describe('integer-sqrt', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER);
         expect(integerSqrt((arg * arg) + BigInt(1)))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect((integerSqrt(arg.multiply(arg).add(EXACT_ONE))))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
 });
 
-// TODO: Continue here and finish the failing tests.
 describe('expt', () => {
     test('racket docs examples: 0 base', () => {
         expect(expt(0, 0)).toBe(1);
@@ -1068,13 +1067,13 @@ describe('abs', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MIN_SAFE_INTEGER);
+        const arg = BigInt(Number.MIN_SAFE_INTEGER);
         expect(abs(arg))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MIN_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(1)});
+        const bignumber = BigInt(Number.MIN_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(1)});
         expect(abs(arg))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
@@ -1103,13 +1102,13 @@ describe('floor', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER);
         expect(floor(arg))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(2)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(2)});
         expect(floor(arg))
             .toBe(4503599627370495);
     });
@@ -1138,13 +1137,13 @@ describe('ceiling', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER);
         expect(ceiling(arg))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(2)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(2)});
         expect(ceiling(arg))
             .toBe(4503599627370496);
     });
@@ -1173,13 +1172,13 @@ describe('round', () => {
     });
 
     test('big numbers: unboxed', () => {
-        let arg = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = BigInt(Number.MAX_SAFE_INTEGER);
         expect(round(arg))
             .toBe(Number.MAX_SAFE_INTEGER);
     });
     test('big numbers: boxed', () => {
-        let bignumber = BigInt(Number.MAX_SAFE_INTEGER);
-        let arg = makeInstance({num: bignumber, den: BigInt(2)});
+        const bignumber = BigInt(Number.MAX_SAFE_INTEGER);
+        const arg = makeInstance({num: bignumber, den: BigInt(2)});
         expect(round(arg))
             .toBe(4503599627370496);
     });

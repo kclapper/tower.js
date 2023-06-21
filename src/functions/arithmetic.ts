@@ -178,7 +178,7 @@ export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
 
     let result;
     if (n instanceof BoxedNumber) {
-        let quotient = n.divide(k as BoxedNumber).floor();
+        const quotient = n.divide(k as BoxedNumber).floor();
         result = n.subtract((k as BoxedNumber).multiply(quotient));
     } else if (typeof n === 'number') {
         result = n % (k as number);
@@ -193,8 +193,7 @@ export function modulo(n: RacketNumber, k: RacketNumber): RacketNumber {
     [n, k] = matchTypes(n, k);
 
     let result = remainder(n, k);
-    let negn = isNegative(n);
-    let negk = isNegative(k);
+    const negk = isNegative(k);
 
     if (negk) {
         if (isPositive(result)) {
@@ -226,14 +225,14 @@ export function sqrt(n: RacketNumber): RacketNumber {
     } else if (typeof n === 'number') {
         if (n < 0) {
             n = -n;
-            let result = Math.sqrt(n);
+            const result = Math.sqrt(n);
             if (Number.isInteger(result)) {
                 return BoxedNumber.makeInstance({num: 0, den: 1, imagNum: result, imagDen: 1});
             } else {
                 return BoxedNumber.makeInstance({num: 0, imagNum: result});
             }
         } else {
-            let result = Math.sqrt(n);
+            const result = Math.sqrt(n);
             if (Number.isInteger(result)) {
                 return result;
             } else {
@@ -248,14 +247,14 @@ export function sqrt(n: RacketNumber): RacketNumber {
 
 export function integerSqrt(n: RacketNumber): RacketNumber {
     if (isNegative(n)) {
-        let result = integerSqrt(multiply(n, -1));
+        const result = integerSqrt(multiply(n, -1));
         if (isExact(result)) {
             return multiply(result, I);
         } else {
             return multiply(result, BoxedNumber.makeInstance({num: 0, imagNum: 1}));
         }
     }
-    let result = floor(sqrt(n));
+    const result = floor(sqrt(n));
     if (isExact(n) && result instanceof BoxedNumber) {
         return result.toFixnum();
     } else {
@@ -292,7 +291,7 @@ export function expt(z: RacketNumber, w: RacketNumber): RacketNumber {
         return normalize(z.expt(w as BoxedNumber));
 
     } else if (typeof z === 'number') {
-        let result = Math.pow(z, w as number);
+        const result = Math.pow(z, w as number);
 
         if (!Number.isFinite(result)) {
             return BoxedNumber.makeInstance({num: result});
@@ -400,7 +399,7 @@ export function gcd(...args: RacketNumber[]): RacketNumber {
             return x;
         },
         function(x: BoxedNumber, y: BoxedNumber): RacketNumber {
-            let isExact = x.isExact() && y.isExact();
+            const isExact = x.isExact() && y.isExact();
 
             let an = numerator(x);
             let ad = denominator(x);
@@ -421,10 +420,10 @@ export function gcd(...args: RacketNumber[]): RacketNumber {
             }
 
 
-            let num = gcd(an, bn);
-            let den = lcm(ad, bd);
+            const num = gcd(an, bn);
+            const den = lcm(ad, bd);
 
-            let result = divide(num, den);
+            const result = divide(num, den);
 
             return isExact? result : exactToInexact(result);
         }
@@ -452,9 +451,9 @@ export function lcm(...args: RacketNumber[]): RacketNumber {
     }
 
     const binopLcm = function(x: RacketNumber, y: RacketNumber): RacketNumber {
-        let product = multiply(x, y);
-        let den = gcd(x, y);
-        let result = abs(divide(product, den));
+        const product = multiply(x, y);
+        const den = gcd(x, y);
+        const result = abs(divide(product, den));
         return result;
     }
 

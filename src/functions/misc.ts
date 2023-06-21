@@ -1,6 +1,6 @@
 import {
     RacketNumber,
-    BoxedNumber
+    BoxedNumber,
 } from '../tower';
 import {
     normalize
@@ -12,6 +12,7 @@ export function inexactToExact(n: RacketNumber): RacketNumber {
     }
     return n;
 }
+export const toExact = inexactToExact; // For backwards compatibility
 
 export function exactToInexact(n: RacketNumber): RacketNumber {
     if (n instanceof BoxedNumber) {
@@ -19,3 +20,4 @@ export function exactToInexact(n: RacketNumber): RacketNumber {
     }
     return BoxedNumber.makeInstance({num: Number(n)});
 }
+export const toInexact = exactToInexact; // For backwards compatibility
