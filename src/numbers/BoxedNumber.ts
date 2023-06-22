@@ -4,9 +4,9 @@ import {
     Level,
 } from './types';
 import {
-    InexactNumber,
-    SmallExactNumber,
-    BigExactNumber,
+    InexactValue,
+    SmallExactValue,
+    BigExactValue,
     Value,
     ZERO_VAL,
     TWO_VAL,
@@ -110,23 +110,23 @@ export class BoxedNumber {
 
         let realVal, imagVal;
         if (isReal && isExact && isBig) {
-            realVal = new BigExactNumber(num as bigint, den as bigint);
+            realVal = new BigExactValue(num as bigint, den as bigint);
             imagVal = ZERO_VAL;
         } else if (isReal && isExact && !isBig) {
-            realVal = new SmallExactNumber(num as number, den as number);
+            realVal = new SmallExactValue(num as number, den as number);
             imagVal = ZERO_VAL;
         } else if (isReal && !isExact) {
-            realVal = new InexactNumber(num as number);
+            realVal = new InexactValue(num as number);
             imagVal = ZERO_VAL;
         } else if (!isReal && isExact && isBig) {
-            realVal = new BigExactNumber(num as bigint, den as bigint);
-            imagVal = new BigExactNumber(imagNum as bigint, imagDen as bigint);
+            realVal = new BigExactValue(num as bigint, den as bigint);
+            imagVal = new BigExactValue(imagNum as bigint, imagDen as bigint);
         } else if (!isReal && isExact && !isBig) {
-            realVal = new SmallExactNumber(num as number, den as number);
-            imagVal = new SmallExactNumber(imagNum as number, imagDen as number);
+            realVal = new SmallExactValue(num as number, den as number);
+            imagVal = new SmallExactValue(imagNum as number, imagDen as number);
         } else if (!isReal && !isExact && !isBig) {
-            realVal = new InexactNumber(num as number);
-            imagVal = new InexactNumber(imagNum as number);
+            realVal = new InexactValue(num as number);
+            imagVal = new InexactValue(imagNum as number);
         } else {
             // Should never get here
             throw new Error(`Error creating BoxedNumber`);
@@ -356,7 +356,7 @@ export class BoxedNumber {
         if (this.isReal()) {
             if (this.isNegative()) {
                 const imag = this.real.multiply(NEG_ONE_VAL).sqrt();
-                const real = this.isExact() ? ZERO_VAL : new InexactNumber(0);
+                const real = this.isExact() ? ZERO_VAL : new InexactValue(0);
                 return new BoxedNumber(real, imag);
             } else {
                 return new BoxedNumber(this.real.sqrt());
@@ -367,7 +367,7 @@ export class BoxedNumber {
         const mag = this.magnitude().real;
         const r_plus_x = mag.add(this.real);
 
-        const real = r_plus_x.divide(new SmallExactNumber(2)).sqrt();
+        const real = r_plus_x.divide(new SmallExactValue(2)).sqrt();
         const imag = this.imag.divide(r_plus_x.multiply(TWO_VAL).sqrt());
 
         return new BoxedNumber(real, imag);
@@ -398,7 +398,7 @@ export class BoxedNumber {
     }
 
     public conjugate(): BoxedNumber {
-        return new BoxedNumber(this.real, new SmallExactNumber(0).subtract(this.imag));
+        return new BoxedNumber(this.real, new SmallExactValue(0).subtract(this.imag));
     }
     public magnitude(): BoxedNumber {
         const realSqr = this.real.multiply(this.real);

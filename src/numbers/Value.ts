@@ -6,16 +6,16 @@ import {
     isSafeInteger
 } from './util';
 
-export type Value = ExactNumber | InexactNumber;
+export type Value = ExactValue | InexactValue;
 
-abstract class AbstractNumber {
+abstract class AbstractValue {
     abstract isFinite(): boolean;
     abstract isInexact(): boolean;
     abstract isExact(): boolean;
     abstract isInteger(): boolean;
 
-    abstract toInexact(): InexactNumber;
-    abstract toExact(): ExactNumber;
+    abstract toInexact(): InexactValue;
+    abstract toExact(): ExactValue;
     abstract toFixnum(): JSInteger;
 
     abstract toString(): string;
@@ -63,7 +63,7 @@ abstract class AbstractNumber {
     abstract asin(): Value;
 }
 
-export class InexactNumber extends AbstractNumber {
+export class InexactValue extends AbstractValue {
     public num: number;
 
     constructor(num: number) {
@@ -87,10 +87,10 @@ export class InexactNumber extends AbstractNumber {
         return Number.isInteger(this.num);
     }
 
-    toInexact(): InexactNumber {
+    toInexact(): InexactValue {
         return this;
     }
-    toExact(): ExactNumber {
+    toExact(): ExactValue {
         if (!this.isFinite()) {
             throw new Error(`There is no exact representation of ${this}`);
         }
@@ -98,12 +98,12 @@ export class InexactNumber extends AbstractNumber {
         const match = stringRep.match(/^(.*)\.(.*)$/);
         if (match) {
             const tenToDecimalPlaces = Math.pow(10, match[2].length);
-            return ExactNumber.makeInstance(
+            return ExactValue.makeInstance(
                 Math.round(this.num * tenToDecimalPlaces),
                 tenToDecimalPlaces
             );
         } else {
-            return ExactNumber.makeInstance(this.num, 1);
+            return ExactValue.makeInstance(this.num, 1);
         }
     }
     toFixnum(): JSInteger {
@@ -131,7 +131,7 @@ export class InexactNumber extends AbstractNumber {
     }
 
     greaterThan(other: Value): boolean {
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             if (this.isNaN()) {
                 return false;
             } else if (!this.isFinite()) {
@@ -142,7 +142,7 @@ export class InexactNumber extends AbstractNumber {
         return this.num > other.num;
     }
     greaterThanOrEqual(other: Value): boolean {
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             if (this.isNaN()) {
                 return false;
             } else if (!this.isFinite()) {
@@ -153,7 +153,7 @@ export class InexactNumber extends AbstractNumber {
         return this.num >= other.num;
     }
     lessThan(other: Value): boolean {
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             if (this.isNaN()) {
                 return false;
             } else if (!this.isFinite()) {
@@ -164,7 +164,7 @@ export class InexactNumber extends AbstractNumber {
         return this.num < other.num;
     }
     lessThanOrEqual(other: Value): boolean {
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             if (this.isNaN()) {
                 return false;
             } else if (!this.isFinite()) {
@@ -179,9 +179,9 @@ export class InexactNumber extends AbstractNumber {
             return false;
         }
         if (!this.isFinite()) {
-            return !(other instanceof ExactNumber) && this.num === other.num;
+            return !(other instanceof ExactValue) && this.num === other.num;
         }
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             return this.toExact().equals(other);
         }
         return this.num === other.num;
@@ -207,34 +207,34 @@ export class InexactNumber extends AbstractNumber {
     }
 
     add(other: Value): Value {
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             return this.add(other.toInexact());
         }
-        return new InexactNumber(this.num + other.num);
+        return new InexactValue(this.num + other.num);
     }
     subtract(other: Value): Value {
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             return this.subtract(other.toInexact());
         }
-        return new InexactNumber(this.num - other.num);
+        return new InexactValue(this.num - other.num);
     }
     multiply(other: Value): Value {
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             if (other.isZero()) {
                 return ZERO_VAL;
             }
             return this.multiply(other.toInexact());
         }
-        return new InexactNumber(this.num * other.num);
+        return new InexactValue(this.num * other.num);
     }
     divide(other: Value): Value {
         if (this.isZero()) {
             return this;
         }
-        if (other instanceof ExactNumber) {
+        if (other instanceof ExactValue) {
             return this.divide(other.toInexact());
         }
-        return new InexactNumber(this.num / other.num);
+        return new InexactValue(this.num / other.num);
     }
 
     numerator(): Value {
@@ -245,35 +245,35 @@ export class InexactNumber extends AbstractNumber {
     }
 
     integerSqrt(): Value {
-        return new InexactNumber(Math.floor(Math.sqrt(this.num)));
+        return new InexactValue(Math.floor(Math.sqrt(this.num)));
     }
     sqrt(): Value {
-        return new InexactNumber(Math.sqrt(this.num));
+        return new InexactValue(Math.sqrt(this.num));
     }
     abs(): Value {
-        return new InexactNumber(Math.abs(this.num));
+        return new InexactValue(Math.abs(this.num));
     }
     floor(): Value {
-        return new InexactNumber(Math.floor(this.num));
+        return new InexactValue(Math.floor(this.num));
     }
     ceiling(): Value {
-        return new InexactNumber(Math.ceil(this.num));
+        return new InexactValue(Math.ceil(this.num));
     }
     round(): Value {
-        return new InexactNumber(Math.round(this.num));
+        return new InexactValue(Math.round(this.num));
     }
 
     log(): Value {
-        return new InexactNumber(Math.log(this.num));
+        return new InexactValue(Math.log(this.num));
     }
     expt(power: Value): Value {
-        if (power instanceof ExactNumber) {
+        if (power instanceof ExactValue) {
             return this.expt(power.toInexact());
         }
-        return new InexactNumber(Math.pow(this.num, power.num));
+        return new InexactValue(Math.pow(this.num, power.num));
     }
     exp(): Value {
-        return new InexactNumber(Math.exp(this.num))
+        return new InexactValue(Math.exp(this.num))
     }
 
     angle(): Value {
@@ -282,46 +282,46 @@ export class InexactNumber extends AbstractNumber {
         if (this.num > 0)
             return EXACT_ZERO;
         else
-            return new InexactNumber(Math.PI);
+            return new InexactValue(Math.PI);
     }
     tan(): Value {
-        return new InexactNumber(Math.tan(this.num));
+        return new InexactValue(Math.tan(this.num));
     }
     cos(): Value {
-        return new InexactNumber(Math.cos(this.num));
+        return new InexactValue(Math.cos(this.num));
     }
     sin(): Value {
-        return new InexactNumber(Math.sin(this.num));
+        return new InexactValue(Math.sin(this.num));
     }
     atan(): Value {
-        return new InexactNumber(Math.atan(this.num));
+        return new InexactValue(Math.atan(this.num));
     }
     acos(): Value {
-        return new InexactNumber(Math.acos(this.num));
+        return new InexactValue(Math.acos(this.num));
     }
     asin(): Value {
-        return new InexactNumber(Math.asin(this.num));
+        return new InexactValue(Math.asin(this.num));
     }
 }
 
-export abstract class ExactNumber extends AbstractNumber {
+export abstract class ExactValue extends AbstractValue {
     abstract readonly num: JSInteger;
     abstract readonly den: JSInteger;
 
-    static makeInstance(num: number, den: number): ExactNumber;
-    static makeInstance(num: bigint, den: bigint): ExactNumber;
-    static makeInstance(num: JSInteger, den: JSInteger): ExactNumber {
+    static makeInstance(num: number, den: number): ExactValue;
+    static makeInstance(num: bigint, den: bigint): ExactValue;
+    static makeInstance(num: JSInteger, den: JSInteger): ExactValue {
        if (typeof num === 'bigint' && typeof den === 'bigint') {
-           return new BigExactNumber(num, den);
+           return new BigExactValue(num, den);
        } else if (typeof num === 'number' && typeof den === 'number') {
-           return new SmallExactNumber(num, den);
+           return new SmallExactValue(num, den);
        } else {
            throw new TypeError(`Numberator and denominator types must match, given ${typeof num} and ${typeof den}`)
        }
     }
 }
 
-export class SmallExactNumber extends ExactNumber {
+export class SmallExactValue extends ExactValue {
     public readonly num: number;
     public readonly den: number;
 
@@ -373,15 +373,15 @@ export class SmallExactNumber extends ExactNumber {
         return this.den === 1;
     }
 
-    toInexact(): InexactNumber {
+    toInexact(): InexactValue {
         const result = this.num / this.den;
-        return new InexactNumber(result);
+        return new InexactValue(result);
     }
-    toExact(): ExactNumber {
+    toExact(): ExactValue {
         return this;
     }
-    toBigExact(): BigExactNumber {
-        return new BigExactNumber(BigInt(this.num), BigInt(this.den));
+    toBigExact(): BigExactValue {
+        return new BigExactValue(BigInt(this.num), BigInt(this.den));
     }
     toFixnum(): JSInteger {
         return Math.floor(this.num / this.den);
@@ -410,7 +410,7 @@ export class SmallExactNumber extends ExactNumber {
 
 
     greaterThan(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -418,7 +418,7 @@ export class SmallExactNumber extends ExactNumber {
             }
             return this.greaterThan(other.toExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().greaterThan(other);
 
         } else {
@@ -428,7 +428,7 @@ export class SmallExactNumber extends ExactNumber {
         }
     }
     greaterThanOrEqual(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -436,7 +436,7 @@ export class SmallExactNumber extends ExactNumber {
             }
             return this.greaterThanOrEqual(other.toExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().greaterThanOrEqual(other);
 
         } else {
@@ -446,7 +446,7 @@ export class SmallExactNumber extends ExactNumber {
         }
     }
     lessThan(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -454,7 +454,7 @@ export class SmallExactNumber extends ExactNumber {
             }
             return this.lessThan(other.toExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().lessThan(other);
 
         } else {
@@ -464,7 +464,7 @@ export class SmallExactNumber extends ExactNumber {
         }
     }
     lessThanOrEqual(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -472,7 +472,7 @@ export class SmallExactNumber extends ExactNumber {
             }
             return this.lessThanOrEqual(other.toExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().lessThanOrEqual(other);
 
         } else {
@@ -482,13 +482,13 @@ export class SmallExactNumber extends ExactNumber {
         }
     }
     equals(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (!other.isFinite()) {
                 return false;
             }
             return this.equals(other.toExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().equals(other);
 
         } else {
@@ -518,11 +518,11 @@ export class SmallExactNumber extends ExactNumber {
     }
 
     add(other: Value): Value {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().add(other);
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().add(other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             const num = (this.num * other.den) + (other.num * this.den);
             const den = this.den * other.den;
 
@@ -530,17 +530,17 @@ export class SmallExactNumber extends ExactNumber {
                 return this.toBigExact().add(other.toBigExact());
             }
 
-            return new SmallExactNumber(num, den);
+            return new SmallExactValue(num, den);
         } else {
             throw new Error(`Cannot add ${this} to value ${other}`);
         }
     }
     subtract(other: Value): Value {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().subtract(other);
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().subtract(other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             const num = (this.num * other.den) - (other.num * this.den);
             const den = this.den * other.den;
 
@@ -548,7 +548,7 @@ export class SmallExactNumber extends ExactNumber {
                 return this.toBigExact().subtract(other.toBigExact());
             }
 
-            return new SmallExactNumber(num, den);
+            return new SmallExactValue(num, den);
         } else {
             throw new Error(`Cannot subtract ${this} and ${other}`);
         }
@@ -558,11 +558,11 @@ export class SmallExactNumber extends ExactNumber {
             return ZERO_VAL;
         }
 
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().multiply(other);
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().multiply(other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             const num = this.num * other.num;
             const den = this.den * other.den;
 
@@ -570,7 +570,7 @@ export class SmallExactNumber extends ExactNumber {
                 return this.toBigExact().multiply(other.toBigExact());
             }
 
-            return new SmallExactNumber(num, den);
+            return new SmallExactValue(num, den);
         } else {
             throw new Error(`Cannot multiply ${this} and ${other}`);
         }
@@ -580,13 +580,13 @@ export class SmallExactNumber extends ExactNumber {
             return this;
         }
 
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().divide(other);
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             return this.toBigExact().divide(other);
         } else if (other.isZero()) {
             throw new Error("/: division by zero" + this + other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             const num = this.num * other.den;
             const den = this.den * other.num;
 
@@ -594,17 +594,17 @@ export class SmallExactNumber extends ExactNumber {
                 return this.toBigExact().divide(other.toBigExact());
             }
 
-            return new SmallExactNumber(num, den);
+            return new SmallExactValue(num, den);
         } else {
             throw new Error(`Cannot divide ${this} and ${other}`);
         }
     }
 
     numerator(): Value {
-        return new SmallExactNumber(this.num);
+        return new SmallExactValue(this.num);
     }
     denominator(): Value {
-        return new SmallExactNumber(this.den);
+        return new SmallExactValue(this.den);
     }
 
     integerSqrt(): Value {
@@ -619,14 +619,14 @@ export class SmallExactNumber extends ExactNumber {
         const den = Math.sqrt(this.den);
 
         if (num === Math.floor(num) && den === Math.floor(den)) {
-           return new SmallExactNumber(num, den);
+           return new SmallExactValue(num, den);
         } else {
-            return new InexactNumber(num / den);
+            return new InexactValue(num / den);
         }
     }
     abs(): Value {
         if (this.isNegative()) {
-            return new SmallExactNumber(-1 * this.num, this.den);
+            return new SmallExactValue(-1 * this.num, this.den);
         } else {
             return this;
         }
@@ -635,26 +635,26 @@ export class SmallExactNumber extends ExactNumber {
         if (this.den === 1) {
             return this;
         } else {
-            return new SmallExactNumber(Math.floor(this.num / this.den));
+            return new SmallExactValue(Math.floor(this.num / this.den));
         }
     }
     ceiling(): Value {
         if (this.den === 1) {
             return this;
         } else {
-            return new SmallExactNumber(Math.ceil(this.num / this.den));
+            return new SmallExactValue(Math.ceil(this.num / this.den));
         }
     }
     round(): Value {
         if (this.den === 1) {
             return this;
         } else {
-            return new SmallExactNumber(Math.round(this.num / this.den));
+            return new SmallExactValue(Math.round(this.num / this.den));
         }
     }
 
     log(): Value {
-        return new InexactNumber(Math.log(this.num / this.den));
+        return new InexactValue(Math.log(this.num / this.den));
     }
     expt(power: Value): Value {
         power = power.toInexact();
@@ -667,43 +667,43 @@ export class SmallExactNumber extends ExactNumber {
                 return this.toBigExact().expt(power);
             }
 
-            return new SmallExactNumber(num, den);
+            return new SmallExactValue(num, den);
         } else {
             return this.toInexact().expt(power);
         }
     }
     exp(): Value {
-        return new InexactNumber(Math.exp(this.num / this.den));
+        return new InexactValue(Math.exp(this.num / this.den));
     }
 
     angle(): Value {
        if (this.isNegative()) {
-           return new InexactNumber(Math.PI);
+           return new InexactValue(Math.PI);
        } else {
-           return new SmallExactNumber(0);
+           return new SmallExactValue(0);
        }
     }
     tan(): Value {
-        return new InexactNumber(Math.tan(this.num / this.den));
+        return new InexactValue(Math.tan(this.num / this.den));
     }
     cos(): Value {
-        return new InexactNumber(Math.cos(this.num / this.den));
+        return new InexactValue(Math.cos(this.num / this.den));
     }
     sin(): Value {
-        return new InexactNumber(Math.sin(this.num / this.den));
+        return new InexactValue(Math.sin(this.num / this.den));
     }
     atan(): Value {
-        return new InexactNumber(Math.atan(this.num / this.den));
+        return new InexactValue(Math.atan(this.num / this.den));
     }
     acos(): Value {
-        return new InexactNumber(Math.acos(this.num / this.den));
+        return new InexactValue(Math.acos(this.num / this.den));
     }
     asin(): Value {
-        return new InexactNumber(Math.asin(this.num / this.den));
+        return new InexactValue(Math.asin(this.num / this.den));
     }
 }
 
-export class BigExactNumber extends ExactNumber {
+export class BigExactValue extends ExactValue {
     public readonly num: bigint;
     public readonly den: bigint;
 
@@ -758,15 +758,15 @@ export class BigExactNumber extends ExactNumber {
         return this.den === 1n;
     }
 
-    toInexact(): InexactNumber {
+    toInexact(): InexactValue {
         const result = Number(this.num) / Number(this.den);
-        return new InexactNumber(result);
+        return new InexactValue(result);
     }
-    toExact(): ExactNumber {
+    toExact(): ExactValue {
         return this;
     }
-    toSmallExact(): SmallExactNumber {
-        return new SmallExactNumber(Number(this.num), Number(this.den));
+    toSmallExact(): SmallExactValue {
+        return new SmallExactValue(Number(this.num), Number(this.den));
     }
     toFixnum(): JSInteger {
         return this.num / this.den;
@@ -801,7 +801,7 @@ export class BigExactNumber extends ExactNumber {
     }
 
     greaterThan(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -809,10 +809,10 @@ export class BigExactNumber extends ExactNumber {
             }
             return this.greaterThan(other.toExact());
 
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.greaterThan(other.toBigExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const thisVal = this.num * other.den;
             const otherVal = other.num * this.den;
             return thisVal > otherVal;
@@ -822,7 +822,7 @@ export class BigExactNumber extends ExactNumber {
         }
     }
     greaterThanOrEqual(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -830,10 +830,10 @@ export class BigExactNumber extends ExactNumber {
             }
             return this.greaterThanOrEqual(other.toExact());
 
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.greaterThanOrEqual(other.toBigExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const thisVal = this.num * other.den;
             const otherVal = other.num * this.den;
             return thisVal >= otherVal;
@@ -843,7 +843,7 @@ export class BigExactNumber extends ExactNumber {
         }
     }
     lessThan(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -851,10 +851,10 @@ export class BigExactNumber extends ExactNumber {
             }
             return this.lessThan(other.toExact());
 
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.lessThan(other.toBigExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const thisVal = this.num * other.den;
             const otherVal = other.num * this.den;
             return thisVal < otherVal;
@@ -864,7 +864,7 @@ export class BigExactNumber extends ExactNumber {
         }
     }
     lessThanOrEqual(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (other.isNaN()) {
                 return false;
             } else if (!other.isFinite()) {
@@ -872,10 +872,10 @@ export class BigExactNumber extends ExactNumber {
             }
             return this.lessThanOrEqual(other.toExact());
 
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.lessThanOrEqual(other.toBigExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const thisVal = this.num * other.den;
             const otherVal = other.num * this.den;
             return thisVal <= otherVal;
@@ -885,16 +885,16 @@ export class BigExactNumber extends ExactNumber {
         }
     }
     equals(other: Value): boolean {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             if (!other.isFinite()) {
                 return false;
             }
             return this.equals(other.toExact());
 
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.equals(other.toBigExact());
 
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const thisVal = this.num * other.den;
             const otherVal = other.num * this.den;
             return thisVal === otherVal;
@@ -924,37 +924,37 @@ export class BigExactNumber extends ExactNumber {
     }
 
     add(other: Value): Value {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().add(other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.add(other.toBigExact());
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const num = (this.num * other.den) + (other.num * this.den);
             const den = this.den * other.den;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return new SmallExactNumber(Number(num), Number(den));
+                return new SmallExactValue(Number(num), Number(den));
             }
 
-            return new BigExactNumber(num, den);
+            return new BigExactValue(num, den);
         } else {
             throw new Error(`Cannot add ${this} and ${other}`);
         }
     }
     subtract(other: Value): Value {
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().subtract(other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.subtract(other.toBigExact());
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const num = (this.num * other.den) - (other.num * this.den);
             const den = this.den * other.den;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return new SmallExactNumber(Number(num), Number(den));
+                return new SmallExactValue(Number(num), Number(den));
             }
 
-            return new BigExactNumber(num, den);
+            return new BigExactValue(num, den);
         } else {
             throw new Error(`Cannot subtract ${this} and ${other}`);
         }
@@ -964,19 +964,19 @@ export class BigExactNumber extends ExactNumber {
             return ZERO_VAL;
         }
 
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().multiply(other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.multiply(other.toBigExact());
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const num = this.num * other.num;
             const den = this.den * other.den;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return new SmallExactNumber(Number(num), Number(den));
+                return new SmallExactValue(Number(num), Number(den));
             }
 
-            return new BigExactNumber(num, den);
+            return new BigExactValue(num, den);
         } else {
             throw new Error(`Cannot multiply ${this} and ${other}`);
         }
@@ -986,29 +986,29 @@ export class BigExactNumber extends ExactNumber {
             return ZERO_VAL;
         }
 
-        if (other instanceof InexactNumber) {
+        if (other instanceof InexactValue) {
             return this.toInexact().divide(other);
-        } else if (other instanceof SmallExactNumber) {
+        } else if (other instanceof SmallExactValue) {
             return this.divide(other.toBigExact());
-        } else if (other instanceof BigExactNumber) {
+        } else if (other instanceof BigExactValue) {
             const num = this.num * other.den;
             const den = this.den * other.num;
 
             if (isSafeInteger(num) && isSafeInteger(den)) {
-                return new SmallExactNumber(Number(num), Number(den));
+                return new SmallExactValue(Number(num), Number(den));
             }
 
-            return new BigExactNumber(num, den);
+            return new BigExactValue(num, den);
         } else {
             throw new Error(`Cannot divide ${this} and ${other}`);
         }
     }
 
     numerator(): Value {
-        return new BigExactNumber(this.num);
+        return new BigExactValue(this.num);
     }
     denominator(): Value {
-        return new BigExactNumber(this.den)
+        return new BigExactValue(this.den)
     }
 
     integerSqrt(): Value {
@@ -1019,7 +1019,7 @@ export class BigExactNumber extends ExactNumber {
     }
     abs(): Value {
         if (this.isNegative()) {
-            return new BigExactNumber(this.num * -1n, this.den);
+            return new BigExactValue(this.num * -1n, this.den);
         } else {
             return this;
         }
@@ -1028,14 +1028,14 @@ export class BigExactNumber extends ExactNumber {
         if (this.den === 1n) {
             return this;
         } else {
-            return new BigExactNumber(this.num / this.den);
+            return new BigExactValue(this.num / this.den);
         }
     }
     ceiling(): Value {
         if (this.den === 1n) {
             return this;
         } else {
-            return new BigExactNumber((this.num / this.den) + 1n);
+            return new BigExactValue((this.num / this.den) + 1n);
         }
     }
     round(): Value {
@@ -1065,7 +1065,7 @@ export class BigExactNumber extends ExactNumber {
             const exp = BigInt(power.num);
             const num = bigExpt(this.num, exp);
             const den = bigExpt(this.den, exp);
-            return new BigExactNumber(num, den);
+            return new BigExactValue(num, den);
         }
         return this.toSmallExact().expt(power);
     }
@@ -1074,7 +1074,7 @@ export class BigExactNumber extends ExactNumber {
     }
 
     angle(): Value {
-        return new BigExactNumber(0n);
+        return new BigExactValue(0n);
     }
     tan(): Value {
         return this.toSmallExact().tan();
@@ -1096,7 +1096,7 @@ export class BigExactNumber extends ExactNumber {
     }
 }
 
-const EXACT_ZERO = new SmallExactNumber(0);
+const EXACT_ZERO = new SmallExactValue(0);
 
 
 /////////////////////// Constants ///////////////////////
@@ -1104,14 +1104,14 @@ const EXACT_ZERO = new SmallExactNumber(0);
 // If you add any constants here, make sure to re-export them from
 // the constants.ts file as well.
 
-export const ZERO_VAL = new SmallExactNumber(0);
-export const ONE_VAL = new SmallExactNumber(1);
-export const TWO_VAL = new SmallExactNumber(2);
+export const ZERO_VAL = new SmallExactValue(0);
+export const ONE_VAL = new SmallExactValue(1);
+export const TWO_VAL = new SmallExactValue(2);
 
-export const NEG_ONE_VAL = new SmallExactNumber(-1);
+export const NEG_ONE_VAL = new SmallExactValue(-1);
 
-export const PI_VAL = new InexactNumber(Math.PI);
+export const PI_VAL = new InexactValue(Math.PI);
 
-export const INF_VAL = new InexactNumber(Number.POSITIVE_INFINITY);
-export const NEG_INF_VAL = new InexactNumber(Number.NEGATIVE_INFINITY);
-export const NAN_VAL = new InexactNumber(Number.NaN);
+export const INF_VAL = new InexactValue(Number.POSITIVE_INFINITY);
+export const NEG_INF_VAL = new InexactValue(Number.NEGATIVE_INFINITY);
+export const NAN_VAL = new InexactValue(Number.NaN);
