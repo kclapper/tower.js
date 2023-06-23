@@ -14,7 +14,7 @@
   "scripts": {
     "lint": "eslint .",
     "test": "jest",
-    "build": "webpack"
+    "build": "npm run lint && npm run test && webpack"
   },
   "repository": {
     "type": "git",
@@ -34,8 +34,8 @@
   },
   "homepage": "https://github.com/kclapper/tower.js#readme",
   "devDependencies": {
-    "@jest/globals": "^29.5.0",
     "@tsconfig/recommended": "^1.0.2",
+    "@types/jest": "^29.5.2",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "benchmark": "^2.1.4",

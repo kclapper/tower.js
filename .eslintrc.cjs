@@ -2,6 +2,7 @@
 module.exports = {
   ignorePatterns: [
     "**/js-numbers.js",
+    "**/js-numbers.cjs",
     "dist/",
     "jest.config.js"
   ],
