@@ -8,10 +8,11 @@
   "compilerOptions": {
     "outDir": "dist",
     "noEmitOnError": true,
-    "module": "commonjs",
+    "module": "es2020",
     "target": "es2020",
     "esModuleInterop": true,
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "experimentalDecorators": true
   }
 }

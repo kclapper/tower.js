@@ -21,8 +21,18 @@ import {
     isNegative,
     isPositive,
     isExact,
-    isZero
+    isInexact,
+    isZero,
+    isEven,
+    isInteger,
+    isReal,
+    isFinite,
+    isNaN,
+    isNegativeZero
 } from './predicates';
+import {
+    equals
+} from './comparison';
 import {
     exactToInexact
 } from './misc';
@@ -35,7 +45,7 @@ type BoxedNumberBinop = (x: BoxedNumber, y: BoxedNumber) => RacketNumber;
  * Makes a function that operates on RacketNumbers. The function takes
  * at least two arguments and folds the given binary operations from left to right.
  */
-export function makeMultiArity(fnForNumbers: NumberBinop,
+function makeMultiArity(fnForNumbers: NumberBinop,
                         fnForBigInts: BigIntBinop,
                         fnForBoxedNumbers: BoxedNumberBinop) {
     return function recur(...args: RacketNumber[]): RacketNumber {
@@ -263,42 +273,36 @@ export function integerSqrt(n: RacketNumber): RacketNumber {
 }
 
 export function expt(z: RacketNumber, w: RacketNumber): RacketNumber {
+    if (isInexact(w) && equals(w, INEXACT_ZERO)) {
+        return INEXACT_ONE;
+
+    } else if (isExact(w) && equals(w, EXACT_HALF)) {
+        return sqrt(z);
+
+    } else if (isNaN(w)) {
+        return isReal(w) ? NAN : BoxedNumber.makeInstance({num: NaN, imagNum: NaN});
+
+    } else if (isNegativeZero(z) && isNegative(w)) {
+        return isEven(w) ? INF : NEG_INF;
+
+    } else if (!isFinite(z) && !isNaN(z) && isNegative(z) && isInteger(w) && isNegative(w)) {
+        return isEven(w) ? INEXACT_ZERO : BoxedNumber.makeInstance({num: -0});
+
+    } else if (!isFinite(z) && !isNaN(z) && isPositive(z) && isInteger(w) && isPositive(w)) {
+        return isEven(w) ? INF : NEG_INF;
+
+    }
+
     [z, w] = matchTypes(z, w);
 
     if (z instanceof BoxedNumber) {
-        w = w as BoxedNumber;
-
-        if (w.isInexact() && w.equals(INEXACT_ZERO)) {
-            return INEXACT_ONE;
-
-        } else if (w.isExact() && w.equals(EXACT_HALF)) {
-            return sqrt(z);
-
-        } else if (w.isNaN()) {
-            return w.isReal() ? NAN : BoxedNumber.makeInstance({num: NaN, imagNum: NaN});
-
-        } else if (z.isNegativeZero() && w.isNegative()) {
-            return w.isEven() ? INF : NEG_INF;
-
-        } else if (!z.isFinite() && !z.isNaN() && z.isNegative() && w.isInteger() && w.isNegative()) {
-            return w.isEven() ? INEXACT_ZERO : BoxedNumber.makeInstance({num: -0});
-
-        } else if (!z.isFinite() && !z.isNaN() && z.isPositive() && w.isInteger() && w.isPositive()) {
-            return w.isEven() ? INF : NEG_INF;
-
-        }
-
         return normalize(z.expt(w as BoxedNumber));
 
     } else if (typeof z === 'number') {
         const result = Math.pow(z, w as number);
 
-        if (!Number.isFinite(result)) {
-            return BoxedNumber.makeInstance({num: result});
-        }
-
-        if (shouldBeBigInt(result)) {
-            return expt(BigInt(z as number), BigInt(w as number));
+        if (shouldBeBigInt(result) || !Number.isFinite(result)) {
+            return bigExpt(BigInt(z), BigInt(w as number));
         }
 
         return result;

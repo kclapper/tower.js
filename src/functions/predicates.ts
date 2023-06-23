@@ -116,3 +116,26 @@ export function isRacketNumber(n: RacketNumber): boolean {
     return n instanceof BoxedNumber || isJSInteger(n);
 }
 export const isSchemeNumber = isRacketNumber; // For backwards compatibility
+
+export function isFinite(n: RacketNumber): boolean {
+    if (n instanceof BoxedNumber) {
+        return n.isFinite();
+    } else if (typeof n === 'number') {
+        return Number.isFinite(n);
+    }
+    return true;
+}
+
+export function isNaN(n: RacketNumber): boolean {
+    if (n instanceof BoxedNumber) {
+        return n.isNaN();
+    }
+    return Number.isNaN(n);
+}
+
+export function isNegativeZero(n: RacketNumber): boolean {
+    if (n instanceof BoxedNumber) {
+        return n.isNegativeZero();
+    }
+    return false;
+}

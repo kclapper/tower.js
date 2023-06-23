@@ -672,6 +672,7 @@ describe('integer-sqrt', () => {
 });
 
 describe('expt', () => {
+    const NEG_ZERO = makeInstance({num: -0});
     test('racket docs examples: 0 base', () => {
         expect(expt(0, 0)).toBe(1);
         expect(expt(0, INEXACT_ZERO))
@@ -696,9 +697,9 @@ describe('expt', () => {
             .toEqual(INF);
     });
     test('racket docs examples: Negative zero base', () => {
-        expect(expt(-0, -1))
+        expect(expt(NEG_ZERO, -1))
             .toEqual(NEG_INF);
-        expect(expt(makeInstance({num: -0.0}), -1))
+        expect(expt(NEG_ZERO, -1))
             .toEqual(NEG_INF);
         expect(expt(makeInstance({num: -0, den: 1}), -1))
             .toEqual(NEG_INF);
@@ -755,6 +756,7 @@ describe('expt', () => {
             .toBe(BigInt(10000));
         expect(expt(makeInstance({num: BigInt(100), den: BigInt(1)}), makeInstance({num: 2, den: 1})))
             .toBe(10000);
+        expect(typeof expt(49, 5000) === 'bigint').toBe(true);
     });
     test('complex numbers', () => {
         expect(expt(makeInstance({num: 5,

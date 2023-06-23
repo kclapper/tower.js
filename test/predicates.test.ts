@@ -27,7 +27,10 @@ import {
     isOdd,
     isExact,
     isInexact,
-    isRacketNumber
+    isRacketNumber,
+    isFinite,
+    isNaN,
+    isNegativeZero
 } from '../src/tower';
 
 const makeInstance = BoxedNumber.makeInstance;
@@ -658,4 +661,32 @@ test('isRacketNumber', () => {
     expect(isRacketNumber(ONE)).toBe(true);
     expect(isRacketNumber(BigInt(5))).toBe(true);
     expect(isRacketNumber(Math.PI)).toBe(false);
+});
+
+test('isFinite', () => {
+    expect(isFinite(5)).toBe(true);
+    expect(isFinite(Infinity)).toBe(false);
+    expect(isFinite(INF)).toBe(false);
+    expect(isFinite(NAN)).toBe(false);
+    expect(isFinite(BigInt(5))).toBe(true);
+    expect(isFinite(ONE)).toBe(true);
+});
+
+test('isNaN', () => {
+    expect(isNaN(5)).toBe(false);
+    expect(isNaN(Infinity)).toBe(false);
+    expect(isNaN(INF)).toBe(false);
+    expect(isNaN(NAN)).toBe(true);
+    expect(isNaN(BigInt(5))).toBe(false);
+    expect(isNaN(ONE)).toBe(false);
+});
+
+test('isNegativeZero', () => {
+    expect(isNegativeZero(5)).toBe(false);
+    expect(isNegativeZero(Infinity)).toBe(false);
+    expect(isNegativeZero(INF)).toBe(false);
+    expect(isNegativeZero(NAN)).toBe(false);
+    expect(isNegativeZero(BigInt(5))).toBe(false);
+    expect(isNegativeZero(ONE)).toBe(false);
+    expect(isNegativeZero(makeInstance({num: -0}))).toBe(true);
 });
