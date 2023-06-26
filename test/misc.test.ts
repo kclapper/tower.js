@@ -8,6 +8,7 @@ import {
     NEG_INF,
     divide,
     fromString,
+    numberToString,
 } from '../src/tower';
 
 const makeInstance = BoxedNumber.makeInstance;
@@ -48,55 +49,55 @@ describe('exactToInexact', () => {
     });
 });
 
-describe('toString', () => {
+describe('numberToString', () => {
     test('integer: exact', () => {
-        expect(makeInstance({num: 5, den: 1}).toString())
+        expect(numberToString(makeInstance({num: 5, den: 1})))
             .toBe("5");
-        expect(makeInstance({num: 5, den: -1}).toString())
+        expect(numberToString(makeInstance({num: 5, den: -1})))
             .toBe("-5");
-        expect(makeInstance({num: -5, den: 1}).toString())
+        expect(numberToString(makeInstance({num: -5, den: 1})))
             .toBe("-5");
-        expect(makeInstance({num: -5, den: -1}).toString())
+        expect(numberToString(makeInstance({num: -5, den: -1})))
             .toBe("5");
     });
     test('integer: inexact', () => {
-        expect(makeInstance({num: 5}).toString())
+        expect(numberToString(makeInstance({num: 5})))
             .toBe("5.0");
-        expect(makeInstance({num: -5}).toString())
+        expect(numberToString(makeInstance({num: -5})))
             .toBe("-5.0");
     });
     test('real', () => {
-        expect(NAN.toString()).toBe("+nan.0");
-        expect(INF.toString()).toBe("+inf.0");
-        expect(NEG_INF.toString()).toBe("-inf.0");
+        expect(numberToString(NAN)).toBe("+nan.0");
+        expect(numberToString(INF)).toBe("+inf.0");
+        expect(numberToString(NEG_INF)).toBe("-inf.0");
     });
     test('complex: exact', () => {
-        expect(makeInstance({num: 5, den: 1, imagNum: 3, imagDen: 7}).toString())
+        expect(numberToString(makeInstance({num: 5, den: 1, imagNum: 3, imagDen: 7})))
             .toBe("5+3/7i");
-        expect(makeInstance({num: 5, den: -1, imagNum: 3, imagDen: -7}).toString())
+        expect(numberToString(makeInstance({num: 5, den: -1, imagNum: 3, imagDen: -7})))
             .toBe("-5-3/7i");
-        expect(makeInstance({num: 5, den: 1, imagNum: 3, imagDen: -7}).toString())
+        expect(numberToString(makeInstance({num: 5, den: 1, imagNum: 3, imagDen: -7})))
             .toBe("5-3/7i");
-        expect(makeInstance({num: -5, den: 1, imagNum: -3, imagDen: 7}).toString())
+        expect(numberToString(makeInstance({num: -5, den: 1, imagNum: -3, imagDen: 7})))
             .toBe("-5-3/7i");
-        expect(makeInstance({num: -5, den: -1, imagNum: -3, imagDen: -7}).toString())
+        expect(numberToString(makeInstance({num: -5, den: -1, imagNum: -3, imagDen: -7})))
             .toBe("5+3/7i");
-        expect(divide(fromString("1-3i") as RacketNumber,
-                      fromString("1+3i") as RacketNumber,
-                      2,
-                      5).toString())
+        expect(numberToString(divide(fromString("1-3i") as RacketNumber,
+                                     fromString("1+3i") as RacketNumber,
+                                     2,
+                                     5)))
             .toBe("-2/25-3/50i");
     });
     test('complex: inexact', () => {
-        expect(makeInstance({num: 5, imagNum: 3}).toString())
+        expect(numberToString(makeInstance({num: 5, imagNum: 3})))
             .toBe("5.0+3.0i");
-        expect(makeInstance({num: 5, imagNum: -3}).toString())
+        expect(numberToString(makeInstance({num: 5, imagNum: -3})))
             .toBe("5.0-3.0i");
-        expect(makeInstance({num: -5, imagNum: 3}).toString())
+        expect(numberToString(makeInstance({num: -5, imagNum: 3})))
             .toBe("-5.0+3.0i");
-        expect(makeInstance({num: -5, imagNum: -3,}).toString())
+        expect(numberToString(makeInstance({num: -5, imagNum: -3,})))
             .toBe("-5.0-3.0i");
-        expect(makeInstance({num: NaN, imagNum: NaN}).toString())
+        expect(numberToString(makeInstance({num: NaN, imagNum: NaN})))
             .toBe("+nan.0+nan.0i");
     });
 });

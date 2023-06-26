@@ -21,3 +21,11 @@ export function exactToInexact(n: RacketNumber): RacketNumber {
     return BoxedNumber.makeInstance({num: Number(n)});
 }
 export const toInexact = exactToInexact; // For backwards compatibility
+
+export function numberToString(n: RacketNumber): string {
+    if (n instanceof BoxedNumber || typeof n === 'number') {
+        return n.toString();
+    }
+
+    return n.toString().slice(0, -1);
+}
