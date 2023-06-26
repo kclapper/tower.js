@@ -37,7 +37,9 @@ const integerRegexp = new RegExp("^[+-]?\\d+$");
 const decimalRegexp = new RegExp("^([+-]?\\d*)\\.(\\d*)$");
 const scientificRegexp = new RegExp("^([+-]?\\d*\\.?\\d*)[Ee](\\+?\\d+)$");
 
-export function fromString(str: string): RacketNumber {
+export function fromString(str: string): RacketNumber | false {
+    str = str.toString(); // For backwards compatibility with js-numbers
+
     const matchExact = str.match(fractionRegexp);
     if (matchExact) {
         return parseExact(str);
@@ -75,7 +77,7 @@ export function fromString(str: string): RacketNumber {
         return parseInteger(str);
     }
 
-    throw new Error(`Cannot parse ${str} to RacketNumber`);
+    return false;
 }
 
 function complexIsExact(matched: string[]): boolean {
@@ -126,4 +128,15 @@ export function makeNumber(num: JSNumber, den?: JSInteger): RacketNumber {
 
 export function makeComplexNumber(num: JSNumber, imagNum: JSNumber, den?: JSInteger, imagDen?: JSInteger): RacketNumber {
     return normalize(BoxedNumber.makeInstance({num: num as number, den: den as number, imagNum: imagNum as number, imagDen: imagDen as number}));
+}
+
+// For backwards compatibility with js-numbers.
+export function makeFloat(n: number): RacketNumber {
+    return normalize(BoxedNumber.makeInstance({num: n}));
+}
+export function makeRational(n: number, d: number): RacketNumber {
+    return normalize(BoxedNumber.makeInstance({num: n, den: d}));
+}
+export function makeComplex(real: RacketNumber, imag: RacketNumber): RacketNumber {
+    return  makeRectangular(real, imag);
 }

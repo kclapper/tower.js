@@ -111,8 +111,10 @@ export function acos(n: RacketNumber): RacketNumber {
     }
 }
 
+export const atan2 = atan; // For backwards compatibility with js-numbers
+
 export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
-    if (isExact(y) && isZero(y)) {
+    if (x === undefined && isExact(y) && isZero(y)) {
         return 0;
     }
 

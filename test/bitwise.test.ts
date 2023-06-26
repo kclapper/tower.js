@@ -2,7 +2,8 @@ import {
     bitwiseOr,
     bitwiseXor,
     bitwiseAnd,
-    bitwiseNot
+    bitwiseNot,
+    arithmeticShift
 } from '../src/tower';
 
 test('bitwiseOr', () => {
@@ -42,4 +43,13 @@ test('bitwiseNot', () => {
     const arg = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
     const expected = BigInt(Number.MIN_SAFE_INTEGER) - BigInt(2);
     expect(bitwiseNot(arg)).toBe(expected);
+});
+
+test('arithmeticShift', () => {
+    expect(arithmeticShift(1, 10)).toBe(1024);
+    expect(arithmeticShift(255, -3)).toBe(31);
+
+    const arg = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2);
+    const expected = arg << BigInt(5);
+    expect(arithmeticShift(arg, 5)).toBe(expected);
 });

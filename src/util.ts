@@ -1,6 +1,15 @@
 import {
+    JSNumber,
     JSInteger
 } from './tower';
+
+export function isJSNumber(n: any): n is JSNumber {
+    return typeof n === 'number' || typeof n === 'bigint';
+}
+
+export function isJSInteger(n: any): n is JSInteger {
+    return Number.isInteger(n) || typeof n === 'bigint';
+}
 
 export function isSafeInteger(n: JSInteger): boolean {
     const max = Number.MAX_SAFE_INTEGER;

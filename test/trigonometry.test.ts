@@ -136,6 +136,7 @@ describe('atan', () => {
             .toEqual(makeInstance({num: -2.356194490192345}));
         expect(atan(-1, 1))
             .toEqual(makeInstance({num: -0.7853981633974483}));
+        expect(atan(0, -1)).toEqual(PI);
     });
     test('special values', () => {
         expect(atan(0))

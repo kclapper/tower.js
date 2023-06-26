@@ -33,6 +33,9 @@ test('boxFixnum', () => {
 });
 
 describe('fromString', () => {
+    test("incorrect", () => {
+        expect(fromString("A")).toBe(false);
+    });
     test("integer", () => {
         expect(fromString("5")).toBe(5);
     });

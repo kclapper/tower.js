@@ -1,15 +1,16 @@
 import {
-    RacketNumber,
+    RacketNumber
 } from '../tower';
 import {
-    normalize
+    normalize,
+    isJSInteger
 } from './util';
 
 export function bitwiseOr(...operands: RacketNumber[]): RacketNumber {
     operands = operands.map(normalize);
 
     for (const param of operands) {
-        if (typeof param !== 'number' && typeof param !== 'bigint') {
+        if (!isJSInteger(param)) {
             throw new TypeError("bitwise operators only defined for integers.");
         }
     }
@@ -26,7 +27,7 @@ export function bitwiseXor(...operands: RacketNumber[]): RacketNumber {
     operands = operands.map(normalize);
 
     for (const param of operands) {
-        if (typeof param !== 'number' && typeof param !== 'bigint') {
+        if (!isJSInteger(param)) {
             throw new TypeError("bitwise operators only defined for integers.");
         }
     }
@@ -43,7 +44,7 @@ export function bitwiseAnd(...operands: RacketNumber[]): RacketNumber {
     operands = operands.map(normalize);
 
     for (const param of operands) {
-        if (typeof param !== 'number' && typeof param !== 'bigint') {
+        if (!isJSInteger(param)) {
             throw new TypeError("bitwise operators only defined for integers.");
         }
     }
@@ -59,9 +60,27 @@ export function bitwiseAnd(...operands: RacketNumber[]): RacketNumber {
 export function bitwiseNot(n: RacketNumber): RacketNumber {
     n = normalize(n);
 
-    if (typeof n !== 'number' && typeof n !== 'bigint') {
+    if (!isJSInteger(n)) {
         throw new TypeError("bitwise operators only defined for integers.");
     }
 
     return normalize(~n);
+}
+
+export function arithmeticShift(n: RacketNumber, m: RacketNumber): RacketNumber {
+    n = normalize(n);
+    m = normalize(m);
+
+    if (!isJSInteger(n) || !isJSInteger(m)) {
+        throw new TypeError("bitwise operators only defined for integers.");
+    }
+
+    n = typeof m === 'bigint' ? BigInt(n) : n;
+    m = typeof n === 'bigint' ? BigInt(m) : m;
+
+    if (m < (typeof m === 'number' ? 0 : 0n)) {
+        return n as number >> -(m as number);
+    } else {
+        return n as number << (m as number);
+    }
 }
