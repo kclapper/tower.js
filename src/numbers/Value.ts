@@ -111,15 +111,31 @@ export class InexactValue extends AbstractValue {
     }
 
     toString(): string {
+        if (Number.isNaN(this.num)) {
+            return "+nan.0";
+        }
+
+        if (this.num === Infinity) {
+            return "+inf.0";
+        } else if (this.num === -Infinity) {
+            return "-inf.0";
+        }
+
         if (Number.isInteger(this.num)) {
             return this.num.toString() + ".0";
         }
+
         return this.num.toString();
     }
     toSignedString(): string {
+        if (!Number.isFinite(this.num)) {
+            return this.toString();
+        }
+
         if (this.num >= 0) {
             return "+" + this.toString();
         }
+
         return this.toString();
     }
     [Symbol.toPrimitive](hint: string): number | string {
@@ -357,7 +373,7 @@ export class SmallExactValue extends ExactValue {
             a = b;
             b = t % b;
         }
-        return a;
+        return Math.abs(a);
     }
 
     isFinite(): boolean {
@@ -735,14 +751,12 @@ export class BigExactValue extends ExactValue {
             a = b;
             b = t % b;
         }
-        return a;
-    }
 
-    private bigintAbs(n: bigint): bigint {
-        if (n < 0n) {
-            return -1n * n;
+        if (a < 0n) {
+            return -1n * a;
         }
-        return n;
+
+        return a;
     }
 
     isFinite(): boolean {
@@ -1100,9 +1114,6 @@ const EXACT_ZERO = new SmallExactValue(0);
 
 
 /////////////////////// Constants ///////////////////////
-
-// If you add any constants here, make sure to re-export them from
-// the constants.ts file as well.
 
 export const ZERO_VAL = new SmallExactValue(0);
 export const ONE_VAL = new SmallExactValue(1);

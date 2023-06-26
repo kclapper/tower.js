@@ -561,9 +561,6 @@ export class BoxedNumber {
 
 /////////////////////// Constants ///////////////////////
 
-// If you add any constants here, make sure to re-export them from
-// the constants.ts file as well.
-
 export const EXACT_ZERO = BoxedNumber.makeInstance({num: 0, den: 1});
 export const EXACT_HALF = BoxedNumber.makeInstance({num: 1, den: 2});
 export const EXACT_ONE = BoxedNumber.makeInstance({num: 1, den: 1});
@@ -573,6 +570,7 @@ export const EXACT_I = BoxedNumber.makeInstance({num: 0, den: 1, imagNum: 1, ima
 export const EXACT_NEG_I = BoxedNumber.makeInstance({num: 0, den: 1, imagNum: -1, imagDen: 1});
 
 export const INEXACT_ZERO = BoxedNumber.makeInstance({num: 0});
+export const INEXACT_NEG_ZERO = BoxedNumber.makeInstance({num: -0});
 export const INEXACT_HALF = BoxedNumber.makeInstance({num: 0.5});
 export const INEXACT_ONE = BoxedNumber.makeInstance({num: 1});
 export const INEXACT_TWO = BoxedNumber.makeInstance({num: 2});
@@ -594,3 +592,17 @@ export const INF = BoxedNumber.makeInstance({num: Number.POSITIVE_INFINITY});
 export const NEG_INF = BoxedNumber.makeInstance({num: Number.NEGATIVE_INFINITY});
 
 export const NAN = BoxedNumber.makeInstance({num: Number.NaN});
+
+// For backwards compatibility with js-numbers
+export const zero = EXACT_ZERO;
+export const one = EXACT_ONE;
+export const two = EXACT_TWO;
+export const negative_one = EXACT_NEG_ONE;
+export const i = EXACT_I
+export const negative_i = EXACT_NEG_I;
+export const pi = PI;
+export const e = BoxedNumber.makeInstance({num: Math.E});
+export const nan = NAN;
+export const negative_inf = NEG_INF;
+export const inf = INF;
+export const negative_zero = INEXACT_NEG_ZERO;

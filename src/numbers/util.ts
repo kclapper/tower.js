@@ -5,14 +5,9 @@ import {
 import {
     Value
 } from './Value';
-
-export function isJSNumber(n: any): n is JSNumber {
-    return typeof n === 'number' || typeof n === 'bigint';
-}
-
-export function isJSInteger(n: any): n is JSInteger {
-    return Number.isInteger(n) || typeof n === 'bigint';
-}
+import {
+    isJSInteger
+} from '../util';
 
 export function integerIsOne(n: JSInteger): boolean {
     const isInteger = isJSInteger(n);
