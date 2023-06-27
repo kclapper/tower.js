@@ -1,9 +1,9 @@
 const assert = require("node:assert").strict;
 
-const benchmark = require("./util.js").benchmark;
+const benchmark = require("./util.cjs").benchmark;
 
-const jsNums = require('./js-numbers.js');
-const tower = require('../dist/tower.js');
+const jsNums = require('./js-numbers.cjs');
+const tower = require('tower.js');
 
 function jsNumsFactorial(n) {
   let result = 1;

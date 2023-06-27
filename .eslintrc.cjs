@@ -1,5 +1,8 @@
 /* eslint-env node */
 module.exports = {
+  env: {
+    node: true
+  },
   ignorePatterns: [
     "**/js-numbers.js",
     "**/js-numbers.cjs",
@@ -9,7 +12,6 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    //'plugin:@typescript-eslint/recommended-requiring-type-checking'
   ],
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
