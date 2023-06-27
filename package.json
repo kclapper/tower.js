@@ -21,6 +21,7 @@
     "url": "git+https://github.com/kclapper/tower.js.git"
   },
   "keywords": [
+    "Racket",
     "Scheme",
     "numeric tower",
     "numbers"

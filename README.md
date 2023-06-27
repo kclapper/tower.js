@@ -54,7 +54,7 @@ result = factorial(inexactFive);
 console.log(numberToString(result)); // "20.0"
 
 result = factorial(complex);
-console.log(numberToString(result)); // 11+27i
+console.log(numberToString(result)); // "11+27i"
 ```
 
 ## Installation
