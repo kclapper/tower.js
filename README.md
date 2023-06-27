@@ -1,5 +1,7 @@
 # tower.js
 
+[![Test tower.js](https://github.com/kclapper/tower.js/actions/workflows/test.yml/badge.svg?event=push)](https://github.com/kclapper/tower.js/actions/workflows/test.yml)
+
 A Typescript implementation of [the Racket numeric
 tower](https://docs.racket-lang.org/reference/numbers.html). This is a rewrite
 of the [js-numbers library by Danny Yoo](https://github.com/dyoo/js-numbers).
