@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: './src/tower.ts',
-  mode: 'development',
+  mode: 'production',
   devtool: 'inline-source-map',
   module: {
     rules: [

@@ -1,13 +1,13 @@
 import { isJSInteger } from "../numbers/util";
 import {
     RacketNumber,
-    BoxedNumber
+    isBoxedNumber
 } from "../tower";
 
 export function isNumber(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number' && Number.isInteger(x);
     const isBigInt = typeof x === 'bigint';
-    const isBoxed = x instanceof BoxedNumber;
+    const isBoxed = isBoxedNumber(x);
     return isNumber || isBigInt || isBoxed;
 }
 
@@ -16,47 +16,47 @@ export const isComplex = isNumber;
 export function isReal(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number' && Number.isInteger(x);
     const isBigInt = typeof x === 'bigint';
-    const isBoxedReal = x instanceof BoxedNumber && x.isReal();
+    const isBoxedReal = isBoxedNumber(x) && x.isReal();
     return isNumber || isBigInt || isBoxedReal;
 }
 
 export function isRational(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number' && Number.isInteger(x);
     const isBigInt = typeof x === 'bigint';
-    const isBoxedRational = x instanceof BoxedNumber && x.isRational();
+    const isBoxedRational = isBoxedNumber(x) && x.isRational();
     return isNumber || isBigInt || isBoxedRational;
 }
 
 export function isInteger(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number' && Number.isInteger(x);
     const isBigInt = typeof x === 'bigint';
-    const isBoxedInteger = x instanceof BoxedNumber && x.isInteger();
+    const isBoxedInteger = isBoxedNumber(x) && x.isInteger();
     return isNumber || isBigInt || isBoxedInteger;
 }
 
 export function isExactInteger(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number' && Number.isInteger(x);
     const isBigInt = typeof x === 'bigint';
-    const isBoxedExactInteger = x instanceof BoxedNumber && x.isInteger() && x.isExact();
+    const isBoxedExactInteger = isBoxedNumber(x) && x.isInteger() && x.isExact();
     return isNumber || isBigInt || isBoxedExactInteger;
 }
 
 export function isExactNonNegativeInteger(x: any): x is RacketNumber {
     const forNumber = typeof x === 'number' && Number.isInteger(x) && x >= 0;
     const forBigInt = typeof x === 'bigint' && x >= 0n;
-    const forBoxed = x instanceof BoxedNumber && x.isInteger() && x.isExact() && !x.isNegative();
+    const forBoxed = isBoxedNumber(x) && x.isInteger() && x.isExact() && !x.isNegative();
     return forNumber || forBigInt || forBoxed;
 }
 
 export function isExactPositiveInteger(x: any): x is RacketNumber {
     const forNumber = typeof x === 'number' && Number.isInteger(x) && x > 0;
     const forBigInt = typeof x === 'bigint' && x > 0n;
-    const forBoxed = x instanceof BoxedNumber && x.isInteger() && x.isExact() && x.isPositive();
+    const forBoxed = isBoxedNumber(x) && x.isInteger() && x.isExact() && x.isPositive();
     return forNumber || forBigInt || forBoxed;
 }
 
 export function isInexactReal(x: any): boolean {
-    return x instanceof BoxedNumber && x.isReal() && x.isInexact();
+    return isBoxedNumber(x) && x.isReal() && x.isInexact();
 }
 
 export function isFixnum(x: any): boolean {
@@ -66,34 +66,34 @@ export function isFixnum(x: any): boolean {
 }
 
 export function isFlonum(x: any): boolean {
-    return x instanceof BoxedNumber && x.isReal() && x.isInexact();
+    return isBoxedNumber(x) && x.isReal() && x.isInexact();
 }
 
 export function isZero(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number' && n === 0;
     const forBigInt = typeof n === 'bigint' && n === 0n;
-    const forBoxed = n instanceof BoxedNumber && n.isZero();
+    const forBoxed = isBoxedNumber(n) && n.isZero();
     return forNumber || forBigInt || forBoxed;
 }
 
 export function isPositive(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number' && n > 0;
     const forBigInt = typeof n === 'bigint' && n > 0n;
-    const forBoxed = n instanceof BoxedNumber && n.isPositive();
+    const forBoxed = isBoxedNumber(n) && n.isPositive();
     return forNumber || forBigInt || forBoxed;
 }
 
 export function isNegative(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number' && n < 0;
     const forBigInt = typeof n === 'bigint' && n < 0n;
-    const forBoxed = n instanceof BoxedNumber && n.isNegative();
+    const forBoxed = isBoxedNumber(n) && n.isNegative();
     return forNumber || forBigInt || forBoxed;
 }
 
 export function isEven(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number' && n % 2 === 0;
     const forBigInt = typeof n === 'bigint' && n % 2n === 0n;
-    const forBoxed = n instanceof BoxedNumber && n.isEven();
+    const forBoxed = isBoxedNumber(n) && n.isEven();
     return forNumber || forBigInt || forBoxed;
 }
 
@@ -104,21 +104,21 @@ export function isOdd(n: RacketNumber): boolean {
 export function isExact(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number';
     const forBigInt = typeof n === 'bigint';
-    const forBoxed = n instanceof BoxedNumber && n.isExact();
+    const forBoxed = isBoxedNumber(n) && n.isExact();
     return forNumber || forBigInt || forBoxed;
 }
 
 export function isInexact(n: RacketNumber): boolean {
-    return n instanceof BoxedNumber && n.isInexact();
+    return isBoxedNumber(n) && n.isInexact();
 }
 
 export function isRacketNumber(n: RacketNumber): boolean {
-    return n instanceof BoxedNumber || isJSInteger(n);
+    return isBoxedNumber(n) || isJSInteger(n);
 }
 export const isSchemeNumber = isRacketNumber; // For backwards compatibility
 
 export function isFinite(n: RacketNumber): boolean {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.isFinite();
     } else if (typeof n === 'number') {
         return Number.isFinite(n);
@@ -127,14 +127,14 @@ export function isFinite(n: RacketNumber): boolean {
 }
 
 export function isNaN(n: RacketNumber): boolean {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.isNaN();
     }
     return Number.isNaN(n);
 }
 
 export function isNegativeZero(n: RacketNumber): boolean {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.isNegativeZero();
     }
     return false;

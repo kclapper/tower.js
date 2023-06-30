@@ -1,13 +1,14 @@
 import {
     RacketNumber,
-    BoxedNumber,
+    isBoxedNumber,
+    InexactNumber
 } from '../tower';
 import {
     normalize
 } from './util';
 
 export function inexactToExact(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.toExact());
     }
     return n;
@@ -15,15 +16,15 @@ export function inexactToExact(n: RacketNumber): RacketNumber {
 export const toExact = inexactToExact; // For backwards compatibility
 
 export function exactToInexact(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.toInexact();
     }
-    return BoxedNumber.makeInstance({num: Number(n)});
+    return new InexactNumber(Number(n));
 }
 export const toInexact = exactToInexact; // For backwards compatibility
 
 export function numberToString(n: RacketNumber): string {
-    if (n instanceof BoxedNumber || typeof n === 'number') {
+    if (isBoxedNumber(n)) {
         return n.toString();
     }
 

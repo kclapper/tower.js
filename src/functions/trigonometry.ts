@@ -1,6 +1,9 @@
 import {
     RacketNumber,
-    BoxedNumber,
+    InexactNumber,
+    SmallExactNumber,
+    BigExactNumber,
+    isBoxedNumber,
     isExact,
     EXACT_ONE,
     INEXACT_ONE,
@@ -19,7 +22,7 @@ import {
 } from "../tower";
 
 function isOne(n: RacketNumber): boolean {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.equals(EXACT_ONE);
     }
     return Number(n) === 1;
@@ -30,12 +33,12 @@ export function sin(n: RacketNumber): RacketNumber {
         return 0;
     }
 
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.sin();
     } else if (typeof n === 'number') {
-        return BoxedNumber.makeInstance({num: Math.sin(n)});
+        return new InexactNumber(Math.sin(n));
     } else {
-        return BoxedNumber.makeInstance({num: Math.sin(Number(n))});
+        return new InexactNumber(Math.sin(Number(n)));
     }
 }
 
@@ -44,12 +47,12 @@ export function cos(n: RacketNumber): RacketNumber {
         return 1;
     }
 
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.cos();
     } else if (typeof n === 'number') {
-        return BoxedNumber.makeInstance({num: Math.cos(n)})
+        return new InexactNumber(Math.cos(n));
     } else {
-        return BoxedNumber.makeInstance({num: Math.cos(Number(n))});
+        return new InexactNumber(Math.cos(Number(n)));
     }
 }
 
@@ -58,12 +61,12 @@ export function tan(n: RacketNumber): RacketNumber {
         return 0;
     }
 
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.tan();
     } else if (typeof n === 'number') {
-        return BoxedNumber.makeInstance({num: Math.tan(n)})
+        return new InexactNumber(Math.tan(n));
     } else {
-        return BoxedNumber.makeInstance({num: Math.tan(Number(n))});
+        return new InexactNumber(Math.tan(Number(n)));
     }
 }
 
@@ -72,20 +75,20 @@ export function asin(n: RacketNumber): RacketNumber {
         return 0;
     }
 
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.asin();
 
     } else if (typeof n === 'number') {
         if (-1 <= n && n <= 1) {
-            return BoxedNumber.makeInstance({num: Math.asin(n)})
+            return new InexactNumber(Math.asin(n));
         }
-        return BoxedNumber.makeInstance({num: n, den: 1}).asin();
+        return (new SmallExactNumber(n, 1)).asin();
 
     } else {
         if (-1n <= n && n <= 1n) {
-            return BoxedNumber.makeInstance({num: Math.asin(Number(n))})
+            return new InexactNumber(Math.asin(Number(n)));
         }
-        return BoxedNumber.makeInstance({num: n, den: 1n}).asin();
+        return (new BigExactNumber(n)).asin();
     }
 }
 
@@ -94,20 +97,20 @@ export function acos(n: RacketNumber): RacketNumber {
         return 0;
     }
 
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.acos();
 
     } else if (typeof n === 'number') {
         if (-1 <= n && n <= 1) {
-            return BoxedNumber.makeInstance({num: Math.acos(n)})
+            return new InexactNumber(Math.acos(n));
         }
-        return BoxedNumber.makeInstance({num: n, den: 1}).acos();
+        return (new SmallExactNumber(n)).acos();
 
     } else {
         if (-1n <= n && n <= 1n) {
-            return BoxedNumber.makeInstance({num: Math.acos(Number(n))})
+            return new InexactNumber(Math.acos(Number(n)));
         }
-        return BoxedNumber.makeInstance({num: n, den: 1n}).acos();
+        return (new BigExactNumber(n)).acos();
     }
 }
 
@@ -125,7 +128,7 @@ export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
     // https://en.wikipedia.org/wiki/Atan2
     const arg = divide(y, x);
 
-    if (arg instanceof BoxedNumber && arg.isNaN()) {
+    if (isBoxedNumber(arg) && arg.isNaN()) {
         if (equals(y, INF) && equals(x, INF)) {
             return divide(PI, 4);
         } else if (equals(y, INF) && equals(x, NEG_INF)) {
@@ -153,16 +156,16 @@ export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
 }
 
 function atan1(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.atan();
     } else if (n === Infinity) {
-        return BoxedNumber.makeInstance({num: 884279719003555 / 562949953421312});
+        return new InexactNumber(884279719003555 / 562949953421312);
     } else if (n === -Infinity) {
-        return BoxedNumber.makeInstance({num: -884279719003555 / 562949953421312});
+        return new InexactNumber(-884279719003555 / 562949953421312)
     } else if (typeof n === 'number') {
-        return BoxedNumber.makeInstance({num: Math.atan(n)})
+        return new InexactNumber(Math.atan(n));
     } else {
-        return BoxedNumber.makeInstance({num: Math.atan(Number(n))});
+        return new InexactNumber(Math.atan(Number(n)));
     }
 }
 

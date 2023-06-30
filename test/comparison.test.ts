@@ -1,5 +1,7 @@
 import {
-    BoxedNumber,
+    InexactNumber,
+    BigExactNumber,
+    makeComplexNumber,
     EXACT_I,
     EXACT_NEG_I,
     EXACT_ONE,
@@ -18,12 +20,12 @@ import {
     lessThanOrEqual,
 } from '../src/tower';
 
-const makeInstance = BoxedNumber.makeInstance;
+const makeInstance = makeComplexNumber;
 
 describe('equals', () => {
     test('racket docs examples', () => {
         expect(equals(1)).toBe(true);
-        expect(equals(1, makeInstance({num: 1}))).toBe(true);
+        expect(equals(1, new InexactNumber(1))).toBe(true);
         expect(equals(1, 2)).toBe(false);
 
         const x = makeInstance({num: 2, den: 1, imagNum: 3, imagDen: 1});
@@ -47,14 +49,14 @@ describe('equals', () => {
         expect(equals(EXACT_NEG_I, EXACT_I)).toBe(false);
     });
     test('bigint', () => {
-        const big3 = makeInstance({num: BigInt(3), den: BigInt(1)});
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
+        const big3 = new BigExactNumber(BigInt(3), BigInt(1));
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
         expect(equals(big5, big5)).toBe(true);
         expect(equals(big3, big5)).toBe(false);
     });
     test('multi-arity', () => {
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
-        const small5 = makeInstance({num: 5});
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
+        const small5 = new InexactNumber(5);
         expect(equals(5, small5, big5)).toBe(true);
         expect(equals(3, small5, big5)).toBe(false);
     });
@@ -79,8 +81,8 @@ describe('approxEquals', () => {
         expect(approxEquals(INEXACT_ZERO, INEXACT_ONE, INEXACT_HALF)).toBe(false);
     });
     test('bigint', () => {
-        const big3 = makeInstance({num: BigInt(3), den: BigInt(1)});
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
+        const big3 = new BigExactNumber(BigInt(3), BigInt(1));
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
         expect(approxEquals(big5, big5, BigInt(0))).toBe(true);
         expect(approxEquals(big3, big5, BigInt(2))).toBe(true);
         expect(approxEquals(big3, big5, BigInt(1))).toBe(false);
@@ -112,15 +114,15 @@ describe('lessThan', () => {
         expect(lessThan(INEXACT_ONE, INEXACT_ZERO)).toBe(false);
     });
     test('bigint', () => {
-        const big3 = makeInstance({num: BigInt(3), den: BigInt(1)});
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
+        const big3 = new BigExactNumber(BigInt(3), BigInt(1));
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
         expect(lessThan(big5, big5)).toBe(false);
         expect(lessThan(big3, big5)).toBe(true);
         expect(lessThan(big5, big3)).toBe(false);
     });
     test('multi-arity', () => {
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
-        const small5 = makeInstance({num: 5});
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
+        const small5 = new InexactNumber(5);
         expect(lessThan(5, small5, big5)).toBe(false);
         expect(lessThan(3, small5, 6)).toBe(true);
     });
@@ -157,15 +159,15 @@ describe('lessThanOrEqual', () => {
         expect(lessThanOrEqual(INEXACT_ONE, INEXACT_ZERO)).toBe(false);
     });
     test('bigint', () => {
-        const big3 = makeInstance({num: BigInt(3), den: BigInt(1)});
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
+        const big3 = new BigExactNumber(BigInt(3), BigInt(1));
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
         expect(lessThanOrEqual(big5, big5)).toBe(true);
         expect(lessThanOrEqual(big3, big5)).toBe(true);
         expect(lessThanOrEqual(big5, big3)).toBe(false);
     });
     test('multi-arity', () => {
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
-        const small5 = makeInstance({num: 5});
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
+        const small5 = new InexactNumber(5);
         expect(lessThanOrEqual(5, small5, big5)).toBe(true);
         expect(lessThanOrEqual(3, small5, 6)).toBe(true);
     });
@@ -202,15 +204,15 @@ describe('greaterThan', () => {
         expect(greaterThan(INEXACT_ONE, INEXACT_ZERO)).toBe(true);
     });
     test('bigint', () => {
-        const big3 = makeInstance({num: BigInt(3), den: BigInt(1)});
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
+        const big3 = new BigExactNumber(BigInt(3), BigInt(1));
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
         expect(greaterThan(big5, big5)).toBe(false);
         expect(greaterThan(big3, big5)).toBe(false);
         expect(greaterThan(big5, big3)).toBe(true);
     });
     test('multi-arity', () => {
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
-        const small5 = makeInstance({num: 5});
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
+        const small5 = new InexactNumber(5);
         expect(greaterThan(5, small5, big5)).toBe(false);
         expect(greaterThan(6, small5, 3)).toBe(true);
         expect(greaterThan(3, small5, 6)).toBe(false);
@@ -249,15 +251,15 @@ describe('greaterThanOrEqual', () => {
         expect(greaterThanOrEqual(INEXACT_ONE, INEXACT_ZERO)).toBe(true);
     });
     test('bigint', () => {
-        const big3 = makeInstance({num: BigInt(3), den: BigInt(1)});
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
+        const big3 = new BigExactNumber(BigInt(3), BigInt(1));
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
         expect(greaterThanOrEqual(big5, big5)).toBe(true);
         expect(greaterThanOrEqual(big3, big5)).toBe(false);
         expect(greaterThanOrEqual(big5, big3)).toBe(true);
     });
     test('multi-arity', () => {
-        const big5 = makeInstance({num: BigInt(5), den: BigInt(1)});
-        const small5 = makeInstance({num: 5});
+        const big5 = new BigExactNumber(BigInt(5), BigInt(1));
+        const small5 = new InexactNumber(5);
         expect(greaterThanOrEqual(5, small5, big5)).toBe(true);
         expect(greaterThanOrEqual(3, small5, 6)).toBe(false);
         expect(greaterThanOrEqual(6, small5, 3)).toBe(true);
