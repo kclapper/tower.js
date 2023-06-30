@@ -1,6 +1,8 @@
 import {
     RacketNumber,
-    BoxedNumber,
+    InexactNumber,
+    SmallExactNumber,
+    makeComplexNumber,
     inexactToExact,
     exactToInexact,
     NAN,
@@ -11,7 +13,7 @@ import {
     numberToString,
 } from '../src/tower';
 
-const makeInstance = BoxedNumber.makeInstance;
+const makeInstance = makeComplexNumber;
 
 describe('inexactToExact', () => {
     test('fixnums', () => {
@@ -19,51 +21,51 @@ describe('inexactToExact', () => {
         expect(inexactToExact(BigInt(5))).toBe(BigInt(5));
     });
     test('boxed numbers', () => {
-        expect(inexactToExact(makeInstance({num: 5})))
+        expect(inexactToExact(new InexactNumber(5)))
             .toBe(5);
-        expect(inexactToExact(makeInstance({num: 5.5})))
-            .toEqual(makeInstance({num: 11, den: 2}));
-        expect(inexactToExact(makeInstance({num: 5, den: 1})))
+        expect(inexactToExact(new InexactNumber(5.5)))
+            .toEqual(new SmallExactNumber(11, 2));
+        expect(inexactToExact(new SmallExactNumber(5, 1)))
             .toBe(5);
-        expect(inexactToExact(makeInstance({num: 5, den: 2})))
-            .toEqual(makeInstance({num: 5, den: 2}));
+        expect(inexactToExact(new SmallExactNumber(5, 2)))
+            .toEqual(new SmallExactNumber(5, 2));
     });
 });
 
 describe('exactToInexact', () => {
     test('fixnums', () => {
         expect(exactToInexact(5))
-            .toEqual(makeInstance({num: 5}));
+            .toEqual(new InexactNumber(5));
         expect(exactToInexact(BigInt(5)))
-            .toEqual(makeInstance({num: 5}));
+            .toEqual(new InexactNumber(5));
     });
     test('boxed numbers', () => {
-        expect(exactToInexact(makeInstance({num: 5})))
-            .toEqual(makeInstance({num: 5}));
-        expect(exactToInexact(makeInstance({num: 5.5})))
-            .toEqual(makeInstance({num: 5.5}));
-        expect(exactToInexact(makeInstance({num: 5, den: 1})))
-            .toEqual(makeInstance({num: 5}));
-        expect(exactToInexact(makeInstance({num: 5, den: 2})))
-            .toEqual(makeInstance({num: 2.5}));
+        expect(exactToInexact(new InexactNumber(5)))
+            .toEqual(new InexactNumber(5));
+        expect(exactToInexact(new InexactNumber(5.5)))
+            .toEqual(new InexactNumber(5.5));
+        expect(exactToInexact(new SmallExactNumber(5, 1)))
+            .toEqual(new InexactNumber(5));
+        expect(exactToInexact(new SmallExactNumber(5, 2)))
+            .toEqual(new InexactNumber(2.5));
     });
 });
 
 describe('numberToString', () => {
     test('integer: exact', () => {
-        expect(numberToString(makeInstance({num: 5, den: 1})))
+        expect(numberToString(new SmallExactNumber(5, 1)))
             .toBe("5");
-        expect(numberToString(makeInstance({num: 5, den: -1})))
+        expect(numberToString(new SmallExactNumber(5, -1)))
             .toBe("-5");
-        expect(numberToString(makeInstance({num: -5, den: 1})))
+        expect(numberToString(new SmallExactNumber(-5, 1)))
             .toBe("-5");
-        expect(numberToString(makeInstance({num: -5, den: -1})))
+        expect(numberToString(new SmallExactNumber(-5, -1)))
             .toBe("5");
     });
     test('integer: inexact', () => {
-        expect(numberToString(makeInstance({num: 5})))
+        expect(numberToString(new InexactNumber(5)))
             .toBe("5.0");
-        expect(numberToString(makeInstance({num: -5})))
+        expect(numberToString(new InexactNumber(-5)))
             .toBe("-5.0");
     });
     test('real', () => {

@@ -1,5 +1,8 @@
 import {
-    BoxedNumber,
+    InexactNumber,
+    SmallExactNumber,
+    BigExactNumber,
+    makeComplexNumber,
     EXACT_ONE,
     EXACT_NEG_ONE,
     EXACT_HALF,
@@ -18,11 +21,11 @@ import {
     conjugate
 } from '../src/tower';
 
-const makeInstance = BoxedNumber.makeInstance;
+const makeInstance = makeComplexNumber;
 
 describe('makeRectangular', () => {
     test('racket docs examples', () => {
-        expect(makeRectangular(3, makeInstance({num: 4})))
+        expect(makeRectangular(3, new InexactNumber(4)))
         .toEqual(makeInstance({num: 3, imagNum: 4}));
     });
     test('fixnums', () => {
@@ -57,7 +60,7 @@ describe('makeRectangular', () => {
             .toBe(1);
     });
     test('bigints', () => {
-        expect(makeRectangular(makeInstance({num: BigInt(5), den: BigInt(1)}), 1))
+        expect(makeRectangular(new BigExactNumber(BigInt(5), BigInt(1)), 1))
             .toEqual(makeInstance({num: 5, den: 1, imagNum: 1, imagDen: 1}));
     });
     test('mixed precision', () => {
@@ -72,7 +75,7 @@ describe('makeRectangular', () => {
     test('racket docs examples', () => {
         expect(makePolar(10, multiply(PI, EXACT_HALF)))
         .toEqual(makeInstance({num: 6.123233995736766e-16, imagNum: 10}));
-        expect(makePolar(10, multiply(PI, makeInstance({num: 1, den: 4}))))
+        expect(makePolar(10, multiply(PI, new SmallExactNumber(1, 4))))
         .toEqual(makeInstance({num: 7.0710678118654755, imagNum: 7.071067811865475}));
     });
     test('fixnums', () => {
@@ -105,7 +108,7 @@ describe('makeRectangular', () => {
             .toBe(1);
     });
     test('bigints', () => {
-        expect(makePolar(makeInstance({num: BigInt(5), den: BigInt(1)}), 1))
+        expect(makePolar(new BigExactNumber(BigInt(5), BigInt(1)), 1))
             .toEqual(makeInstance({num: 2.701511529340699, imagNum: 4.207354924039483}));
     });
     test('mixed precision', () => {
@@ -119,8 +122,8 @@ describe('makeRectangular', () => {
 describe('magnitude', () => {
     test('racket docs examples', () => {
         expect(magnitude(-3)).toBe(3);
-        expect(magnitude(makeInstance({num: 3})))
-            .toEqual(makeInstance({num: 3}));
+        expect(magnitude(new InexactNumber(3)))
+            .toEqual(new InexactNumber(3));
         expect(magnitude(makeInstance({num: 3, den: 1, imagNum: 4, imagDen: 1})))
             .toEqual(5);
     });
@@ -135,7 +138,7 @@ describe('magnitude', () => {
             .toEqual(INF);
     });
     test('bigints', () => {
-        expect(magnitude(makeInstance({num: BigInt(5), den: BigInt(1)})))
+        expect(magnitude(new BigExactNumber(BigInt(5), BigInt(1))))
             .toBe(5);
     });
 });
@@ -146,41 +149,41 @@ describe('angle', () => {
             .toEqual(PI);
         expect(angle(-1))
             .toEqual(PI);
-        expect(angle(makeInstance({num: 3})))
+        expect(angle(new InexactNumber(3)))
             .toBe(0);
         expect(angle(makeInstance({num: 3, den: 1, imagNum: 4, imagDen: 1})))
-            .toEqual(makeInstance({num: 0.9272952180016122}));
+            .toEqual(new InexactNumber(0.9272952180016122));
         expect(angle(makeInstance({num: Infinity, imagNum: Infinity})))
-            .toEqual(makeInstance({num: 0.7853981633974483}));
+            .toEqual(new InexactNumber(0.7853981633974483));
     });
     test('infinity', () => {
         expect(angle(makeInstance({num: Infinity, imagNum: -Infinity})))
-            .toEqual(makeInstance({num: -0.7853981633974483}));
+            .toEqual(new InexactNumber(-0.7853981633974483));
         expect(angle(makeInstance({num: -Infinity, imagNum: -Infinity})))
-            .toEqual(makeInstance({num: -2.356194490192345}));
+            .toEqual(new InexactNumber(-2.356194490192345));
         expect(angle(makeInstance({num: -Infinity, imagNum: Infinity})))
-            .toEqual(makeInstance({num: 2.356194490192345}));
+            .toEqual(new InexactNumber(2.356194490192345));
 
         expect(angle(makeInstance({num: Infinity, imagNum: 5})))
             .toEqual(INEXACT_ZERO);
         expect(angle(makeInstance({num: Infinity, imagNum: -5})))
-            .toEqual(makeInstance({num: -0}));
+            .toEqual(new InexactNumber(-0));
         expect(angle(makeInstance({num: 5, imagNum: Infinity})))
-            .toEqual(makeInstance({num: 1.5707963267948966}));
+            .toEqual(new InexactNumber(1.5707963267948966));
         expect(angle(makeInstance({num: -5, imagNum: Infinity})))
-            .toEqual(makeInstance({num: 1.5707963267948966}));
+            .toEqual(new InexactNumber(1.5707963267948966));
 
         expect(angle(makeInstance({num: -Infinity, imagNum: 5})))
             .toEqual(PI);
         expect(angle(makeInstance({num: -Infinity, imagNum: -5})))
             .toEqual(PI.multiply(EXACT_NEG_ONE));
         expect(angle(makeInstance({num: 5, imagNum: -Infinity})))
-            .toEqual(makeInstance({num: -1.5707963267948966}));
+            .toEqual(new InexactNumber(-1.5707963267948966));
         expect(angle(makeInstance({num: -5, imagNum: -Infinity})))
-            .toEqual(makeInstance({num: -1.5707963267948966}));
+            .toEqual(new InexactNumber(-1.5707963267948966));
     });
     test('bigints', () => {
-        expect(angle(makeInstance({num: BigInt(5), den: BigInt(1)})))
+        expect(angle(new BigExactNumber(BigInt(5), BigInt(1))))
             .toBe(0);
     });
 });
@@ -190,20 +193,20 @@ describe('realPart', () => {
         expect(realPart(makeInstance({num: 3, den: 1, imagNum: 4, imagDen: 1})))
             .toEqual(3);
         expect(realPart(makeInstance({num: 3, imagNum: 4})))
-            .toEqual(makeInstance({num: 3}));
-        expect(realPart(makeInstance({num: 5})))
-            .toEqual(makeInstance({num: 5}));
+            .toEqual(new InexactNumber(3));
+        expect(realPart(new InexactNumber(5)))
+            .toEqual(new InexactNumber(5));
     });
     test('infinity', () => {
         expect(realPart(makeInstance({num: Infinity, imagNum: -Infinity})))
-            .toEqual(makeInstance({num: Infinity}));
+            .toEqual(new InexactNumber(Infinity));
         expect(realPart(makeInstance({num: -Infinity, imagNum: -Infinity})))
-            .toEqual(makeInstance({num: -Infinity}));
+            .toEqual(new InexactNumber(-Infinity));
         expect(realPart(makeInstance({num: -Infinity, imagNum: Infinity})))
-            .toEqual(makeInstance({num: -Infinity}));
+            .toEqual(new InexactNumber(-Infinity));
     });
     test('bigints', () => {
-        expect(realPart(makeInstance({num: BigInt(5), den: BigInt(1)})))
+        expect(realPart(new BigExactNumber(BigInt(5), BigInt(1))))
             .toBe(5);
     });
 });
@@ -213,20 +216,20 @@ describe('imaginaryPart', () => {
         expect(imaginaryPart(makeInstance({num: 3, den: 1, imagNum: 4, imagDen: 1})))
             .toEqual(4);
         expect(imaginaryPart(makeInstance({num: 3, imagNum: 4})))
-            .toEqual(makeInstance({num: 4}));
-        expect(imaginaryPart(makeInstance({num: 5})))
+            .toEqual(new InexactNumber(4));
+        expect(imaginaryPart(new InexactNumber(5)))
             .toEqual(0);
         expect(imaginaryPart(makeInstance({num: 5, imagNum: 0})))
             .toEqual(INEXACT_ZERO);
     });
     test('infinity', () => {
         expect(imaginaryPart(makeInstance({num: Infinity, imagNum: -Infinity})))
-            .toEqual(makeInstance({num: -Infinity}));
+            .toEqual(new InexactNumber(-Infinity));
         expect(imaginaryPart(makeInstance({num: -Infinity, imagNum: Infinity})))
-            .toEqual(makeInstance({num: Infinity}));
+            .toEqual(new InexactNumber(Infinity));
     });
     test('bigints', () => {
-        expect(imaginaryPart(makeInstance({num: BigInt(5), den: BigInt(1)})))
+        expect(imaginaryPart(new BigExactNumber(BigInt(5), BigInt(1))))
             .toBe(0);
     });
 });
@@ -246,7 +249,7 @@ describe('conjugate', () => {
             .toEqual(makeInstance({num: Infinity, imagNum: -Infinity}));
     });
     test('bigints', () => {
-        expect(conjugate(makeInstance({num: BigInt(5), den: BigInt(1)})))
+        expect(conjugate(new BigExactNumber(BigInt(5), BigInt(1))))
             .toBe(5);
     });
 });

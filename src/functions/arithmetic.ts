@@ -1,14 +1,21 @@
 import {
     RacketNumber,
     BoxedNumber,
+    isBoxedNumber,
+    InexactNumber,
+    SmallExactNumber,
+    BigExactNumber,
+    ComplexNumber,
     EXACT_HALF,
     INF,
     NAN,
     NEG_INF,
     ONE,
     I,
+    INEXACT_I,
     EXACT_ZERO,
     INEXACT_ZERO,
+    INEXACT_NEG_ZERO,
     INEXACT_ONE,
 } from '../tower';
 import {
@@ -53,28 +60,23 @@ function makeMultiArity(fnForNumbers: NumberBinop,
             throw new Error("Must be called with at least two arguments.")
         }
 
-        let x = args[0];
-        let y = args[1];
-
-        [x, y] = matchTypes(x, y);
-
-        let result;
-        if (typeof x === 'number') {
-            result = fnForNumbers(x, y as number);
-            if (!Number.isSafeInteger(result)) {
-                result = fnForBigInts(BigInt(x), BigInt(y as number));
+        let acc = args[0];
+        let x: RacketNumber, y: RacketNumber;
+        for (let i = 1; i < args.length; i++) {
+            [x, y] = matchTypes(acc, args[i]);
+            if (typeof x === 'number') {
+                acc = fnForNumbers(x, y as number);
+                if (!Number.isSafeInteger(acc)) {
+                    acc = fnForBigInts(BigInt(x), BigInt(y as number));
+                }
+            } else if (typeof x === 'bigint') {
+                acc = fnForBigInts(x, y as bigint);
+            } else {
+                acc = fnForBoxedNumbers(x, y as BoxedNumber);
             }
-        } else if (typeof x === 'bigint') {
-            result = fnForBigInts(x, y as bigint);
-        } else {
-            result = fnForBoxedNumbers(x, y as BoxedNumber);
         }
 
-        if (args.length === 2) {
-            return normalize(result);
-        } else {
-            return recur(result, ...args.slice(2));
-        }
+        return normalize(acc);
     }
 }
 
@@ -148,13 +150,13 @@ export function divide(...nums: RacketNumber[]): RacketNumber {
             if (x % y === 0) {
                 return x / y;
             }
-            return BoxedNumber.makeInstance({num: x, den: 1}).divide(BoxedNumber.makeInstance({num: y, den: 1}));
+            return (new SmallExactNumber(x)).divide(new SmallExactNumber(y));
         },
         function(x: bigint, y: bigint): bigint | BoxedNumber {
             if (x % y === 0n) {
                 return x / y;
             }
-            return BoxedNumber.makeInstance({num: x, den: 1n}).divide(BoxedNumber.makeInstance({num: y, den: 1n}));
+            return (new BigExactNumber(x)).divide(new BigExactNumber(y));
         },
         function(x: BoxedNumber, y: BoxedNumber): BoxedNumber {
             return x.divide(y);
@@ -171,8 +173,8 @@ export function divide(...nums: RacketNumber[]): RacketNumber {
 export function quotient(n: RacketNumber, k: RacketNumber): RacketNumber {
     [n, k] = matchTypes(n, k);
 
-    let result;
-    if (n instanceof BoxedNumber) {
+    let result: RacketNumber;
+    if (isBoxedNumber(n)) {
         result = n.divide(k as BoxedNumber).floor();
     } else if (typeof n === 'number') {
         result = Math.floor(n / (k as number));
@@ -186,8 +188,8 @@ export function quotient(n: RacketNumber, k: RacketNumber): RacketNumber {
 export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
     [n, k] = matchTypes(n, k);
 
-    let result;
-    if (n instanceof BoxedNumber) {
+    let result: RacketNumber;
+    if (isBoxedNumber(n)) {
         const quotient = n.divide(k as BoxedNumber).floor();
         result = n.subtract((k as BoxedNumber).multiply(quotient));
     } else if (typeof n === 'number') {
@@ -219,7 +221,7 @@ export function modulo(n: RacketNumber, k: RacketNumber): RacketNumber {
 }
 
 export function sqr(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.multiply(n));
     } else if (typeof n === 'number') {
         return normalize(n * n);
@@ -229,7 +231,7 @@ export function sqr(n: RacketNumber): RacketNumber {
 }
 
 export function sqrt(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.sqrt());
 
     } else if (typeof n === 'number') {
@@ -237,21 +239,21 @@ export function sqrt(n: RacketNumber): RacketNumber {
             n = -n;
             const result = Math.sqrt(n);
             if (Number.isInteger(result)) {
-                return BoxedNumber.makeInstance({num: 0, den: 1, imagNum: result, imagDen: 1});
+                return new ComplexNumber(EXACT_ZERO, new SmallExactNumber(result));
             } else {
-                return BoxedNumber.makeInstance({num: 0, imagNum: result});
+                return new ComplexNumber(INEXACT_ZERO, new InexactNumber(result));
             }
         } else {
             const result = Math.sqrt(n);
             if (Number.isInteger(result)) {
                 return result;
             } else {
-                return BoxedNumber.makeInstance({num: result});
+                return new InexactNumber(result);
             }
         }
 
     } else {
-        return normalize(BoxedNumber.makeInstance({num: n, den: 1n}).sqrt());
+        return normalize((new BigExactNumber(n)).sqrt());
     }
 }
 
@@ -261,11 +263,11 @@ export function integerSqrt(n: RacketNumber): RacketNumber {
         if (isExact(result)) {
             return multiply(result, I);
         } else {
-            return multiply(result, BoxedNumber.makeInstance({num: 0, imagNum: 1}));
+            return multiply(result, INEXACT_I);
         }
     }
     const result = floor(sqrt(n));
-    if (isExact(n) && result instanceof BoxedNumber) {
+    if (isExact(n) && isBoxedNumber(result)) {
         return result.toFixnum();
     } else {
         return result;
@@ -273,29 +275,34 @@ export function integerSqrt(n: RacketNumber): RacketNumber {
 }
 
 export function expt(z: RacketNumber, w: RacketNumber): RacketNumber {
-    if (isInexact(w) && equals(w, INEXACT_ZERO)) {
+    if (isExact(w) && equals(w, 0)) {
+        return 1;
+
+    } else if (isInexact(w) && equals(w, INEXACT_ZERO)) {
         return INEXACT_ONE;
 
     } else if (isExact(w) && equals(w, EXACT_HALF)) {
         return sqrt(z);
 
     } else if (isNaN(w)) {
-        return isReal(w) ? NAN : BoxedNumber.makeInstance({num: NaN, imagNum: NaN});
+        return isReal(w) ? NAN : new ComplexNumber(NAN, NAN);
 
     } else if (isNegativeZero(z) && isNegative(w)) {
         return isEven(w) ? INF : NEG_INF;
 
     } else if (!isFinite(z) && !isNaN(z) && isNegative(z) && isInteger(w) && isNegative(w)) {
-        return isEven(w) ? INEXACT_ZERO : BoxedNumber.makeInstance({num: -0});
+        return isEven(w) ? INEXACT_ZERO : INEXACT_NEG_ZERO;
 
     } else if (!isFinite(z) && !isNaN(z) && isPositive(z) && isInteger(w) && isPositive(w)) {
         return isEven(w) ? INF : NEG_INF;
 
+    } else if (isExact(z) && isZero(z) && equals(w, -1)) {
+        throw new TypeError("not defined for 0 and -1");
     }
 
     [z, w] = matchTypes(z, w);
 
-    if (z instanceof BoxedNumber) {
+    if (isBoxedNumber(z)) {
         return normalize(z.expt(w as BoxedNumber));
 
     } else if (typeof z === 'number') {
@@ -317,20 +324,20 @@ export function exp(n: RacketNumber): RacketNumber {
         return 1;
     }
 
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.exp();
 
     } else if (typeof n === 'number') {
-        return BoxedNumber.makeInstance({num: Math.exp(n)});
+        return new InexactNumber(Math.exp(n));
 
     } else {
-        return exp(BoxedNumber.makeInstance({num: n, den: 1n}));
+        return exp(new BigExactNumber(n));
     }
 }
 
 export function log(z: RacketNumber, b?: RacketNumber): RacketNumber {
-    let result;
-    if (z instanceof BoxedNumber) {
+    let result: RacketNumber;
+    if (isBoxedNumber(z)) {
         if (z.isExact() && z.equals(ONE)) {
             return 0;
         }
@@ -345,31 +352,31 @@ export function log(z: RacketNumber, b?: RacketNumber): RacketNumber {
             return 0;
         }
         if (z < 0) {
-            return log(BoxedNumber.makeInstance({num: z, den: 1}), b);
+            return log(new SmallExactNumber(z), b);
         }
         result = Math.log(z);
         if (b) {
             return divide(result, log(b));
         }
-        return BoxedNumber.makeInstance({num: result});
+        return new InexactNumber(result);
 
     } else {
         if (z === 1n) {
             return 0;
         }
-        return log(BoxedNumber.makeInstance({num: z, den: 1n}), b);
+        return log(new BigExactNumber(z), b);
     }
 }
 
 export function numerator(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.numerator());
     }
     return n;
 }
 
 export function denominator(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.denominator());
     }
     return 1;
@@ -407,19 +414,19 @@ export function gcd(...args: RacketNumber[]): RacketNumber {
 
             let an = numerator(x);
             let ad = denominator(x);
-            if (an instanceof BoxedNumber) {
+            if (isBoxedNumber(an)) {
                 an = an.toFixnum();
             }
-            if (ad instanceof BoxedNumber) {
+            if (isBoxedNumber(ad)) {
                 ad = ad.toFixnum();
             }
 
             let bn = numerator(y);
             let bd = denominator(y);
-            if (bn instanceof BoxedNumber) {
+            if (isBoxedNumber(bn)) {
                 bn = bn.toFixnum();
             }
-            if (bd instanceof BoxedNumber) {
+            if (isBoxedNumber(bd)) {
                 bd = bd.toFixnum();
             }
 
@@ -465,7 +472,7 @@ export function lcm(...args: RacketNumber[]): RacketNumber {
 }
 
 export function abs(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.abs());
     } else if (typeof n === 'number') {
         return Math.abs(n);
@@ -477,7 +484,7 @@ export function abs(n: RacketNumber): RacketNumber {
 }
 
 export function floor(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.floor());
     } else if (typeof n === 'bigint') {
         return normalize(n);
@@ -487,7 +494,7 @@ export function floor(n: RacketNumber): RacketNumber {
 }
 
 export function ceiling(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.ceiling());
     } else if (typeof n === 'bigint') {
         return normalize(n);
@@ -497,7 +504,7 @@ export function ceiling(n: RacketNumber): RacketNumber {
 }
 
 export function round(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return normalize(n.round());
     } else if (typeof n === 'bigint') {
         return normalize(n);

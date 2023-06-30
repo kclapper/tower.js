@@ -1,5 +1,7 @@
 import {
-    BoxedNumber,
+    InexactNumber,
+    SmallExactNumber,
+    makeComplexNumber,
     NEG_ONE,
     ZERO,
     ONE,
@@ -32,7 +34,7 @@ import {
     isNegativeZero
 } from '../src/tower';
 
-const makeInstance = BoxedNumber.makeInstance;
+const makeInstance = makeComplexNumber;
 
 describe('isNumber()', () => {
     test('Non-number', () => {
@@ -48,7 +50,7 @@ describe('isNumber()', () => {
         expect(isNumber(ZERO)).toBe(true);
     });
     test('Boxed number: Rational', () => {
-        expect(isNumber(makeInstance({num: 1.5}))).toBe(true);
+        expect(isNumber(new InexactNumber(1.5))).toBe(true);
     });
     test('Boxed number: Real', () => {
         expect(isNumber(INF)).toBe(true);
@@ -75,7 +77,7 @@ describe('isComplex()', () => {
         expect(isComplex(ZERO)).toBe(true);
     });
     test('Boxed number: Rational', () => {
-        expect(isComplex(makeInstance({num: 1.5}))).toBe(true);
+        expect(isComplex(new InexactNumber(1.5))).toBe(true);
     });
     test('Boxed number: Real', () => {
         expect(isComplex(INF)).toBe(true);
@@ -102,7 +104,7 @@ describe('isReal()', () => {
         expect(isReal(ZERO)).toBe(true);
     });
     test('Boxed number: Rational', () => {
-        expect(isReal(makeInstance({num: 1.5}))).toBe(true);
+        expect(isReal(new InexactNumber(1.5))).toBe(true);
     });
     test('Boxed number: Real', () => {
         expect(isReal(INF)).toBe(true);
@@ -129,7 +131,7 @@ describe('isRational()', () => {
         expect(isRational(ZERO)).toBe(true);
     });
     test('Boxed number: Rational', () => {
-        expect(isRational(makeInstance({num: 1.5}))).toBe(true);
+        expect(isRational(new InexactNumber(1.5))).toBe(true);
     });
     test('Boxed number: Real', () => {
         expect(isRational(INF)).toBe(false);
@@ -156,7 +158,7 @@ describe('isInteger()', () => {
         expect(isInteger(ZERO)).toBe(true);
     });
     test('Boxed number: Rational', () => {
-        expect(isInteger(makeInstance({num: 1.5}))).toBe(false);
+        expect(isInteger(new InexactNumber(1.5))).toBe(false);
     });
     test('Boxed number: Real', () => {
         expect(isInteger(INF)).toBe(false);
@@ -183,10 +185,10 @@ describe('isExactInteger()', () => {
         expect(isExactInteger(ZERO)).toBe(true);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isExactInteger(makeInstance({num: 0}))).toBe(false);
+        expect(isExactInteger(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Rational', () => {
-        expect(isExactInteger(makeInstance({num: 1.5}))).toBe(false);
+        expect(isExactInteger(new InexactNumber(1.5))).toBe(false);
     });
     test('Boxed number: Real', () => {
         expect(isExactInteger(INF)).toBe(false);
@@ -219,10 +221,10 @@ describe('isExactNonNegativeInteger()', () => {
         expect(isExactNonNegativeInteger(NEG_ONE)).toBe(false);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isExactNonNegativeInteger(makeInstance({num: 0}))).toBe(false);
+        expect(isExactNonNegativeInteger(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Rational', () => {
-        expect(isExactNonNegativeInteger(makeInstance({num: 1.5}))).toBe(false);
+        expect(isExactNonNegativeInteger(new InexactNumber(1.5))).toBe(false);
     });
     test('Boxed number: Real', () => {
         expect(isExactNonNegativeInteger(INF)).toBe(false);
@@ -255,10 +257,10 @@ describe('isExactPositiveInteger()', () => {
         expect(isExactPositiveInteger(NEG_ONE)).toBe(false);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isExactPositiveInteger(makeInstance({num: 0}))).toBe(false);
+        expect(isExactPositiveInteger(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Rational', () => {
-        expect(isExactPositiveInteger(makeInstance({num: 1.5}))).toBe(false);
+        expect(isExactPositiveInteger(new InexactNumber(1.5))).toBe(false);
     });
     test('Boxed number: Real', () => {
         expect(isExactPositiveInteger(INF)).toBe(false);
@@ -285,16 +287,16 @@ describe('isInexactReal()', () => {
         expect(isInexactReal(ONE)).toBe(false);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isInexactReal(makeInstance({num: 0}))).toBe(true);
+        expect(isInexactReal(new InexactNumber(0))).toBe(true);
     });
     test('Boxed number: Inexact Rational', () => {
-        expect(isInexactReal(makeInstance({num: 1.5}))).toBe(true);
+        expect(isInexactReal(new InexactNumber(1.5))).toBe(true);
     });
     test('Boxed number: Inexact Real', () => {
         expect(isInexactReal(INF)).toBe(true);
     });
     test('Boxed number: Exact Real', () => {
-        expect(isInexactReal(makeInstance({num: 3, den: 2}))).toBe(false);
+        expect(isInexactReal(new SmallExactNumber(3, 2))).toBe(false);
     });
     test('Boxed number: NAN', () => {
         expect(isInexactReal(NAN)).toBe(true);
@@ -318,16 +320,16 @@ describe('isFixnum()', () => {
         expect(isFixnum(ONE)).toBe(false);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isFixnum(makeInstance({num: 0}))).toBe(false);
+        expect(isFixnum(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Inexact Rational', () => {
-        expect(isFixnum(makeInstance({num: 1.5}))).toBe(false);
+        expect(isFixnum(new InexactNumber(1.5))).toBe(false);
     });
     test('Boxed number: Inexact Real', () => {
         expect(isFixnum(INF)).toBe(false);
     });
     test('Boxed number: Exact Real', () => {
-        expect(isFixnum(makeInstance({num: 3, den: 2}))).toBe(false);
+        expect(isFixnum(new SmallExactNumber(3, 2))).toBe(false);
     });
     test('Boxed number: NAN', () => {
         expect(isFixnum(NAN)).toBe(false);
@@ -351,16 +353,16 @@ describe('isFlonum()', () => {
         expect(isFlonum(ONE)).toBe(false);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isFlonum(makeInstance({num: 0}))).toBe(true);
+        expect(isFlonum(new InexactNumber(0))).toBe(true);
     });
     test('Boxed number: Inexact Rational', () => {
-        expect(isFlonum(makeInstance({num: 1.5}))).toBe(true);
+        expect(isFlonum(new InexactNumber(1.5))).toBe(true);
     });
     test('Boxed number: Inexact Real', () => {
         expect(isFlonum(INF)).toBe(true);
     });
     test('Boxed number: Exact Real', () => {
-        expect(isFlonum(makeInstance({num: 3, den: 2}))).toBe(false);
+        expect(isFlonum(new SmallExactNumber(3, 2))).toBe(false);
     });
     test('Boxed number: NAN', () => {
         expect(isFlonum(NAN)).toBe(true);
@@ -390,19 +392,19 @@ describe('isZero()', () => {
         expect(isZero(ZERO)).toBe(true);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isZero(makeInstance({num: 1}))).toBe(false);
+        expect(isZero(new InexactNumber(1))).toBe(false);
     });
     test('Boxed number: Inexact Zero', () => {
-        expect(isZero(makeInstance({num: 0}))).toBe(true);
+        expect(isZero(new InexactNumber(0))).toBe(true);
     });
     test('Boxed number: Inexact Rational', () => {
-        expect(isZero(makeInstance({num: 1.5}))).toBe(false);
+        expect(isZero(new InexactNumber(1.5))).toBe(false);
     });
     test('Boxed number: Inexact Real', () => {
         expect(isZero(INF)).toBe(false);
     });
     test('Boxed number: Exact Real', () => {
-        expect(isZero(makeInstance({num: 3, den: 2}))).toBe(false);
+        expect(isZero(new SmallExactNumber(3, 2))).toBe(false);
     });
     test('Boxed number: NAN', () => {
         expect(isZero(NAN)).toBe(false);
@@ -444,13 +446,13 @@ describe('isPositive()', () => {
         expect(isPositive(NEG_ONE)).toBe(false);
     });
     test('Boxed number: Inexact Positive Integer', () => {
-        expect(isPositive(makeInstance({num: 1}))).toBe(true);
+        expect(isPositive(new InexactNumber(1))).toBe(true);
     });
     test('Boxed number: Inexact Zero', () => {
-        expect(isPositive(makeInstance({num: 0}))).toBe(false);
+        expect(isPositive(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Inexact Negative Integer', () => {
-        expect(isPositive(makeInstance({num: -1}))).toBe(false);
+        expect(isPositive(new InexactNumber(-1))).toBe(false);
     });
     test('Boxed number: Positive Infinity', () => {
         expect(isPositive(INF)).toBe(true);
@@ -492,13 +494,13 @@ describe('isNegative()', () => {
         expect(isNegative(NEG_ONE)).toBe(true);
     });
     test('Boxed number: Inexact Positive Integer', () => {
-        expect(isNegative(makeInstance({num: 1}))).toBe(false);
+        expect(isNegative(new InexactNumber(1))).toBe(false);
     });
     test('Boxed number: Inexact Zero', () => {
-        expect(isNegative(makeInstance({num: 0}))).toBe(false);
+        expect(isNegative(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Inexact Negative Integer', () => {
-        expect(isNegative(makeInstance({num: -1}))).toBe(true);
+        expect(isNegative(new InexactNumber(-1))).toBe(true);
     });
     test('Boxed number: Positive Infinity', () => {
         expect(isNegative(INF)).toBe(false);
@@ -540,13 +542,13 @@ describe('isEven()', () => {
         expect(isEven(ONE)).toBe(false);
     });
     test('Boxed number: Inexact Even Integer', () => {
-        expect(isEven(makeInstance({num: 2}))).toBe(true);
+        expect(isEven(new InexactNumber(2))).toBe(true);
     });
     test('Boxed number: Inexact Zero', () => {
-        expect(isEven(makeInstance({num: 0}))).toBe(true);
+        expect(isEven(new InexactNumber(0))).toBe(true);
     });
     test('Boxed number: Inexact Odd Integer', () => {
-        expect(isEven(makeInstance({num: 3}))).toBe(false);
+        expect(isEven(new InexactNumber(3))).toBe(false);
     });
 });
 
@@ -579,13 +581,13 @@ describe('isOdd()', () => {
         expect(isOdd(ONE)).toBe(true);
     });
     test('Boxed number: Inexact Even Integer', () => {
-        expect(isOdd(makeInstance({num: 2}))).toBe(false);
+        expect(isOdd(new InexactNumber(2))).toBe(false);
     });
     test('Boxed number: Inexact Zero', () => {
-        expect(isOdd(makeInstance({num: 0}))).toBe(false);
+        expect(isOdd(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Inexact Odd Integer', () => {
-        expect(isOdd(makeInstance({num: 3}))).toBe(true);
+        expect(isOdd(new InexactNumber(3))).toBe(true);
     });
 });
 
@@ -600,13 +602,13 @@ describe('isExact()', () => {
         expect(isExact(ZERO)).toBe(true);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isExact(makeInstance({num: 0}))).toBe(false);
+        expect(isExact(new InexactNumber(0))).toBe(false);
     });
     test('Boxed number: Exact Rational', () => {
-        expect(isExact(makeInstance({num: 3, den: 2}))).toBe(true);
+        expect(isExact(new SmallExactNumber(3, 2))).toBe(true);
     });
     test('Boxed number: Inexact Rational', () => {
-        expect(isExact(makeInstance({num: 1.5}))).toBe(false);
+        expect(isExact(new InexactNumber(1.5))).toBe(false);
     });
     test('Boxed number: Infinity', () => {
         expect(isExact(INF)).toBe(false);
@@ -633,13 +635,13 @@ describe('isInexact()', () => {
         expect(isInexact(ZERO)).toBe(false);
     });
     test('Boxed number: Inexact Integer', () => {
-        expect(isInexact(makeInstance({num: 0}))).toBe(true);
+        expect(isInexact(new InexactNumber(0))).toBe(true);
     });
     test('Boxed number: Exact Rational', () => {
-        expect(isInexact(makeInstance({num: 3, den: 2}))).toBe(false);
+        expect(isInexact(new SmallExactNumber(3, 2))).toBe(false);
     });
     test('Boxed number: Inexact Rational', () => {
-        expect(isInexact(makeInstance({num: 1.5}))).toBe(true);
+        expect(isInexact(new InexactNumber(1.5))).toBe(true);
     });
     test('Boxed number: Infinity', () => {
         expect(isInexact(INF)).toBe(true);

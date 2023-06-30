@@ -1,13 +1,14 @@
 import {
     JSInteger,
-    JSNumber
-} from './types';
-import {
-    Value
-} from './Value';
-import {
-    isJSInteger
-} from '../util';
+    JSNumber,
+    BoxedNumber,
+    RealNumber,
+    ExactNumber,
+    isJSInteger,
+
+    SmallExactNumber,
+    BigExactNumber
+} from './index';
 
 export function integerIsOne(n: JSInteger): boolean {
     const isInteger = isJSInteger(n);
@@ -21,11 +22,14 @@ export function numberIsRational(n: JSNumber): boolean {
     return isBigInt || isRationalFloat;
 }
 
-export function matchExactness(x: Value, y: Value): Value[] {
+export function matchExactness(x: RealNumber, y: RealNumber): RealNumber[] {
     x = !y.isExact() ? x.toInexact() : x;
     y = !x.isExact() ? y.toInexact() : y;
     return [x, y];
 }
 
+export function isExactReal(n: BoxedNumber): n is ExactNumber {
+    return n instanceof SmallExactNumber || n instanceof BigExactNumber;
+}
 
 export * from '../util';

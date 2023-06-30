@@ -1,19 +1,25 @@
 import {
     RacketNumber,
     BoxedNumber,
+    RealNumber,
+    isBoxedNumber,
+    SmallExactNumber,
+    BigExactNumber,
+    ComplexNumber,
     JSInteger,
     JSNumber,
+    InexactNumber,
     makeRectangular,
+    EXACT_ZERO,
+    INEXACT_NEG_ZERO,
     NAN,
     INF,
-    NEG_INF
+    NEG_INF,
 } from '../tower';
-import {
-    normalize,
-} from './util';
+import { isJSInteger, isSafeInteger } from '../util';
 
 export function toFixnum(n: RacketNumber): JSInteger {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         return n.toFixnum();
     }
     return n;
@@ -23,12 +29,12 @@ export function fromJSNumber(n: JSNumber): RacketNumber {
     if (typeof n === 'bigint') {
         return n;
     } else {
-        return Number.isInteger(n) ? n : BoxedNumber.makeInstance({num: n});
+        return Number.isInteger(n) ? n : new InexactNumber(n);
     }
 }
 
 export function boxFixnum(n: JSInteger): BoxedNumber {
-    return typeof n === 'number' ? BoxedNumber.makeInstance({num: n, den: 1}) : BoxedNumber.makeInstance({num: n, den: 1n});
+    return typeof n === 'number' ? new SmallExactNumber(n) : new BigExactNumber(n);
 }
 
 const fractionRegexp = new RegExp("^([+-]?\\d+)/(\\d+)$");
@@ -56,7 +62,10 @@ export function fromString(str: string): RacketNumber | false {
             return makeRectangular(real, imag);
         }
 
-        return BoxedNumber.makeInstance({num: Number(realStr), imagNum: Number(imagStr)});
+        const real = new InexactNumber(Number(realStr));
+        const imag = new InexactNumber(Number(imagStr));
+
+        return new ComplexNumber(real, imag);
     }
 
     if (str === '+nan.0' || str === '-nan.0' || str === '+nan.f' || str === '-nan.f' ) {
@@ -66,11 +75,11 @@ export function fromString(str: string): RacketNumber | false {
     } else if (str === '-inf.0' || str === '-inf.f') {
         return NEG_INF;
     } else if (str === '-0.0') {
-        return BoxedNumber.makeInstance({num: -0.0});
+        return INEXACT_NEG_ZERO;
     }
 
     if (str.match(decimalRegexp) || str.match(scientificRegexp)) {
-        return BoxedNumber.makeInstance({num: Number(str)});
+        return new InexactNumber(Number(str));
     }
 
     if (str.match(integerRegexp)) {
@@ -91,8 +100,13 @@ function parseExact(str: string): RacketNumber {
     if (matchInteger) {
         return parseInteger(str);
     }
-    const [num, den] = parseFraction(str) as [number, number];
-    return BoxedNumber.makeInstance({num: num, den: den});
+    const [num, den] = parseFraction(str);
+
+    if (typeof num === 'number') {
+        return new SmallExactNumber(num, den as number);
+    } else {
+        return new BigExactNumber(num, den as bigint);
+    }
 }
 
 function parseInteger(str: string): JSInteger {
@@ -123,19 +137,132 @@ function parseFraction(str: string): JSInteger[] {
 }
 
 export function makeNumber(num: JSNumber, den?: JSInteger): RacketNumber {
-    return normalize(BoxedNumber.makeInstance({num: num as number, den: den as number}));
+    if (den === undefined || den === 1 || den === 1n) {
+        if (isSafeInteger(num)) {
+            return Number(num);
+        } else if (typeof num === 'bigint') {
+            return num;
+        } else if (typeof num === 'number' && Number.isInteger(num)) {
+            return BigInt(num);
+        } else {
+            return new InexactNumber(num);
+        }
+    }
+
+    if (!isJSInteger(num) || !isJSInteger(den)) {
+        throw new TypeError("Numerator and denominator must be integers");
+    }
+
+    if (den === 1 || den === 1n) {
+        return num;
+    }
+
+    if (typeof num !== typeof den) {
+        num = BigInt(num);
+        den = BigInt(den);
+        return new BigExactNumber(num, den);
+    }
+
+    if (typeof num === 'bigint') {
+        return new BigExactNumber(num, den as bigint);
+    }
+
+    return new SmallExactNumber(num, den as number);
 }
 
-export function makeComplexNumber(num: JSNumber, imagNum: JSNumber, den?: JSInteger, imagDen?: JSInteger): RacketNumber {
-    return normalize(BoxedNumber.makeInstance({num: num as number, den: den as number, imagNum: imagNum as number, imagDen: imagDen as number}));
-}
+export function makeComplexNumber({num}: {num: number}): BoxedNumber;
+
+export function makeComplexNumber({num, imagNum}: {num: bigint, imagNum: bigint}): BoxedNumber;
+export function makeComplexNumber({num, den}: {num: bigint, den: bigint}): BoxedNumber;
+export function makeComplexNumber({num, den, imagNum, imagDen}:
+                                  {num: bigint, den: bigint, imagNum: bigint, imagDen: bigint}): BoxedNumber;
+
+export function makeComplexNumber({num, imagNum}: {num: number, imagNum: number}): BoxedNumber;
+export function makeComplexNumber({num, den}: {num: number, den: number}): BoxedNumber;
+export function makeComplexNumber({num, den, imagNum,  imagDen}:
+                                  {num: number, den: number, imagNum: number, imagDen: number}): BoxedNumber;
+
+export function makeComplexNumber({num, den, imagNum, imagDen}:
+                                  {num: JSNumber, den?: JSInteger, imagNum?: JSNumber, imagDen?: JSInteger}): BoxedNumber {
+        const isReal = imagNum === undefined;
+        if (isReal && imagDen !== undefined) {
+           throw new Error("Must specify both a numerator and denominator.");
+        }
+
+        const denominatorsExist = den !== undefined && imagDen !== undefined;
+        if (!isReal && !denominatorsExist && (den !== undefined || imagDen !== undefined)) {
+            throw new Error("Real and imaginary part must be the same exactness.")
+        }
+
+        let isExact;
+        if (isReal) {
+            isExact = den !== undefined
+                && isJSInteger(num)
+                && isJSInteger(den);
+        } else {
+            isExact = den !== undefined
+                && isJSInteger(num)
+                && isJSInteger(den)
+                && imagDen != undefined
+                && isJSInteger(imagNum)
+                && isJSInteger(imagDen);
+        }
+
+        if (!isExact && typeof num === 'bigint') {
+            throw new TypeError("bigints can only be used with exact numbers");
+        }
+
+        let typesAreSame: boolean;
+        if (isReal && isExact) {
+            typesAreSame = typeof num === typeof den;
+        } else if (isReal && !isExact) {
+            typesAreSame = true;
+        } else if (!isReal && isExact) {
+            typesAreSame = typeof num === typeof imagNum
+                && typeof den === typeof imagDen
+                && typeof num === typeof den;
+        } else {
+            typesAreSame = typeof num === typeof imagNum;
+        }
+        if (!typesAreSame) {
+            throw new TypeError("All makeInstance arguments must be the same type.")
+        }
+
+        const isBig = typeof num === 'bigint';
+
+        let realVal: RealNumber, imagVal: RealNumber;
+        if (isReal && isExact && isBig) {
+            realVal = new BigExactNumber(num as bigint, den as bigint);
+            imagVal = EXACT_ZERO;
+        } else if (isReal && isExact && !isBig) {
+            realVal = new SmallExactNumber(num as number, den as number);
+            imagVal = EXACT_ZERO;
+        } else if (isReal && !isExact) {
+            realVal = new InexactNumber(num as number);
+            imagVal = EXACT_ZERO;
+        } else if (!isReal && isExact && isBig) {
+            realVal = new BigExactNumber(num as bigint, den as bigint);
+            imagVal = new BigExactNumber(imagNum as bigint, imagDen as bigint);
+        } else if (!isReal && isExact && !isBig) {
+            realVal = new SmallExactNumber(num as number, den as number);
+            imagVal = new SmallExactNumber(imagNum as number, imagDen as number);
+        } else if (!isReal && !isExact && !isBig) {
+            realVal = new InexactNumber(num as number);
+            imagVal = new InexactNumber(imagNum as number);
+        } else {
+            // Should never get here
+            throw new Error(`Error creating Number`);
+        }
+
+        return new ComplexNumber(realVal, imagVal);
+    }
 
 // For backwards compatibility with js-numbers.
 export function makeFloat(n: number): RacketNumber {
-    return normalize(BoxedNumber.makeInstance({num: n}));
+    return new InexactNumber(n);
 }
-export function makeRational(n: number, d: number): RacketNumber {
-    return normalize(BoxedNumber.makeInstance({num: n, den: d}));
+export function makeRational(n: JSInteger, d: JSInteger): RacketNumber {
+    return makeNumber(n, d);
 }
 export function makeComplex(real: RacketNumber, imag: RacketNumber): RacketNumber {
     return  makeRectangular(real, imag);

@@ -1,5 +1,6 @@
 import {
     RacketNumber,
+    isBoxedNumber,
     BoxedNumber,
     subtract,
     abs
@@ -30,7 +31,7 @@ const makeMultiArity = function (fnForNumbers: NumberCompare,
                 return false;
             } else if (typeof x === 'bigint' && !fnForBigInt(x, y as bigint)) {
                 return false;
-            } else if (x instanceof BoxedNumber && !fnForBoxedNumbers(x as BoxedNumber, y as BoxedNumber)) {
+            } else if (isBoxedNumber(x) && !fnForBoxedNumbers(x as BoxedNumber, y as BoxedNumber)) {
                 return false;
             }
         }

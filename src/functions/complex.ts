@@ -1,6 +1,7 @@
 import {
     RacketNumber,
     BoxedNumber,
+    isBoxedNumber,
     INEXACT_ZERO,
     EXACT_NEG_ONE,
     EXACT_TWO,
@@ -31,7 +32,7 @@ export function makePolar(r: RacketNumber, theta: RacketNumber): RacketNumber {
 }
 
 export function magnitude(n: RacketNumber): RacketNumber {
-    if (n instanceof BoxedNumber) {
+    if (isBoxedNumber(n)) {
         if (containsInfinity(n)) {
             return INF;
         }

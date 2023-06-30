@@ -1,6 +1,8 @@
 import {
     RacketNumber,
-    BoxedNumber
+    isBoxedNumber,
+    SmallExactNumber,
+    BigExactNumber,
 } from '../tower';
 import {
     isSafeInteger
@@ -8,7 +10,7 @@ import {
 
 export function normalize(x: RacketNumber): RacketNumber {
     // Don't keep BoxedNumbers if unnecessary
-    if (x instanceof BoxedNumber
+    if (isBoxedNumber(x)
         && x.isReal()
         && x.isInteger()
         && x.isExact()) {
@@ -31,23 +33,23 @@ export function matchTypes(x: RacketNumber, y: RacketNumber): RacketNumber[] {
     }
 
     // Make types match
-    if (x instanceof BoxedNumber) {
+    if (isBoxedNumber(x)) {
         if (typeof y === 'bigint') {
-            return [x, BoxedNumber.makeInstance({num: y, den: 1n})]
+            return [x, new BigExactNumber(y)]
         } else {
-            return [x, BoxedNumber.makeInstance({num: y as number, den: 1})];
+            return [x, new SmallExactNumber(y as number)];
         }
 
     } else if (typeof x === 'bigint') {
-        if (y instanceof BoxedNumber) {
-           return [BoxedNumber.makeInstance({num: x, den: 1n}), y];
+        if (isBoxedNumber(y)) {
+           return [new BigExactNumber(x), y];
         } else {
             return [x, BigInt(y)];
         }
 
     } else if (typeof x === 'number') {
-        if (y instanceof BoxedNumber) {
-            return [BoxedNumber.makeInstance({num: x, den: 1}), y];
+        if (isBoxedNumber(y)) {
+            return [new SmallExactNumber(x), y];
         } else {
             return [BigInt(x), y];
         }

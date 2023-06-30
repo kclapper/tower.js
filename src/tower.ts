@@ -1,5 +1,5 @@
-export * from './numbers/types';
-export * from './numbers/BoxedNumber';
+export * from './numbers/index';
+
 export * from './functions/arithmetic';
 export * from './functions/comparison';
 export * from './functions/predicates';
