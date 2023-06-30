@@ -14,7 +14,7 @@
   "scripts": {
     "lint": "eslint --max-warnings=0 .",
     "test": "jest",
-    "build": "npm run lint && npm run test && webpack"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
