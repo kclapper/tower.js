@@ -52,6 +52,12 @@ describe('exactToInexact', () => {
 });
 
 describe('numberToString', () => {
+    test('fixnum', () => {
+        expect(numberToString(5)).toBe("5");
+        expect(numberToString(-5)).toBe("-5");
+        expect(numberToString(BigInt(5))).toBe("5");
+        expect(numberToString(BigInt(-5))).toBe("-5");
+    });
     test('integer: exact', () => {
         expect(numberToString(new SmallExactNumber(5, 1)))
             .toBe("5");

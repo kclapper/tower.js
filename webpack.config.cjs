@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = {
   entry: './src/tower.ts',
   mode: 'production',
+  target: 'es2020',
   devtool: 'inline-source-map',
   module: {
     rules: [
@@ -16,11 +17,14 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
+  experiments: {
+    outputModule: true,
+  },
   output: {
     library: {
-      type: 'commonjs-static',
+      type: 'module',
     },
-    filename: 'tower.cjs',
+    filename: 'tower.mjs',
     path: path.resolve(__dirname, 'dist'),
     chunkFormat: 'module',
     clean: true,

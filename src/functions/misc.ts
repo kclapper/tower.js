@@ -24,9 +24,5 @@ export function exactToInexact(n: RacketNumber): RacketNumber {
 export const toInexact = exactToInexact; // For backwards compatibility
 
 export function numberToString(n: RacketNumber): string {
-    if (isBoxedNumber(n)) {
-        return n.toString();
-    }
-
-    return n.toString().slice(0, -1);
+    return n.toString();
 }
