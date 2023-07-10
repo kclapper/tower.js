@@ -13,8 +13,14 @@ export class Benchmark {
       throw new Error("Must run at least 1 trial");
     }
 
+    if (global.gc === undefined) {
+      throw new Error("Must run benchmarks with: node --expose-gc");
+    }
+
     // Collect benchmark data
     for (const current of this.cases) {
+      global.gc(); // Start with a fresh bowl.
+
       let result = {};
 
       result['value'] = current.thunk();

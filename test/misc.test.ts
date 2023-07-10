@@ -2,7 +2,6 @@ import {
     RacketNumber,
     InexactNumber,
     SmallExactNumber,
-    makeComplexNumber,
     inexactToExact,
     exactToInexact,
     NAN,
@@ -11,10 +10,10 @@ import {
     divide,
     fromString,
     numberToString,
+    ComplexNumber,
 } from '../src/tower';
 
-const makeInstance = makeComplexNumber;
-
+// TODO:
 describe('inexactToExact', () => {
     test('fixnums', () => {
         expect(inexactToExact(5)).toBe(5);
@@ -32,6 +31,7 @@ describe('inexactToExact', () => {
     });
 });
 
+// TODO:
 describe('exactToInexact', () => {
     test('fixnums', () => {
         expect(exactToInexact(5))
@@ -52,11 +52,11 @@ describe('exactToInexact', () => {
 });
 
 describe('numberToString', () => {
-    test('fixnum', () => {
-        expect(numberToString(5)).toBe("5");
-        expect(numberToString(-5)).toBe("-5");
-        expect(numberToString(BigInt(5))).toBe("5");
-        expect(numberToString(BigInt(-5))).toBe("-5");
+    test('unboxed', () => {
+        expect(numberToString(5n)).toBe("5");
+        expect(numberToString(-5n)).toBe("-5");
+        expect(numberToString(5)).toBe("5.0");
+        expect(numberToString(-5)).toBe("-5.0");
     });
     test('integer: exact', () => {
         expect(numberToString(new SmallExactNumber(5, 1)))
@@ -78,34 +78,46 @@ describe('numberToString', () => {
         expect(numberToString(NAN)).toBe("+nan.0");
         expect(numberToString(INF)).toBe("+inf.0");
         expect(numberToString(NEG_INF)).toBe("-inf.0");
+        expect(numberToString(NaN)).toBe("+nan.0");
+        expect(numberToString(Infinity)).toBe("+inf.0");
+        expect(numberToString(-Infinity)).toBe("-inf.0");
     });
     test('complex: exact', () => {
-        expect(numberToString(makeInstance({num: 5, den: 1, imagNum: 3, imagDen: 7})))
+        expect(numberToString(new ComplexNumber(new SmallExactNumber(5),
+                                                new SmallExactNumber(3, 7))))
             .toBe("5+3/7i");
-        expect(numberToString(makeInstance({num: 5, den: -1, imagNum: 3, imagDen: -7})))
+        expect(numberToString(new ComplexNumber(new SmallExactNumber(5, -1),
+                                                new SmallExactNumber(3, -7))))
             .toBe("-5-3/7i");
-        expect(numberToString(makeInstance({num: 5, den: 1, imagNum: 3, imagDen: -7})))
+        expect(numberToString(new ComplexNumber(new SmallExactNumber(5),
+                                                new SmallExactNumber(3, -7))))
             .toBe("5-3/7i");
-        expect(numberToString(makeInstance({num: -5, den: 1, imagNum: -3, imagDen: 7})))
+        expect(numberToString(new ComplexNumber(new SmallExactNumber(-5),
+                                                new SmallExactNumber(-3, 7))))
             .toBe("-5-3/7i");
-        expect(numberToString(makeInstance({num: -5, den: -1, imagNum: -3, imagDen: -7})))
+        expect(numberToString(new ComplexNumber(new SmallExactNumber(-5, -1),
+                                                new SmallExactNumber(-3, -7))))
             .toBe("5+3/7i");
         expect(numberToString(divide(fromString("1-3i") as RacketNumber,
                                      fromString("1+3i") as RacketNumber,
-                                     2,
-                                     5)))
+                                     2n,
+                                     5n)))
             .toBe("-2/25-3/50i");
     });
     test('complex: inexact', () => {
-        expect(numberToString(makeInstance({num: 5, imagNum: 3})))
+        expect(numberToString(new ComplexNumber(new InexactNumber(5),
+                                                new InexactNumber(3))))
             .toBe("5.0+3.0i");
-        expect(numberToString(makeInstance({num: 5, imagNum: -3})))
+        expect(numberToString(new ComplexNumber(new InexactNumber(5),
+                                                new InexactNumber(-3))))
             .toBe("5.0-3.0i");
-        expect(numberToString(makeInstance({num: -5, imagNum: 3})))
+        expect(numberToString(new ComplexNumber(new InexactNumber(-5),
+                                                new InexactNumber(3))))
             .toBe("-5.0+3.0i");
-        expect(numberToString(makeInstance({num: -5, imagNum: -3,})))
+        expect(numberToString(new ComplexNumber(new InexactNumber(-5),
+                                                new InexactNumber(-3))))
             .toBe("-5.0-3.0i");
-        expect(numberToString(makeInstance({num: NaN, imagNum: NaN})))
+        expect(numberToString(new ComplexNumber(NAN, NAN)))
             .toBe("+nan.0+nan.0i");
     });
 });

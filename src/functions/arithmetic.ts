@@ -7,39 +7,26 @@ import {
     BigExactNumber,
     ComplexNumber,
     EXACT_HALF,
-    INF,
     NAN,
-    NEG_INF,
     ONE,
     I,
     INEXACT_I,
     EXACT_ZERO,
     INEXACT_ZERO,
-    INEXACT_NEG_ZERO,
-    INEXACT_ONE,
+    EXACT_NEG_ONE,
 } from '../tower';
 import {
     normalize,
-    matchTypes,
+    boxIfNecessary,
     bigExpt,
-    shouldBeBigInt,
+    isSafeInteger,
 } from './util';
 import {
     isNegative,
     isPositive,
     isExact,
-    isInexact,
     isZero,
-    isEven,
-    isInteger,
-    isReal,
-    isFinite,
-    isNaN,
-    isNegativeZero
 } from './predicates';
-import {
-    equals
-} from './comparison';
 import {
     exactToInexact
 } from './misc';
@@ -63,7 +50,7 @@ function makeMultiArity(fnForNumbers: NumberBinop,
         let acc = args[0];
         let x: RacketNumber, y: RacketNumber;
         for (let i = 1; i < args.length; i++) {
-            [x, y] = matchTypes(acc, args[i]);
+            [x, y] = boxIfNecessary(acc, args[i]);
             if (typeof x === 'number') {
                 acc = fnForNumbers(x, y as number);
                 if (!Number.isSafeInteger(acc)) {
@@ -171,7 +158,7 @@ export function divide(...nums: RacketNumber[]): RacketNumber {
 }
 
 export function quotient(n: RacketNumber, k: RacketNumber): RacketNumber {
-    [n, k] = matchTypes(n, k);
+    [n, k] = boxIfNecessary(n, k);
 
     let result: RacketNumber;
     if (isBoxedNumber(n)) {
@@ -186,7 +173,7 @@ export function quotient(n: RacketNumber, k: RacketNumber): RacketNumber {
 }
 
 export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
-    [n, k] = matchTypes(n, k);
+    [n, k] = boxIfNecessary(n, k);
 
     let result: RacketNumber;
     if (isBoxedNumber(n)) {
@@ -202,7 +189,7 @@ export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
 }
 
 export function modulo(n: RacketNumber, k: RacketNumber): RacketNumber {
-    [n, k] = matchTypes(n, k);
+    [n, k] = boxIfNecessary(n, k);
 
     let result = remainder(n, k);
     const negk = isNegative(k);
@@ -275,46 +262,91 @@ export function integerSqrt(n: RacketNumber): RacketNumber {
 }
 
 export function expt(z: RacketNumber, w: RacketNumber): RacketNumber {
-    if (isExact(w) && equals(w, 0)) {
-        return 1;
+    [z, w] = boxIfNecessary(z, w);
 
-    } else if (isInexact(w) && equals(w, INEXACT_ZERO)) {
-        return INEXACT_ONE;
+    // Examine special cases for boxed numbers
+    if (isBoxedNumber(z)) {
+        w = w as BoxedNumber;
 
-    } else if (isExact(w) && equals(w, EXACT_HALF)) {
-        return sqrt(z);
-
-    } else if (isNaN(w)) {
-        return isReal(w) ? NAN : new ComplexNumber(NAN, NAN);
-
-    } else if (isNegativeZero(z) && isNegative(w)) {
-        return isEven(w) ? INF : NEG_INF;
-
-    } else if (!isFinite(z) && !isNaN(z) && isNegative(z) && isInteger(w) && isNegative(w)) {
-        return isEven(w) ? INEXACT_ZERO : INEXACT_NEG_ZERO;
-
-    } else if (!isFinite(z) && !isNaN(z) && isPositive(z) && isInteger(w) && isPositive(w)) {
-        return isEven(w) ? INF : NEG_INF;
-
-    } else if (isExact(z) && isZero(z) && equals(w, -1)) {
-        throw new TypeError("not defined for 0 and -1");
+        if (w.isExact() && w.isZero()) {
+            return 1n;
+        }
+        if (w.isInexact() && w.isZero()) {
+            return 1;
+        }
+        if (w.isExact() && w.equals(EXACT_HALF)) {
+            return sqrt(z);
+        }
+        if (w.isNaN()) {
+            return w.isReal() ? NaN : new ComplexNumber(NAN, NAN);
+        }
+        if (z.isNegativeZero() && w.isNegative()) {
+            return w.isEven() ? Infinity : -Infinity;
+        }
+        if (!z.isFinite() && !z.isNaN() && z.isNegative() && w.isInteger() && w.isNegative()) {
+            return w.isEven() ? 0 : -0;
+        }
+        if (!z.isFinite() && !z.isNaN() && z.isPositive() && w.isInteger() && w.isPositive()) {
+            return w.isEven() ? Infinity : -Infinity;
+        }
+        if (z.isExact() && z.isZero() && w.equals(EXACT_NEG_ONE)) {
+            throw new TypeError("expt not defined for 0 and -1");
+        }
+    } else {
+        // Examine special cases for unboxed numbers.
+        if (w === 0n) {
+            return 1n;
+        }
+        if (w === 0) {
+            return 1;
+        }
+        if (Number.isNaN(w)) {
+            return NaN;
+        }
+        if (Object.is(z, -0)) {
+            if (typeof w === 'number' && w < 0) {
+                return w % 2 === 0 ? Infinity : -Infinity;
+            }
+            if (typeof w === 'bigint' && w < 0n) {
+                return w % 2n === 0n ? Infinity : -Infinity;
+            }
+        }
+        if (typeof z === 'number' && !Number.isFinite(z) && !Number.isNaN(z)) {
+            if (typeof w === 'number' && Number.isInteger(w)) {
+                if (z < 0 && w < 0) {
+                    return w % 2 === 0 ? 0 : -0;
+                }
+                if (z > 0 && w > 0) {
+                    return w % 2 === 0 ? Infinity : -Infinity;
+                }
+            }
+            if (typeof w === 'bigint') {
+                if (z < 0 && w < 0n) {
+                    return w % 2n === 0n ? 0 : -0;
+                }
+                if (z > 0 && w > 0n) {
+                    return w % 2n === 0n ? Infinity : -Infinity;
+                }
+            }
+        }
+        if (z === 0n && (w === -1 || w === -1n)) {
+            throw new TypeError('expt not defined for 0 and -1');
+        }
     }
-
-    [z, w] = matchTypes(z, w);
 
     if (isBoxedNumber(z)) {
         return normalize(z.expt(w as BoxedNumber));
 
-    } else if (typeof z === 'number') {
-        const result = Math.pow(z, w as number);
-
-        if (shouldBeBigInt(result) || !Number.isFinite(result)) {
-            return bigExpt(BigInt(z), BigInt(w as number));
-        }
-
-        return result;
+    } else if (typeof z === 'number' || typeof w === 'number') {
+        return Math.pow(Number(z), Number(w));
 
     } else {
+        if (isSafeInteger(z) && isSafeInteger(w as bigint)) {
+            const result = Math.pow(Number(z), Number(w));
+            if (isSafeInteger(result)) {
+                return BigInt(result);
+            }
+        }
         return bigExpt(z, w as bigint);
     }
 }

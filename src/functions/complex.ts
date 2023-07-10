@@ -17,14 +17,24 @@ import {
     divide,
     abs,
     sin,
-    cos
+    cos,
+    ComplexNumber,
+    boxNumber,
+    isRealNumber,
 } from '../tower'
 import {
     normalize
 } from './util';
 
 export function makeRectangular(real: RacketNumber, imag: RacketNumber): RacketNumber {
-    return add(real, multiply(imag, EXACT_I));
+    real = boxNumber(real);
+    imag = boxNumber(imag);
+
+    if (!isRealNumber(real) || !isRealNumber(imag)) {
+        throw new TypeError("makeRectangular arguments must be real numbers");
+    }
+
+    return new ComplexNumber(real, imag);
 }
 
 export function makePolar(r: RacketNumber, theta: RacketNumber): RacketNumber {

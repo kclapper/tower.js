@@ -12,7 +12,8 @@ import {
     bigExpt,
     isSafeInteger,
 
-    EXACT_ZERO
+    EXACT_ZERO,
+    Fixnum
 } from './index';
 
 export class BigExactNumber implements Number {
@@ -74,7 +75,7 @@ export class BigExactNumber implements Number {
     public toComplex(): ComplexNumber {
         return new ComplexNumber(this, EXACT_ZERO);
     }
-    public toFixnum(): JSInteger {
+    public toFixnum(): Fixnum {
         return this.num / this.den;
     }
 
@@ -114,8 +115,8 @@ export class BigExactNumber implements Number {
     }
 
     public toString(): string {
-        const numStr = this.num.toString().slice(0, -1);
-        const denStr = this.den.toString().slice(0, -1);
+        const numStr = this.num.toString();
+        const denStr = this.den.toString();
 
         if (this.den === 1n) {
             return numStr;
@@ -134,8 +135,12 @@ export class BigExactNumber implements Number {
             return this.toString();
         }
 
-        if (this.den === 1n) {
+        if (hint === 'bigint' && this.den === 1n) {
             return this.num;
+        }
+
+        if (this.den === 1n) {
+            return Number(this.num);
         }
 
         return Number(this.num) / Number(this.den);

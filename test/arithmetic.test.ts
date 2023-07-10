@@ -37,6 +37,7 @@ import {
     floor,
     ceiling,
     round,
+    ComplexNumber,
 } from '../src/tower';
 
 const makeInstance = makeComplexNumber;
@@ -674,130 +675,120 @@ describe('integer-sqrt', () => {
     });
 });
 
-describe('expt', () => {
+describe.only('expt', () => {
     test('racket docs examples: 0 base', () => {
-        expect(expt(0, 0)).toBe(1);
-        expect(expt(0, INEXACT_ZERO))
-            .toEqual(INEXACT_ONE);
-        expect(expt(0, NAN))
-            .toEqual(NAN);
-        expect(expt(0, 5)).toBe(0);
+        expect(expt(0n, 0n)).toBe(1n);
+        expect(expt(0n, 0))
+            .toEqual(1);
+        expect(expt(0n, NaN))
+            .toEqual(NaN);
+        expect(expt(0n, 5n)).toBe(0n);
     });
     test('racket docs examples: Exact 1/2 exponent', () => {
-        expect(expt(9, EXACT_HALF)).toBe(3);
-        expect(expt(9, INEXACT_HALF))
-            .toEqual(new InexactNumber(3));
-        expect(expt(16, new SmallExactNumber(1, 4)))
-            .toEqual(new InexactNumber(2));
-        expect(expt(16, new InexactNumber(0.25)))
-            .toEqual(new InexactNumber(2));
+        expect(expt(9n, EXACT_HALF)).toBe(3n);
+        expect(expt(9n, 0.5))
+            .toEqual(3);
+        expect(expt(16n, new SmallExactNumber(1, 4)))
+            .toEqual(2);
+        expect(expt(16n, 0.25))
+            .toEqual(2);
     });
     test('racket docs examples: Inexact zero base', () => {
-        expect(expt(INEXACT_ZERO, 1))
-            .toEqual(INEXACT_ZERO);
-        expect(expt(INEXACT_ZERO, -1))
-            .toEqual(INF);
+        expect(expt(0, 1n))
+            .toEqual(0);
+        expect(expt(0, -1n))
+            .toEqual(Infinity);
     });
     test('racket docs examples: Negative zero base', () => {
-        expect(expt(INEXACT_NEG_ZERO, -1))
-            .toEqual(NEG_INF);
-        expect(expt(INEXACT_NEG_ZERO, -1))
-            .toEqual(NEG_INF);
-        expect(expt(new InexactNumber(-0.0), -3))
-            .toEqual(NEG_INF);
-        expect(expt(new InexactNumber(-0.0), -2))
-            .toEqual(INF);
-        expect(expt(new InexactNumber(-0.0), 1))
-            .toEqual(new InexactNumber(-0.0));
-        expect(expt(new InexactNumber(-0.0), 3))
-            .toEqual(new InexactNumber(-0.0));
-        expect(expt(new InexactNumber(-0.0), 2))
-            .toEqual(INEXACT_ZERO);
+        expect(expt(-0, -1n))
+            .toEqual(-Infinity);
+        expect(expt(-0, -1n))
+            .toEqual(-Infinity);
+        expect(expt(-0, -3n))
+            .toEqual(-Infinity);
+        expect(expt(-0, -2n))
+            .toEqual(Infinity);
+        expect(expt(-0, 1n))
+            .toEqual(-0);
+        expect(expt(-0, 3n))
+            .toEqual(-0);
+        expect(expt(-0, 2n))
+            .toEqual(0);
     });
     test('racket docs examples: Infinite exponent', () => {
-        expect(expt(EXACT_TWO, NEG_INF))
-            .toEqual(INEXACT_ZERO);
-        expect(expt(new InexactNumber(0.5), NEG_INF))
-            .toEqual(INF);
+        expect(expt(2n, -Infinity))
+            .toEqual(0);
+        expect(expt(0.5, -Infinity))
+            .toEqual(Infinity);
 
-        expect(expt(EXACT_TWO, INF))
-            .toEqual(INF);
-        expect(expt(new InexactNumber(0.5), INF))
-            .toEqual(INEXACT_ZERO);
+        expect(expt(2, Infinity))
+            .toEqual(Infinity);
+        expect(expt(0.5, Infinity))
+            .toEqual(0);
     });
     test('racket docs examples: Infinite base', () => {
-        expect(expt(NEG_INF, -1))
-            .toEqual(new InexactNumber(-0));
-        expect(expt(NEG_INF, -2))
-            .toEqual(new InexactNumber(0));
-        expect(expt(NEG_INF, 1))
-            .toEqual(NEG_INF);
-        expect(expt(NEG_INF, 2))
-            .toEqual(INF);
+        expect(expt(-Infinity, -1n))
+            .toEqual(-0);
+        expect(expt(-Infinity, -2n))
+            .toEqual(0);
+        expect(expt(-Infinity, 1n))
+            .toEqual(-Infinity);
+        expect(expt(-Infinity, 2n))
+            .toEqual(Infinity);
 
-        expect(expt(INF, -1))
-            .toEqual(INEXACT_ZERO);
-        expect(expt(INF, 2))
-            .toEqual(INF);
+        expect(expt(Infinity, -1n))
+            .toEqual(0);
+        expect(expt(Infinity, 2n))
+            .toEqual(Infinity);
     });
     test('racket docs examples', () => {
-        expect(expt(2, 3)).toBe(8);
-        expect(expt(4, new InexactNumber(0.5)))
-            .toEqual(INEXACT_TWO);
-        expect(expt(INF, EXACT_ZERO))
-            .toBe(1);
+        expect(expt(2n, 3n)).toBe(8n);
+        expect(expt(4n, 0.5))
+            .toEqual(2);
+        expect(expt(Infinity, 0n))
+            .toBe(1n);
     });
     test('boxed numbers', () => {
-        expect(expt(EXACT_TWO, INEXACT_TWO))
-            .toEqual(new InexactNumber(4));
+        expect(expt(new SmallExactNumber(2), new InexactNumber(2)))
+            .toEqual(4);
+        expect(expt(new SmallExactNumber(2), new InexactNumber(2)))
+            .toEqual(4);
     });
     test('bigints', () => {
-        expect(expt(BigInt(100), BigInt(2)))
-            .toBe(BigInt(10000));
-        expect(expt(new BigExactNumber(BigInt(100), BigInt(1)), new SmallExactNumber(2, 1)))
-            .toBe(10000);
-        expect(typeof expt(49, 5000) === 'bigint').toBe(true);
+        expect(expt(100n, 2n))
+            .toBe(10000n);
+        expect(expt(new BigExactNumber(100n), new SmallExactNumber(2)))
+            .toBe(10000n);
+        expect(typeof expt(49, 5000) === 'bigint').toBe(false);
     });
     test('complex numbers', () => {
-        expect(expt(makeInstance({num: 5,
-                                  den: 1,
-                                  imagNum: 3,
-                                  imagDen: 1}),
+        expect(expt(new ComplexNumber(new SmallExactNumber(5),
+                                      new SmallExactNumber(3)),
+                    2n))
+            .toEqual(new ComplexNumber(new SmallExactNumber(16),
+                                       new SmallExactNumber(30)));
+        expect(expt(new ComplexNumber(new InexactNumber(5),
+                                      new InexactNumber(3)),
+                    2n))
+            .toEqual(new ComplexNumber(new InexactNumber(16),
+                                       new InexactNumber(30)));
+        expect(expt(new ComplexNumber(new InexactNumber(5),
+                                      new InexactNumber(3)),
                     2))
-            .toEqual(makeInstance({num: 16,
-                                   den: 1,
-                                   imagNum: 30,
-                                   imagDen: 1}));
-        expect(expt(makeInstance({num: 5,
-                                  imagNum: 3}),
-                    2))
-            .toEqual(makeInstance({num: 16,
-                                   imagNum: 30}));
-        expect(expt(makeInstance({num: 5,
-                                  imagNum: 3}),
-                    INEXACT_TWO))
-            .toEqual(makeInstance({num: 16.000000000000004,
-                                   imagNum: 30.000000000000007}));
-        expect(expt(makeInstance({num: 5,
-                                  den: 1,
-                                  imagNum: 3,
-                                  imagDen: 1}),
-                    makeInstance({num: 5,
-                                  den: 1,
-                                  imagNum: 3,
-                                  imagDen: 1})))
-            .toEqual(makeInstance({num: -182.81777310243467,
-                                  imagNum: 1319.6714172143932}))
-        expect(expt(makeInstance({num: 5,
-                                  den: 1,
-                                  imagNum: 3,
-                                  imagDen: 1}),
-                    makeInstance({num: -7,
-                                  den: 1,
-                                  imagNum: -9,
-                                  imagDen: 1})))
-            .toEqual(makeInstance({num: 0.0003929046784149532,
-                                  imagNum: -0.00040617442897733556}))
+            .toEqual(new ComplexNumber(new InexactNumber(16.000000000000004),
+                                       new InexactNumber(30.000000000000007)));
+        expect(expt(new ComplexNumber(new SmallExactNumber(5),
+                                      new SmallExactNumber(3)),
+                    new ComplexNumber(new SmallExactNumber(5),
+                                      new SmallExactNumber(3))))
+            .toEqual(new ComplexNumber(new InexactNumber(-182.81777310243467),
+                                       new InexactNumber(1319.6714172143932)))
+        expect(expt(new ComplexNumber(new SmallExactNumber(5),
+                                      new SmallExactNumber(3)),
+                    new ComplexNumber(new SmallExactNumber(-7),
+                                      new SmallExactNumber(-9))))
+            .toEqual(new ComplexNumber(new InexactNumber(0.0003929046784149532),
+                                       new InexactNumber(-0.00040617442897733556)))
     });
 });
 

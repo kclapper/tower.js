@@ -6,7 +6,7 @@ import {
     abs
 } from '../tower';
 import {
-    matchTypes
+    boxIfNecessary
 } from './util';
 
 type NumberCompare = (x: number, y: number) => boolean;
@@ -25,7 +25,7 @@ const makeMultiArity = function (fnForNumbers: NumberCompare,
             let x = args[i];
             let y = args[i+1];
 
-            [x, y] = matchTypes(x, y);
+            [x, y] = boxIfNecessary(x, y);
 
             if (typeof x === 'number' && !fnForNumbers(x, y as number)) {
                 return false;
