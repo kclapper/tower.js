@@ -1,11 +1,14 @@
 export class Benchmark {
-  constructor(name) {
+  constructor(name, argStrs=[]) {
     this.name = name;
+    this.argStrs = argStrs;
     this.cases = [];
   }
 
-  add(name, thunk) {
-    this.cases.push({name: name, thunk: thunk});
+  add(name, thunk, argFormatter=(x) => x) {
+    this.cases.push({name: name,
+                     thunk: thunk,
+                     argFormatter: argFormatter});
   }
 
   run(trials) {

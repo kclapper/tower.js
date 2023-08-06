@@ -1,86 +1,140 @@
 import {
-    RacketNumber
+    RacketNumber,
+    RealNumber,
+    ComplexNumber,
+    isExactInteger,
+    boxNumber,
+    SmallExactNumber,
+    BigExactNumber,
 } from '../tower';
 import {
     normalize,
-    isJSInteger
+    normalized,
+    isJSInteger,
+    isSafeInteger
 } from './util';
 
 export function bitwiseOr(...operands: RacketNumber[]): RacketNumber {
-    operands = operands.map(normalize);
-
     for (const param of operands) {
-        if (!isJSInteger(param)) {
-            throw new TypeError("bitwise operators only defined for integers.");
+        if (!isExactInteger(param)) {
+            throw new TypeError("bitwise operators only defined for exact integers.");
         }
     }
 
-    const isBig = operands.reduce((acc, n) => acc || typeof n === 'bigint', false);
-    if (isBig) {
-        operands = operands.map((n) => BigInt(n as number));
+    let acc = 0n;
+    for (let param of operands) {
+        if (param instanceof ComplexNumber) {
+            param = param.toReal();
+        }
+        param = param as RealNumber;
+        acc |= BigInt(param.num);
     }
 
-    return normalize(operands.reduce((a, b) => (a as number) | (b as number), isBig ? 0n : 0));
+    if (isSafeInteger(acc)) {
+        return new SmallExactNumber(Number(acc));
+    }
+
+    return new BigExactNumber(acc);
 }
 
 export function bitwiseXor(...operands: RacketNumber[]): RacketNumber {
-    operands = operands.map(normalize);
-
     for (const param of operands) {
-        if (!isJSInteger(param)) {
-            throw new TypeError("bitwise operators only defined for integers.");
+        if (!isExactInteger(param)) {
+            throw new TypeError("bitwise operators only defined for exact integers.");
         }
     }
 
-    const isBig = operands.reduce((acc, n) => acc || typeof n === 'bigint', false);
-    if (isBig) {
-        operands = operands.map((n) => BigInt(n as number));
+    let acc = 0n;
+    for (let param of operands) {
+        if (param instanceof ComplexNumber) {
+            param = param.toReal();
+        }
+
+        param = param as RealNumber;
+
+        acc ^= BigInt(param.num);
     }
 
-    return normalize(operands.reduce((a, b) => (a as number) ^ (b as number), isBig ? 0n : 0));
+    if (isSafeInteger(acc)) {
+        return new SmallExactNumber(Number(acc));
+    }
+
+    return new BigExactNumber(acc);
 }
 
 export function bitwiseAnd(...operands: RacketNumber[]): RacketNumber {
-    operands = operands.map(normalize);
-
     for (const param of operands) {
-        if (!isJSInteger(param)) {
-            throw new TypeError("bitwise operators only defined for integers.");
+        if (!isExactInteger(param)) {
+            throw new TypeError("bitwise operators only defined for exact integers.");
         }
     }
 
-    const isBig = operands.reduce((acc, n) => acc || typeof n === 'bigint', false);
-    if (isBig) {
-        operands = operands.map((n) => BigInt(n as number));
+    let acc = -1n;
+    for (let param of operands) {
+        if (param instanceof ComplexNumber) {
+            param = param.toReal();
+        }
+
+        param = param as RealNumber;
+
+        acc &= BigInt(param.num);
     }
 
-    return normalize(operands.reduce((a, b) => (a as number) & (b as number), isBig ? -1n : -1));
+    if (isSafeInteger(acc)) {
+        return new SmallExactNumber(Number(acc));
+    }
+
+    return new BigExactNumber(acc);
 }
 
 export function bitwiseNot(n: RacketNumber): RacketNumber {
-    n = normalize(n);
-
-    if (!isJSInteger(n)) {
-        throw new TypeError("bitwise operators only defined for integers.");
+    if (!isExactInteger(n)) {
+        throw new TypeError("bitwise operators only defined for exact integers.");
     }
 
-    return normalize(~n);
+    if (n instanceof ComplexNumber) {
+        n = n.toReal();
+    }
+
+    n = n as RealNumber;
+
+    const result = ~BigInt(n.num);
+
+    if (isSafeInteger(result)) {
+        return new SmallExactNumber(Number(result));
+    }
+
+    return new BigExactNumber(result);
 }
 
 export function arithmeticShift(n: RacketNumber, m: RacketNumber): RacketNumber {
-    n = normalize(n);
-    m = normalize(m);
-
-    if (!isJSInteger(n) || !isJSInteger(m)) {
+    if (!isExactInteger(n) || !isExactInteger(m)) {
         throw new TypeError("bitwise operators only defined for integers.");
     }
 
-    n = typeof m === 'bigint' ? BigInt(n) : n;
-    m = typeof n === 'bigint' ? BigInt(m) : m;
-
-    if (m < (typeof m === 'number' ? 0 : 0n)) {
-        return n as number >> -(m as number);
-    } else {
-        return n as number << (m as number);
+    if (n instanceof ComplexNumber) {
+        n = n.toReal();
     }
+    n = n as RealNumber;
+
+    if (m instanceof ComplexNumber) {
+        m = m.toReal();
+    }
+    m = m as RealNumber;
+
+    let result;
+    const x = BigInt(n.num);
+    const y = BigInt(m.num);
+
+    if (y < 0n) {
+        result = x >> -y;
+    } else {
+        result = x << y;
+    }
+
+    if (isSafeInteger(result)) {
+        return new SmallExactNumber(Number(result));
+    }
+
+    return new BigExactNumber(result);
 }

@@ -5,13 +5,9 @@ import {
     ComplexNumber
 } from './index';
 
-export type RacketNumber = Fixnum | Flonum | BoxedNumber;
+export type RacketNumber = number | BoxedNumber;
 
-export type Fixnum = bigint;
-
-export type Flonum = number;
-
-export type JSInteger = JSNumber;
+export type JSInteger = number | bigint;
 
 export type JSNumber = number | bigint;
 
@@ -39,7 +35,7 @@ export interface Number {
     toInexact(): BoxedNumber;
     toExact(): BoxedNumber;
     toComplex(): ComplexNumber;
-    toFixnum(): Fixnum;
+    toFixnum(): number;
 
     isInteger(): boolean;
     isRational(): boolean;

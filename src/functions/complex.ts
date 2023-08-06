@@ -3,12 +3,14 @@ import {
     BoxedNumber,
     isBoxedNumber,
     INEXACT_ZERO,
+    EXACT_ZERO,
     EXACT_NEG_ONE,
     EXACT_TWO,
     PI,
     EXACT_I,
     INF,
     NEG_INF,
+    equals,
     isReal,
     isZero,
     isPositive,
@@ -21,6 +23,11 @@ import {
     ComplexNumber,
     boxNumber,
     isRealNumber,
+    isExact,
+    isInexact,
+    exactToInexact,
+    RealNumber,
+    isComplex,
 } from '../tower'
 import {
     normalize
@@ -34,6 +41,22 @@ export function makeRectangular(real: RacketNumber, imag: RacketNumber): RacketN
         throw new TypeError("makeRectangular arguments must be real numbers");
     }
 
+    if (imag.equals(EXACT_ZERO) && imag.isExact()) {
+        return normalize(real);
+    }
+
+    if (isInexact(real) && isExact(imag)) {
+        imag = exactToInexact(imag);
+        imag = boxNumber(imag) as RealNumber;
+        return new ComplexNumber(real, imag);
+    }
+
+    if (isInexact(imag) && isExact(real)) {
+        real = exactToInexact(real);
+        real = boxNumber(real) as RealNumber;
+        return new ComplexNumber(real, imag);
+    }
+
     return new ComplexNumber(real, imag);
 }
 
@@ -42,10 +65,13 @@ export function makePolar(r: RacketNumber, theta: RacketNumber): RacketNumber {
 }
 
 export function magnitude(n: RacketNumber): RacketNumber {
-    if (isBoxedNumber(n)) {
+    if (isComplex(n)) {
+        n = n as BoxedNumber;
+
         if (containsInfinity(n)) {
             return INF;
         }
+
         return normalize(n.magnitude());
     }
     return abs(n);
@@ -66,57 +92,57 @@ export function angle(n: RacketNumber): RacketNumber {
     }
 
     if (isReal(n)) {
-        return isPositive(n) ? 0 : PI;
+        return isPositive(n) ? EXACT_ZERO : Math.PI;
     }
 
-    // We know n is a boxed number if it's not real
-    n = n as BoxedNumber;
+    // We know n is a complex number if it's not real
+    n = n as ComplexNumber;
     if (containsInfinity(n)) {
         const real = n.realPart();
         const imag = n.imaginaryPart();
 
         if (real.equals(INF) && imag.equals(INF)) {
-            return divide(PI, 4);
+            return Math.PI / 4;
         } else if (real.equals(INF) && imag.equals(NEG_INF)) {
-            return multiply(-1, divide(PI, 4));
+            return -1 * (Math.PI / 4);
         } else if (real.equals(NEG_INF) && imag.equals(NEG_INF)) {
-            return multiply(-3, divide(PI, 4));
+            return -3 * (Math.PI / 4);
         } else if (real.equals(NEG_INF) && imag.equals(INF)) {
-            return multiply(3, divide(PI, 4));
+            return 3 * (Math.PI / 4);
         }
 
         // One of the two is not infinity
         if (real.equals(INF)) {
-            return INEXACT_ZERO.multiply(imag);
+            return normalize(INEXACT_ZERO.multiply(imag));
         } else if (real.equals(NEG_INF)) {
-            return imag.isPositive() ? PI : PI.multiply(EXACT_NEG_ONE);
+            return imag.isPositive() ? Math.PI : -Math.PI;
         } else if (imag.equals(INF)) {
-            return PI.divide(EXACT_TWO);
+            return Math.PI / 2;
         } else {
-            return PI.divide(EXACT_TWO).multiply(EXACT_NEG_ONE);
+            return -(Math.PI / 2);
         }
     }
 
-    return normalize((n as BoxedNumber).angle());
+    return normalize(n.angle());
 }
 
 export function realPart(n: RacketNumber): RacketNumber {
     if (isReal(n)) {
         return normalize(n);
     }
-    return normalize((n as BoxedNumber).realPart());
+    return normalize((n as ComplexNumber).realPart());
 }
 
 export function imaginaryPart(n: RacketNumber): RacketNumber {
     if (isReal(n)) {
-        return 0;
+        return EXACT_ZERO;
     }
-    return normalize((n as BoxedNumber).imaginaryPart());
+    return normalize((n as ComplexNumber).imaginaryPart());
 }
 
 export function conjugate(n: RacketNumber): RacketNumber {
     if (isReal(n)) {
         return normalize(n);
     }
-    return (n as BoxedNumber).conjugate();
+    return (n as ComplexNumber).conjugate();
 }

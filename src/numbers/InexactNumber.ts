@@ -1,5 +1,4 @@
 import {
-    JSInteger,
     Number,
     BoxedNumber,
     ExactNumber,
@@ -12,7 +11,6 @@ import {
     EXACT_ZERO,
     INEXACT_ZERO,
     INEXACT_NEG_ONE,
-    Fixnum
 } from './index';
 
 export class InexactNumber implements Number {
@@ -54,8 +52,8 @@ export class InexactNumber implements Number {
     public toComplex(): ComplexNumber {
         return new ComplexNumber(this, EXACT_ZERO);
     }
-    public toFixnum(): Fixnum {
-        return BigInt(Math.floor(this.num));
+    public toFixnum(): number {
+        return Math.floor(this.num);
     }
 
     public isInteger(): boolean {

@@ -6,7 +6,8 @@ import {
     abs
 } from '../tower';
 import {
-    boxIfNecessary
+    boxIfNecessary,
+    makeCompatible
 } from './util';
 
 type NumberCompare = (x: number, y: number) => boolean;
@@ -14,7 +15,6 @@ type BigIntCompare = (x: bigint, y: bigint) => boolean;
 type BoxedNumberCompare = (x: BoxedNumber, y: BoxedNumber) => boolean;
 
 const makeMultiArity = function (fnForNumbers: NumberCompare,
-                                 fnForBigInt: BigIntCompare,
                                  fnForBoxedNumbers: BoxedNumberCompare) {
     return function(...args: RacketNumber[]): boolean {
         if (args.length < 2) {
@@ -25,11 +25,9 @@ const makeMultiArity = function (fnForNumbers: NumberCompare,
             let x = args[i];
             let y = args[i+1];
 
-            [x, y] = boxIfNecessary(x, y);
+            [x, y] = makeCompatible(x, y);
 
             if (typeof x === 'number' && !fnForNumbers(x, y as number)) {
-                return false;
-            } else if (typeof x === 'bigint' && !fnForBigInt(x, y as bigint)) {
                 return false;
             } else if (isBoxedNumber(x) && !fnForBoxedNumbers(x as BoxedNumber, y as BoxedNumber)) {
                 return false;
@@ -43,20 +41,13 @@ export function equals(...nums: RacketNumber[]): boolean {
     if (nums.length === 1) {
         return true;
     }
-    const equalComp = makeMultiArity(
-        function(x: number, y: number): boolean {
-            return x === y;
-        },
-        function(x: bigint, y: bigint): boolean {
-            return x === y;
-        },
-        function(x: BoxedNumber, y: BoxedNumber): boolean {
-            return x.equals(y);
-        },
-    );
-
     return equalComp(...nums);
 }
+
+const equalComp = makeMultiArity(
+    (x: number, y: number) => x === y,
+    (x: BoxedNumber, y: BoxedNumber) => x.equals(y)
+);
 
 // This is provided for compatibility with the original js-numbers library
 export function eqv(x: RacketNumber, y: RacketNumber): boolean {
@@ -72,78 +63,46 @@ export function greaterThan(...nums: RacketNumber[]): boolean {
     if (nums.length === 1) {
         return true;
     }
-
-    const gtComp = makeMultiArity(
-        function(x: number, y: number): boolean {
-            return x > y;
-        },
-        function(x: bigint, y: bigint): boolean {
-            return x > y;
-        },
-        function(x: BoxedNumber, y: BoxedNumber): boolean {
-            return x.greaterThan(y);
-        }
-    );
-
     return gtComp(...nums);
 }
+
+const gtComp = makeMultiArity(
+    (x: number, y: number) => x > y,
+    (x: BoxedNumber, y: BoxedNumber) => x.greaterThan(y)
+);
 
 export function greaterThanOrEqual(...nums: RacketNumber[]): boolean {
     if (nums.length === 1) {
         return true;
     }
-
-    const gteComp = makeMultiArity(
-        function(x: number, y: number): boolean {
-            return x >= y;
-        },
-        function(x: bigint, y: bigint): boolean {
-            return x >= y;
-        },
-        function(x: BoxedNumber, y: BoxedNumber): boolean {
-            return x.greaterThanOrEqual(y);
-        }
-    );
-
     return gteComp(...nums);
 }
+
+const gteComp = makeMultiArity(
+    (x: number, y: number) => x >= y,
+    (x: BoxedNumber, y: BoxedNumber) => x.greaterThanOrEqual(y)
+);
 
 export function lessThan(...nums: RacketNumber[]): boolean {
     if (nums.length === 1) {
         return true;
     }
-
-    const ltComp = makeMultiArity(
-        function(x: number, y: number): boolean {
-            return x < y;
-        },
-        function(x: bigint, y: bigint): boolean {
-            return x < y;
-        },
-        function(x: BoxedNumber, y: BoxedNumber): boolean {
-            return x.lessThan(y);
-        }
-    );
-
     return ltComp(...nums);
 }
+
+const ltComp = makeMultiArity(
+    (x: number, y: number) => x < y,
+    (x: BoxedNumber, y: BoxedNumber) => x.lessThan(y)
+);
 
 export function lessThanOrEqual(...nums: RacketNumber[]): boolean {
     if (nums.length === 1) {
         return true;
     }
-
-    const lteComp = makeMultiArity(
-        function(x: number, y: number): boolean {
-            return x <= y;
-        },
-        function(x: bigint, y: bigint): boolean {
-            return x <= y;
-        },
-        function(x: BoxedNumber, y: BoxedNumber): boolean {
-            return x.lessThanOrEqual(y);
-        }
-    );
-
     return lteComp(...nums);
 }
+
+const lteComp = makeMultiArity(
+    (x: number, y: number) => x <= y,
+    (x: BoxedNumber, y: BoxedNumber) => x.lessThanOrEqual(y)
+);

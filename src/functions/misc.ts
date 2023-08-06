@@ -1,25 +1,29 @@
 import {
     RacketNumber,
     isBoxedNumber,
-    InexactNumber
+    InexactNumber,
+    SmallExactNumber,
+    BigExactNumber,
+    boxNumber
 } from '../tower';
 import {
+    isSafeInteger,
     normalize
 } from './util';
 
 export function inexactToExact(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
-        return normalize(n.toExact());
+        return n.toExact();
     }
-    return n;
+    return boxNumber(n).toExact();
 }
 export const toExact = inexactToExact; // For backwards compatibility
 
 export function exactToInexact(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
-        return n.toInexact();
+        return normalize(n.toInexact());
     }
-    return new InexactNumber(Number(n));
+    return n;
 }
 export const toInexact = exactToInexact; // For backwards compatibility
 

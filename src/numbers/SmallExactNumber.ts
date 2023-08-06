@@ -15,7 +15,6 @@ import {
 
     EXACT_ZERO,
     EXACT_NEG_ONE,
-    Fixnum,
 } from './index';
 
 export class SmallExactNumber implements Number {
@@ -80,8 +79,8 @@ export class SmallExactNumber implements Number {
     public toComplex(): ComplexNumber {
         return new ComplexNumber(this, EXACT_ZERO);
     }
-    public toFixnum(): Fixnum {
-        return BigInt(Math.floor(this.num / this.den));
+    public toFixnum(): number {
+        return Math.floor(this.num / this.den);
     }
 
     public isInteger(): boolean {
@@ -426,7 +425,7 @@ export class SmallExactNumber implements Number {
         return this;
     }
     public magnitude(): BoxedNumber {
-        return this;
+        return this.abs();
     }
     public realPart(): RealNumber {
         return this;

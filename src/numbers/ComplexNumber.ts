@@ -17,7 +17,6 @@ import {
 
     PI,
     NEG_INF,
-    Fixnum
 } from './index';
 
 export class ComplexNumber implements Number {
@@ -71,7 +70,7 @@ export class ComplexNumber implements Number {
     public toComplex(): ComplexNumber {
         return this;
     }
-    public toFixnum(): Fixnum {
+    public toFixnum(): number {
         if (!this.isReal()) {
             throw new TypeError("Not defined for complex numbers.");
         }
@@ -218,6 +217,10 @@ export class ComplexNumber implements Number {
 
         real = !imag.isExact() ? real.toInexact() : real;
 
+        if (imag.isExact() && imag.isZero()) {
+            return real;
+        }
+
         return new ComplexNumber(real, imag);
     }
     public divide(other: BoxedNumber): BoxedNumber {
@@ -351,7 +354,7 @@ export class ComplexNumber implements Number {
     public expt(power: BoxedNumber): BoxedNumber {
         if (power.isExact() && power.isInteger() && power.greaterThanOrEqual(ZERO)) {
             let n: BoxedNumber = this;
-            let k: bigint = power.toFixnum();
+            let k: bigint = BigInt(power.toFixnum());
 
             let acc: BoxedNumber = ONE;
 

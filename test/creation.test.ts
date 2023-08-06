@@ -3,38 +3,15 @@ import {
     SmallExactNumber,
     BigExactNumber,
     ComplexNumber,
-    makeComplexNumber,
-    toFixnum,
-    fromJSNumber,
     boxNumber,
-    fromString,
-    EXACT_ZERO,
-    INEXACT_ZERO,
-    EXACT_I,
-    INEXACT_I,
-    makeNumber,
+    fromString
 } from '../src/tower';
 
-// TODO:
-test('toFixnum', () => {
-    expect(toFixnum(5)).toBe(5);
-    expect(toFixnum(BigInt(5))).toBe(BigInt(5));
-    expect(toFixnum(new SmallExactNumber(5, 7)))
-        .toBe(0);
-});
-
-// TODO:
-test('fromJSNumber', () => {
-    expect(fromJSNumber(5)).toBe(5);
-    expect(fromJSNumber(BigInt(5))).toBe(BigInt(5));
-    expect(fromJSNumber(5.5))
-        .toEqual(new InexactNumber(5.5));
-});
-
 test('boxNumber', () => {
-    expect(boxNumber(5)).toEqual(new InexactNumber(5));
-    expect(boxNumber(5n)).toEqual(new SmallExactNumber(5, 1));
-    expect(boxNumber(new SmallExactNumber(1))).toEqual(new SmallExactNumber(1));
+    expect(boxNumber(5))
+        .toEqual(new InexactNumber(5));
+    expect(boxNumber(new SmallExactNumber(1)))
+        .toEqual(new SmallExactNumber(1));
 });
 
 describe('fromString', () => {
@@ -42,7 +19,10 @@ describe('fromString', () => {
         expect(fromString("A")).toBe(false);
     });
     test("integer", () => {
-        expect(fromString("5")).toBe(5n);
+        expect(fromString("5"))
+            .toEqual(new SmallExactNumber(5));
+        expect(fromString((BigInt(Number.MAX_SAFE_INTEGER) + 5n).toString()))
+            .toEqual(new BigExactNumber(BigInt(Number.MAX_SAFE_INTEGER) + 5n));
     });
     test("fraction", () => {
         expect(fromString("9/7"))
@@ -99,37 +79,11 @@ describe('fromString', () => {
         const bignumberstr = bignumber.toString();
 
         expect(fromString(bignumberstr))
-            .toBe(bignumber);
+            .toEqual(new BigExactNumber(bignumber));
         expect(fromString(`${bignumberstr}/${7}`))
             .toEqual(new BigExactNumber(bignumber, 7n));
         expect(fromString(`${bignumberstr}+${bignumberstr}i`))
             .toEqual(new ComplexNumber(new BigExactNumber(bignumber),
                                        new BigExactNumber(bignumber)));
     });
-});
-
-// TODO:
-test('makeNumber', () => {
-    expect(makeNumber(5, 1)).toBe(5);
-    expect(makeNumber(5))
-        .toEqual(5);
-    expect(makeNumber(5, 2))
-        .toEqual(new SmallExactNumber(5, 2));
-    expect(makeNumber(BigInt(5), BigInt(1))).toBe(5);
-    expect(makeNumber(BigInt(5), BigInt(2)))
-        .toEqual(new BigExactNumber(BigInt(5), BigInt(2)));
-});
-
-// TODO:
-test('makeComplexNumber', () => {
-    expect(makeComplexNumber({num: 0, den: 1}))
-        .toEqual(new ComplexNumber(EXACT_ZERO, EXACT_ZERO));
-    expect(makeComplexNumber({num: 0}))
-        .toEqual(new ComplexNumber(INEXACT_ZERO, EXACT_ZERO));
-    expect(makeComplexNumber({num: 0, den: 1, imagNum: 1, imagDen: 1}))
-        .toEqual(EXACT_I);
-    expect(makeComplexNumber({num: 0, imagNum: 1}))
-        .toEqual(INEXACT_I);
-    expect(makeComplexNumber({num: BigInt(1), den: BigInt(1)}))
-        .toEqual(new ComplexNumber(new BigExactNumber(BigInt(1)), EXACT_ZERO));
 });

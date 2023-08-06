@@ -13,7 +13,6 @@ import {
     isSafeInteger,
 
     EXACT_ZERO,
-    Fixnum
 } from './index';
 
 export class BigExactNumber implements Number {
@@ -75,8 +74,8 @@ export class BigExactNumber implements Number {
     public toComplex(): ComplexNumber {
         return new ComplexNumber(this, EXACT_ZERO);
     }
-    public toFixnum(): Fixnum {
-        return this.num / this.den;
+    public toFixnum(): number {
+        return Number(this.num / this.den);
     }
 
     public isInteger(): boolean {
@@ -356,9 +355,15 @@ export class BigExactNumber implements Number {
     }
 
     public numerator(): RealNumber {
+        if (isSafeInteger(this.num)) {
+            return new SmallExactNumber(Number(this.num));
+        }
         return new BigExactNumber(this.num);
     }
     public denominator(): RealNumber {
+        if (isSafeInteger(this.den)) {
+            return new SmallExactNumber(Number(this.den));
+        }
         return new BigExactNumber(this.den)
     }
 
@@ -369,6 +374,10 @@ export class BigExactNumber implements Number {
         return this.toSmallExact().sqrt();
     }
     public abs(): RealNumber {
+        if (isSafeInteger(this.num) && isSafeInteger(this.den)) {
+            return new SmallExactNumber(Number(this.num), Number(this.den)).abs();
+        }
+
         if (this.isNegative()) {
             return new BigExactNumber(this.num * -1n, this.den);
         } else {
