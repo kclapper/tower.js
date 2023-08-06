@@ -1,62 +1,43 @@
 import {
     RacketNumber,
-    isBoxedNumber,
-    SmallExactNumber,
-    BigExactNumber,
+    InexactNumber,
 } from '../tower';
-import {
-    isSafeInteger
-} from '../util';
+
+type Normalizable = (...n: RacketNumber[]) => RacketNumber;
+type Normalized<F extends Normalizable> = (...n: Parameters<F>) => RacketNumber;
+export function normalized<Func extends Normalizable>(fn: Func): Normalized<Func> {
+    return function(...nums: RacketNumber[]): RacketNumber {
+        for (let i = 0; i < nums.length; i++) {
+            const n = nums[i];
+            if (n instanceof InexactNumber) {
+                nums[i] = n.num;
+            }
+        }
+
+        const result = fn(...nums);
+
+        if (result instanceof InexactNumber) {
+            return result.num;
+        }
+        return result;
+    }
+}
 
 export function normalize(x: RacketNumber): RacketNumber {
-    // Don't keep BoxedNumbers if unnecessary
-    if (isBoxedNumber(x)
-        && x.isReal()
-        && x.isInteger()
-        && x.isExact()) {
-
-        x = x.toFixnum();
+    if (x instanceof InexactNumber) {
+        return x.num;
     }
-
-    // Don't keep bigints if unnecessary
-    if (typeof x === 'bigint' && isSafeInteger(x)) {
-        x = Number(x);
-    }
-
     return x;
 }
 
-export function matchTypes(x: RacketNumber, y: RacketNumber): RacketNumber[] {
-    // Check if they're already the same
-    if (typeof x === typeof y) {
-        return [x, y];
+export function makeCompatible(x: RacketNumber, y: RacketNumber): [RacketNumber, RacketNumber] {
+    if (typeof x === 'number' && typeof y === 'object') {
+        x = new InexactNumber(x);
     }
-
-    // Make types match
-    if (isBoxedNumber(x)) {
-        if (typeof y === 'bigint') {
-            return [x, new BigExactNumber(y)]
-        } else {
-            return [x, new SmallExactNumber(y as number)];
-        }
-
-    } else if (typeof x === 'bigint') {
-        if (isBoxedNumber(y)) {
-           return [new BigExactNumber(x), y];
-        } else {
-            return [x, BigInt(y)];
-        }
-
-    } else if (typeof x === 'number') {
-        if (isBoxedNumber(y)) {
-            return [new SmallExactNumber(x), y];
-        } else {
-            return [BigInt(x), y];
-        }
-
-    } else {
-       throw new TypeError(`Cannot match values ${x} ${y}`);
+    if (typeof y === 'number' && typeof x === 'object') {
+        y = new InexactNumber(y);
     }
+    return [x, y];
 }
 
 export * from '../util';

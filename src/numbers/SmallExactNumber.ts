@@ -1,5 +1,4 @@
 import {
-    JSInteger,
     Number,
     BoxedNumber,
     ExactNumber,
@@ -79,7 +78,7 @@ export class SmallExactNumber implements Number {
     public toComplex(): ComplexNumber {
         return new ComplexNumber(this, EXACT_ZERO);
     }
-    public toFixnum(): JSInteger {
+    public toFixnum(): number {
         return Math.floor(this.num / this.den);
     }
 
@@ -131,9 +130,13 @@ export class SmallExactNumber implements Number {
         }
         return this.toString();
     }
-    public [Symbol.toPrimitive](hint: string): number | string {
+    public [Symbol.toPrimitive](hint: string): number | bigint | string {
         if (hint === 'string') {
             return this.toString();
+        }
+
+        if (hint === 'bigint' && this.den === 1) {
+            return BigInt(this.num);
         }
 
         return this.num / this.den;
@@ -421,7 +424,7 @@ export class SmallExactNumber implements Number {
         return this;
     }
     public magnitude(): BoxedNumber {
-        return this;
+        return this.abs();
     }
     public realPart(): RealNumber {
         return this;

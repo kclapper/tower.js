@@ -1,129 +1,112 @@
-import { isJSInteger } from "../numbers/util";
 import {
     RacketNumber,
     isBoxedNumber
 } from "../tower";
 
 export function isNumber(x: any): x is RacketNumber {
-    const isNumber = typeof x === 'number' && Number.isInteger(x);
-    const isBigInt = typeof x === 'bigint';
+    const isNumber = typeof x === 'number';
     const isBoxed = isBoxedNumber(x);
-    return isNumber || isBigInt || isBoxed;
+    return isNumber || isBoxed;
 }
 
 export const isComplex = isNumber;
 
 export function isReal(x: any): x is RacketNumber {
-    const isNumber = typeof x === 'number' && Number.isInteger(x);
-    const isBigInt = typeof x === 'bigint';
+    const isNumber = typeof x === 'number';
     const isBoxedReal = isBoxedNumber(x) && x.isReal();
-    return isNumber || isBigInt || isBoxedReal;
+    return isNumber || isBoxedReal;
 }
 
 export function isRational(x: any): x is RacketNumber {
-    const isNumber = typeof x === 'number' && Number.isInteger(x);
-    const isBigInt = typeof x === 'bigint';
+    const isNumber = typeof x === 'number' && Number.isFinite(x);
     const isBoxedRational = isBoxedNumber(x) && x.isRational();
-    return isNumber || isBigInt || isBoxedRational;
+    return isNumber || isBoxedRational;
 }
 
 export function isInteger(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number' && Number.isInteger(x);
-    const isBigInt = typeof x === 'bigint';
     const isBoxedInteger = isBoxedNumber(x) && x.isInteger();
-    return isNumber || isBigInt || isBoxedInteger;
+    return isNumber || isBoxedInteger;
 }
 
 export function isExactInteger(x: any): x is RacketNumber {
-    const isNumber = typeof x === 'number' && Number.isInteger(x);
-    const isBigInt = typeof x === 'bigint';
-    const isBoxedExactInteger = isBoxedNumber(x) && x.isInteger() && x.isExact();
-    return isNumber || isBigInt || isBoxedExactInteger;
+    return isBoxedNumber(x) && x.isInteger() && x.isExact();
 }
 
 export function isExactNonNegativeInteger(x: any): x is RacketNumber {
-    const forNumber = typeof x === 'number' && Number.isInteger(x) && x >= 0;
-    const forBigInt = typeof x === 'bigint' && x >= 0n;
-    const forBoxed = isBoxedNumber(x) && x.isInteger() && x.isExact() && !x.isNegative();
-    return forNumber || forBigInt || forBoxed;
+    return isBoxedNumber(x) && x.isInteger() && x.isExact() && !x.isNegative();
 }
 
 export function isExactPositiveInteger(x: any): x is RacketNumber {
-    const forNumber = typeof x === 'number' && Number.isInteger(x) && x > 0;
-    const forBigInt = typeof x === 'bigint' && x > 0n;
-    const forBoxed = isBoxedNumber(x) && x.isInteger() && x.isExact() && x.isPositive();
-    return forNumber || forBigInt || forBoxed;
+    return isBoxedNumber(x) && x.isInteger() && x.isExact() && x.isPositive();
 }
 
 export function isInexactReal(x: any): boolean {
-    return isBoxedNumber(x) && x.isReal() && x.isInexact();
+    return typeof x === 'number'
+        || (isBoxedNumber(x) && x.isReal() && x.isInexact());
 }
 
-export function isFixnum(x: any): boolean {
-    const forNumber = typeof x === 'number' && Number.isInteger(x);
-    const forBigInt = typeof x === 'bigint';
-    return forNumber || forBigInt;
-}
-
-export function isFlonum(x: any): boolean {
-    return isBoxedNumber(x) && x.isReal() && x.isInexact();
+export function isFlonum(x: any): x is number {
+    return typeof x === 'number';
 }
 
 export function isZero(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number' && n === 0;
-    const forBigInt = typeof n === 'bigint' && n === 0n;
     const forBoxed = isBoxedNumber(n) && n.isZero();
-    return forNumber || forBigInt || forBoxed;
+    return forNumber || forBoxed;
 }
 
 export function isPositive(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number' && n > 0;
-    const forBigInt = typeof n === 'bigint' && n > 0n;
     const forBoxed = isBoxedNumber(n) && n.isPositive();
-    return forNumber || forBigInt || forBoxed;
+    return forNumber || forBoxed;
 }
 
 export function isNegative(n: RacketNumber): boolean {
     const forNumber = typeof n === 'number' && n < 0;
-    const forBigInt = typeof n === 'bigint' && n < 0n;
     const forBoxed = isBoxedNumber(n) && n.isNegative();
-    return forNumber || forBigInt || forBoxed;
+    return forNumber || forBoxed;
 }
 
 export function isEven(n: RacketNumber): boolean {
+    if (!isInteger(n)) {
+        throw new TypeError("'isEven' only defined for integers");
+    }
+
     const forNumber = typeof n === 'number' && n % 2 === 0;
-    const forBigInt = typeof n === 'bigint' && n % 2n === 0n;
     const forBoxed = isBoxedNumber(n) && n.isEven();
-    return forNumber || forBigInt || forBoxed;
+    return forNumber || forBoxed;
 }
 
 export function isOdd(n: RacketNumber): boolean {
+    if (!isInteger(n)) {
+        throw new TypeError("'isOdd' only defined for integers");
+    }
+
     return !isEven(n);
 }
 
 export function isExact(n: RacketNumber): boolean {
-    const forNumber = typeof n === 'number';
-    const forBigInt = typeof n === 'bigint';
-    const forBoxed = isBoxedNumber(n) && n.isExact();
-    return forNumber || forBigInt || forBoxed;
+    return isBoxedNumber(n) && n.isExact();
 }
 
 export function isInexact(n: RacketNumber): boolean {
-    return isBoxedNumber(n) && n.isInexact();
+    return typeof n === 'number'
+        || (isBoxedNumber(n) && n.isInexact());
 }
 
-export function isRacketNumber(n: RacketNumber): boolean {
-    return isBoxedNumber(n) || isJSInteger(n);
+export function isRacketNumber(n: RacketNumber): n is RacketNumber {
+    return typeof n === 'number'
+        || isBoxedNumber(n);
 }
 export const isSchemeNumber = isRacketNumber; // For backwards compatibility
 
 export function isFinite(n: RacketNumber): boolean {
     if (isBoxedNumber(n)) {
         return n.isFinite();
-    } else if (typeof n === 'number') {
-        return Number.isFinite(n);
     }
-    return true;
+
+    return Number.isFinite(n);
 }
 
 export function isNaN(n: RacketNumber): boolean {
@@ -137,5 +120,5 @@ export function isNegativeZero(n: RacketNumber): boolean {
     if (isBoxedNumber(n)) {
         return n.isNegativeZero();
     }
-    return false;
+    return Object.is(n, -0);
 }

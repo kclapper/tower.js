@@ -5,9 +5,9 @@ import {
     ComplexNumber
 } from './index';
 
-export type RacketNumber = JSInteger | BoxedNumber;
+export type RacketNumber = number | BoxedNumber;
 
-export type JSInteger = JSNumber;
+export type JSInteger = number | bigint;
 
 export type JSNumber = number | bigint;
 
@@ -22,6 +22,11 @@ export function isBoxedNumber(n: any): n is BoxedNumber {
 export type ExactNumber = SmallExactNumber | BigExactNumber;
 
 export type RealNumber = InexactNumber | ExactNumber;
+export function isRealNumber(n: any): n is RealNumber {
+    return n instanceof InexactNumber
+        || n instanceof SmallExactNumber
+        || n instanceof BigExactNumber
+}
 
 export interface Number {
     isInexact(): boolean;
@@ -30,7 +35,7 @@ export interface Number {
     toInexact(): BoxedNumber;
     toExact(): BoxedNumber;
     toComplex(): ComplexNumber;
-    toFixnum(): JSInteger;
+    toFixnum(): number;
 
     isInteger(): boolean;
     isRational(): boolean;

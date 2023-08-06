@@ -1,5 +1,4 @@
 import {
-    JSInteger,
     Number,
     BoxedNumber,
     ExactNumber,
@@ -12,7 +11,7 @@ import {
     bigExpt,
     isSafeInteger,
 
-    EXACT_ZERO
+    EXACT_ZERO,
 } from './index';
 
 export class BigExactNumber implements Number {
@@ -74,8 +73,8 @@ export class BigExactNumber implements Number {
     public toComplex(): ComplexNumber {
         return new ComplexNumber(this, EXACT_ZERO);
     }
-    public toFixnum(): JSInteger {
-        return this.num / this.den;
+    public toFixnum(): number {
+        return Number(this.num / this.den);
     }
 
     public isInteger(): boolean {
@@ -114,8 +113,8 @@ export class BigExactNumber implements Number {
     }
 
     public toString(): string {
-        const numStr = this.num.toString().slice(0, -1);
-        const denStr = this.den.toString().slice(0, -1);
+        const numStr = this.num.toString();
+        const denStr = this.den.toString();
 
         if (this.den === 1n) {
             return numStr;
@@ -134,8 +133,12 @@ export class BigExactNumber implements Number {
             return this.toString();
         }
 
-        if (this.den === 1n) {
+        if (hint === 'bigint' && this.den === 1n) {
             return this.num;
+        }
+
+        if (this.den === 1n) {
+            return Number(this.num);
         }
 
         return Number(this.num) / Number(this.den);
@@ -351,9 +354,15 @@ export class BigExactNumber implements Number {
     }
 
     public numerator(): RealNumber {
+        if (isSafeInteger(this.num)) {
+            return new SmallExactNumber(Number(this.num));
+        }
         return new BigExactNumber(this.num);
     }
     public denominator(): RealNumber {
+        if (isSafeInteger(this.den)) {
+            return new SmallExactNumber(Number(this.den));
+        }
         return new BigExactNumber(this.den)
     }
 
@@ -364,6 +373,10 @@ export class BigExactNumber implements Number {
         return this.toSmallExact().sqrt();
     }
     public abs(): RealNumber {
+        if (isSafeInteger(this.num) && isSafeInteger(this.den)) {
+            return new SmallExactNumber(Number(this.num), Number(this.den)).abs();
+        }
+
         if (this.isNegative()) {
             return new BigExactNumber(this.num * -1n, this.den);
         } else {

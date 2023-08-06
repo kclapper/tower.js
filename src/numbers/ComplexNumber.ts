@@ -1,5 +1,4 @@
 import {
-    JSInteger,
     Number,
     BoxedNumber,
     RealNumber,
@@ -16,7 +15,7 @@ import {
     NEG_I,
 
     PI,
-    NEG_INF
+    NEG_INF,
 } from './index';
 
 export class ComplexNumber implements Number {
@@ -70,7 +69,7 @@ export class ComplexNumber implements Number {
     public toComplex(): ComplexNumber {
         return this;
     }
-    public toFixnum(): JSInteger {
+    public toFixnum(): number {
         if (!this.isReal()) {
             throw new TypeError("Not defined for complex numbers.");
         }
@@ -146,8 +145,6 @@ export class ComplexNumber implements Number {
             return Number(primitive);
         } else if (hint === 'default' && typeof primitive === 'bigint') {
             return Number(primitive);
-        } else if (hint === 'bigint' && typeof primitive === 'number') {
-            return BigInt(primitive);
         }
 
         return primitive;
@@ -218,6 +215,10 @@ export class ComplexNumber implements Number {
         const imag = thisReal.multiply(otherImag).add(thisImag.multiply(otherReal));
 
         real = !imag.isExact() ? real.toInexact() : real;
+
+        if (imag.isExact() && imag.isZero()) {
+            return real;
+        }
 
         return new ComplexNumber(real, imag);
     }
@@ -351,24 +352,18 @@ export class ComplexNumber implements Number {
     }
     public expt(power: BoxedNumber): BoxedNumber {
         if (power.isExact() && power.isInteger() && power.greaterThanOrEqual(ZERO)) {
-            // HACK: k can be a bigint or a number so we need some gross casting.
             let n: BoxedNumber = this;
-            let k: number = power.toFixnum() as number;
-
-            const isNumber = typeof k === 'number';
-            const zero = (isNumber ? 0 : 0n) as number;
-            const one = (isNumber ? 1 : 1n) as number;
-            const two = (isNumber ? 2 : 2n) as number;
+            let k: bigint = BigInt(power.toFixnum());
 
             let acc: BoxedNumber = ONE;
 
-            while (k !== zero) {
-                if (k % two === zero) {
+            while (k !== 0n) {
+                if (k % 2n === 0n) {
                     n = n.multiply(n);
-                    k = k / two;
+                    k = k / 2n;
                 } else {
                     acc = acc.multiply(n);
-                    k = k - one;
+                    k = k - 1n;
                 }
             }
             return acc;
