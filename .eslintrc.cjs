@@ -1,7 +1,8 @@
 /* eslint-env node */
 module.exports = {
   env: {
-    node: true
+    node: true,
+    es2020: true
   },
   ignorePatterns: [
     "**/js-numbers.js",

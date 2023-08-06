@@ -3,14 +3,10 @@ import {
     RealNumber,
     ComplexNumber,
     isExactInteger,
-    boxNumber,
     SmallExactNumber,
     BigExactNumber,
 } from '../tower';
 import {
-    normalize,
-    normalized,
-    isJSInteger,
     isSafeInteger
 } from './util';
 

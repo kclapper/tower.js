@@ -1,8 +1,4 @@
-import { strict as assert } from 'node:assert';
-import {
-  bigExpt,
-  Benchmark
-} from './util.js';
+import { Benchmark } from './util.js';
 import * as tower from 'tower.js';
 import jsNums from './js-numbers.cjs';
 

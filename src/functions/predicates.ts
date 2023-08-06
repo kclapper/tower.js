@@ -1,4 +1,3 @@
-import { isJSInteger } from "../numbers/util";
 import {
     RacketNumber,
     isBoxedNumber
@@ -45,14 +44,6 @@ export function isExactPositiveInteger(x: any): x is RacketNumber {
 export function isInexactReal(x: any): boolean {
     return typeof x === 'number'
         || (isBoxedNumber(x) && x.isReal() && x.isInexact());
-}
-
-// DEPRECATED
-export function isFixnum(x: any): boolean {
-    return false;
-    //const forNumber = typeof x === 'number' && Number.isInteger(x);
-    //const forBigInt = typeof x === 'bigint';
-    //return forNumber || forBigInt;
 }
 
 export function isFlonum(x: any): x is number {

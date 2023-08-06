@@ -20,7 +20,6 @@ import {
     isExactNonNegativeInteger,
     isExactPositiveInteger,
     isInexactReal,
-    isFixnum,
     isFlonum,
     isZero,
     isPositive,
@@ -403,50 +402,6 @@ describe('isInexactReal()', () => {
             .toBe(false);
     });
 });
-
-// DEPRECATED
-//describe('isFixnum()', () => {
-//    test('Non-number', () => {
-//        expect(isFixnum("Not a number"))
-//            .toBe(false);
-//    });
-//    test('Unboxed number: number', () => {
-//        expect(isFixnum(10))
-//            .toBe(true);
-//    });
-//    test('Unboxed number: bigint', () => {
-//        expect(isFixnum(BigInt(10)))
-//            .toBe(true);
-//    });
-//    test('Boxed number: Exact Integer', () => {
-//        expect(isFixnum(ONE))
-//            .toBe(false);
-//    });
-//    test('Boxed number: Inexact Integer', () => {
-//        expect(isFixnum(new InexactNumber(0)))
-//            .toBe(false);
-//    });
-//    test('Boxed number: Inexact Rational', () => {
-//        expect(isFixnum(new InexactNumber(1.5)))
-//            .toBe(false);
-//    });
-//    test('Boxed number: Inexact Real', () => {
-//        expect(isFixnum(INF))
-//            .toBe(false);
-//    });
-//    test('Boxed number: Exact Real', () => {
-//        expect(isFixnum(new SmallExactNumber(3, 2)))
-//            .toBe(false);
-//    });
-//    test('Boxed number: NAN', () => {
-//        expect(isFixnum(NAN))
-//            .toBe(false);
-//    });
-//    test('Boxed number: Complex', () => {
-//        expect(isFixnum(I))
-//            .toBe(false);
-//    });
-//});
 
 describe('isFlonum()', () => {
     test('Non-number', () => {

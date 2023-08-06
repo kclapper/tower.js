@@ -1,13 +1,9 @@
 import {
     RacketNumber,
     isBoxedNumber,
-    InexactNumber,
-    SmallExactNumber,
-    BigExactNumber,
     boxNumber
 } from '../tower';
 import {
-    isSafeInteger,
     normalize
 } from './util';
 

@@ -1,11 +1,8 @@
 import {
     InexactNumber,
-    SmallExactNumber,
     ComplexNumber,
     EXACT_ZERO,
     EXACT_ONE,
-    EXACT_TWO,
-    INEXACT_ONE,
     PI,
     INF,
     NEG_INF,

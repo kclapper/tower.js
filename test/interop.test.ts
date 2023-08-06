@@ -3,7 +3,6 @@
 import {
     InexactNumber,
     SmallExactNumber,
-    BigExactNumber,
     ComplexNumber,
 } from '../src/tower';
 

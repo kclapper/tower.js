@@ -1,5 +1,4 @@
 import {
-    JSInteger,
     Number,
     BoxedNumber,
     ExactNumber,

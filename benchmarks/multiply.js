@@ -1,4 +1,3 @@
-import { strict as assert } from 'node:assert';
 import {
   Benchmark
 } from './util.js';

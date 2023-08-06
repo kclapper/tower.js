@@ -6,12 +6,10 @@ import {
     abs
 } from '../tower';
 import {
-    boxIfNecessary,
     makeCompatible
 } from './util';
 
 type NumberCompare = (x: number, y: number) => boolean;
-type BigIntCompare = (x: bigint, y: bigint) => boolean;
 type BoxedNumberCompare = (x: BoxedNumber, y: BoxedNumber) => boolean;
 
 const makeMultiArity = function (fnForNumbers: NumberCompare,

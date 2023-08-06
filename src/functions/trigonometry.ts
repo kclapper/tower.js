@@ -1,8 +1,6 @@
 import {
     RacketNumber,
     InexactNumber,
-    SmallExactNumber,
-    BigExactNumber,
     isBoxedNumber,
     isExact,
     isNaN,
@@ -10,7 +8,6 @@ import {
     EXACT_ONE,
     EXACT_TWO,
     EXACT_NEG_ONE,
-    INEXACT_ONE,
     PI,
     INF,
     NEG_INF,

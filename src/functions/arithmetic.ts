@@ -18,7 +18,6 @@ import {
 import {
     normalize,
     normalized,
-    boxIfNecessary,
     makeCompatible,
 } from './util';
 import {
@@ -29,7 +28,6 @@ import {
 } from './predicates';
 
 type NumberBinop = (x: number, y: number) => RacketNumber;
-//type BigIntBinop = (x: bigint, y: bigint) => RacketNumber;
 type BoxedNumberBinop = (x: BoxedNumber, y: BoxedNumber) => RacketNumber;
 
 /*
@@ -146,7 +144,7 @@ export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
 }
 
 export function modulo(n: RacketNumber, k: RacketNumber): RacketNumber {
-    [n, k] = boxIfNecessary(n, k);
+    [n, k] = makeCompatible(n, k);
 
     let result = remainder(n, k);
     const negk = isNegative(k);
@@ -347,8 +345,8 @@ const gcder = makeMultiArity(
 
         // The numerator of the result is the gcd of the numerators of the
         // arguments.
-        let an = x.numerator();
-        let bn = y.numerator();
+        const an = x.numerator();
+        const bn = y.numerator();
         let num;
         if (typeof an.num === 'bigint' || typeof bn.num === 'bigint') {
             let x = BigInt(an.num);
