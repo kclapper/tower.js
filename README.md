@@ -6,11 +6,10 @@ A Typescript implementation of [the Racket numeric
 tower](https://docs.racket-lang.org/reference/numbers.html). This is a rewrite
 of the [js-numbers library by Danny Yoo](https://github.com/dyoo/js-numbers).
 
-This library is meant to be used in a functional style and mainly consists of
-functions that mirror their counterpart from Racket. Racket numbers are
-represented as either Javascript numbers, bigints, or a custom class. These
-numbers should be manipulated with the library functions instead of with
-Javascript operators, functions, or with the methods on the custom class.
+Tower.js is an implementation of the [Racket numeric](https://docs.racket-lang.org/guide/numbers.html)
+tower in Typescript. It gives you the ability to use exact numbers, complex numbers, and 
+arbitrary precision numbers. This library is based on the [js-numbers](https://github.com/dyoo/js-numbers) library, 
+originally written by dyoo.
 
 ## Example
 
@@ -27,17 +26,15 @@ import {
     ONE,
 } from 'tower.js';
 
-
 // Numbers can be Javascript numbers or
 // tower.js boxed numbers. Javascript numbers
 // are treated as inexact real numbers.
 let inexactFive = 5;
 
-// Numbers can be parsed from strings. Invalid strings 
-// will return false (hence the cast).
-let inexactFive = fromString("5.0") as RacketNumber;
-let exactFive = fromString("5") as RacketNumber;
-let complex = fromString("5+3i") as RacketNumber;
+// Numbers can be parsed from strings.
+let inexactFive = fromString("5.0");
+let exactFive = fromString("5");
+let complex = fromString("5+3i");
 
 // Factorial
 function factorial(n: RacketNumber): RacketNumber {
@@ -59,4 +56,15 @@ console.log(numberToString(result)); // "11+27i"
 
 ## Installation
 
-`npm install tower.js`
+`npm install tower.js@latest`
+
+## Documentation 
+
+Documentation can be found at this repositories [Github Pages site](https://kclapper.github.io/tower.js/).
+
+## Bugs and Contributing 
+
+Bug reports are appreciated, please open an Issue on this repository. If you'd
+like to fix an issue or have a contribution to suggest, feel free to open a pull
+request. If the contribution is large, you should open a draft PR first to
+suggest it first before writing all of the code.
