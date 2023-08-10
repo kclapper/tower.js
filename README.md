@@ -28,23 +28,23 @@ import {
 } from 'tower.js';
 
 
-// Numbers can be Javascript integers, bigints, or
-// tower.js boxed numbers. Javascript integers and 
-// bigints are treated as exact integers.
-let exactFive = 5;
-let exactTen = 10n;
+// Numbers can be Javascript numbers or
+// tower.js boxed numbers. Javascript numbers
+// are treated as inexact real numbers.
+let inexactFive = 5;
 
 // Numbers can be parsed from strings. Invalid strings 
 // will return false (hence the cast).
 let inexactFive = fromString("5.0") as RacketNumber;
+let exactFive = fromString("5") as RacketNumber;
 let complex = fromString("5+3i") as RacketNumber;
 
 // Factorial
 function factorial(n: RacketNumber): RacketNumber {
-    if (equals(n, 0)) {
-        return 1;
+    if (equals(n, ZERO)) {
+        return ONE;
     }
-    return multiply(n, subtract(n, 1));
+    return multiply(n, subtract(n, ONE));
 }
 
 let result = factorial(exactFive);

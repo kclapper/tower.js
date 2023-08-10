@@ -1,7 +1,7 @@
 import {
     RacketNumber,
     isBoxedNumber
-} from "../tower";
+} from "../numbers/index";
 
 export function isNumber(x: any): x is RacketNumber {
     const isNumber = typeof x === 'number';
@@ -95,7 +95,7 @@ export function isInexact(n: RacketNumber): boolean {
         || (isBoxedNumber(n) && n.isInexact());
 }
 
-export function isRacketNumber(n: RacketNumber): n is RacketNumber {
+export function isRacketNumber(n: any): n is RacketNumber {
     return typeof n === 'number'
         || isBoxedNumber(n);
 }

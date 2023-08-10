@@ -1,4 +1,13 @@
-export * from './numbers/index';
+// Public API
+
+export {
+    RacketNumber,
+    InexactNumber,
+    SmallExactNumber,
+    BigExactNumber,
+    ComplexNumber
+} from './numbers/index';
+export * from './numbers/constants';
 
 export * from './functions/arithmetic';
 export * from './functions/comparison';

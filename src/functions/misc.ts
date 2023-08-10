@@ -1,8 +1,10 @@
 import {
     RacketNumber,
     isBoxedNumber,
+} from '../numbers/index';
+import {
     boxNumber
-} from '../tower';
+} from './index';
 import {
     normalize
 } from './util';

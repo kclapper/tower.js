@@ -6,6 +6,11 @@ import {
     EXACT_I,
     INF,
     NEG_INF,
+    ComplexNumber,
+    isRealNumber,
+    RealNumber,
+} from '../numbers/index';
+import {
     isReal,
     isZero,
     isPositive,
@@ -14,15 +19,12 @@ import {
     abs,
     sin,
     cos,
-    ComplexNumber,
     boxNumber,
-    isRealNumber,
     isExact,
     isInexact,
     exactToInexact,
-    RealNumber,
     isComplex,
-} from '../tower'
+} from './index';
 import {
     normalize
 } from './util';

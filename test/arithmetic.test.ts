@@ -1,9 +1,8 @@
 import {
-    RacketNumber,
     InexactNumber,
     SmallExactNumber,
     BigExactNumber,
-    fromString as createFromString,
+    fromString,
     EXACT_ZERO,
     EXACT_HALF,
     EXACT_ONE,
@@ -38,9 +37,6 @@ import {
     round,
     ComplexNumber,
 } from '../src/tower';
-
-// Assume we're gonna give fromString valid strings.
-const fromString = createFromString as (str: string) => RacketNumber;
 
 test('Exact constants are exact', () => {
     expect(EXACT_ONE.isExact())

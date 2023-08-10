@@ -1,7 +1,7 @@
 import {
     RacketNumber,
     InexactNumber,
-} from '../tower';
+} from '../numbers/index';
 
 type Normalizable = (...n: RacketNumber[]) => RacketNumber;
 type Normalized<F extends Normalizable> = (...n: Parameters<F>) => RacketNumber;

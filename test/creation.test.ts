@@ -16,7 +16,8 @@ test('boxNumber', () => {
 
 describe('fromString', () => {
     test("incorrect", () => {
-        expect(fromString("A")).toBe(false);
+        expect(() => fromString("A"))
+            .toThrow();
     });
     test("integer", () => {
         expect(fromString("5"))

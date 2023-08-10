@@ -2,8 +2,6 @@ import {
     RacketNumber,
     InexactNumber,
     isBoxedNumber,
-    isExact,
-    isNaN,
     EXACT_ZERO,
     EXACT_ONE,
     EXACT_TWO,
@@ -11,6 +9,10 @@ import {
     PI,
     INF,
     NEG_INF,
+} from "../numbers/index";
+import {
+    isExact,
+    isNaN,
     add,
     subtract,
     multiply,
@@ -20,7 +22,7 @@ import {
     isNegative,
     isZero,
     equals,
-} from "../tower";
+} from './index';
 import {
     normalize
 } from './util';

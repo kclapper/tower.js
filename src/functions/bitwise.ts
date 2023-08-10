@@ -2,10 +2,12 @@ import {
     RacketNumber,
     RealNumber,
     ComplexNumber,
-    isExactInteger,
     SmallExactNumber,
     BigExactNumber,
-} from '../tower';
+} from '../numbers/index';
+import {
+    isExactInteger,
+} from './index';
 import {
     isSafeInteger
 } from './util';

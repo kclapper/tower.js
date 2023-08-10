@@ -1,13 +1,17 @@
 import {
     RacketNumber,
+    JSInteger,
     BoxedNumber,
     SmallExactNumber,
     BigExactNumber,
     ComplexNumber,
     InexactNumber,
-    makeRectangular,
     ExactNumber,
-} from '../tower';
+    isSafeInteger,
+} from '../numbers/index';
+import {
+    makeRectangular,
+} from './index';
 
 export function boxNumber(n: RacketNumber): BoxedNumber {
     if (typeof n === 'number') {
@@ -22,7 +26,7 @@ const integerRegexp = new RegExp("^[+-]?\\d+$");
 const decimalRegexp = new RegExp("^([+-]?\\d*)\\.(\\d*)$");
 const scientificRegexp = new RegExp("^([+-]?\\d*\\.?\\d*)[Ee](\\+?\\d+)$");
 
-export function fromString(str: string): RacketNumber | false {
+export function fromString(str: string): RacketNumber {
     str = str.toString(); // For backwards compatibility with js-numbers
 
     const matchExact = str.match(fractionRegexp);
@@ -65,7 +69,7 @@ export function fromString(str: string): RacketNumber | false {
         return parseInteger(str);
     }
 
-    return false;
+    throw new Error(`Unable to parse a RacketNumber from ${str}`);
 }
 
 function complexIsExact(matched: string[]): boolean {
@@ -112,12 +116,37 @@ function parseFraction(str: string): RacketNumber {
 export function makeFloat(n: number): RacketNumber {
     return new InexactNumber(n);
 }
+export function makeExact(n: JSInteger, d?: JSInteger): RacketNumber {
+    if (d !== undefined) {
+        if (typeof n !== typeof d) {
+            throw new TypeError("numerator and denominator must be same type.");
+        }
+        if (typeof n === 'number' && (!Number.isInteger(n) || !Number.isInteger(d))) {
+            throw new TypeError("numerator and denominator must be integers");
+        }
+
+        if (isSafeInteger(n) && isSafeInteger(d)) {
+            return new SmallExactNumber(Number(n), Number(d));
+        }
+
+        return new BigExactNumber(BigInt(n), BigInt(d));
+    }
+
+    if (isSafeInteger(n)) {
+        return new SmallExactNumber(Number(n));
+    }
+
+    return new BigExactNumber(BigInt(n));
+}
+
+// For backwards compatibility with js-numbers.
 export function makeRational(n: number, d: number): RacketNumber {
     if (!Number.isInteger(n) || !Number.isInteger(d)) {
         throw new TypeError("numerator and denominator must be integers.")
     }
     return new SmallExactNumber(n, d);
 }
+
 export function makeComplex(real: RacketNumber, imag: RacketNumber): RacketNumber {
     return  makeRectangular(real, imag);
 }

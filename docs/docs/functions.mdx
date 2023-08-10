@@ -1,0 +1,121 @@
+# Functions
+
+The functions Tower.js provides hue closely to the corresponding function in the [Racket docs](https://docs.racket-lang.org/reference/generic-numbers.html). 
+To get more information about how a function behaves, click the link to see the corresponding
+Racket doc.
+
+export const List = ({ name, link='', children }) => (
+    <>
+        <a href={ link }>
+            <h3>
+                { name }
+            </h3>
+        </a>
+        <ul>
+            { children }
+        </ul>
+    </>
+);
+
+export const Func = ({ link, children }) => (
+    <li>
+        <a href={ link }>
+            <code>
+                { children }
+            </code>
+        </a>
+    </li>
+);
+
+### [Arithmetic](https://docs.racket-lang.org/reference/generic-numbers.html#%28part._.Arithmetic%29)
+
+- [`add`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._%2B%29%29)
+- [`subtract`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._-%29%29)
+- [`multiply`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._%2A%29%29)
+- [`divide`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._%2F%29%29)
+- [`quotient`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._quotient%29%29)
+- [`remainder`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._remainder%29%29)
+- [`modulo`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._modulo%29%29)
+- [`sqr`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28lib._racket%2Fmath..rkt%29._sqr%29%29)
+- [`sqrt`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._sqrt%29%29)
+- [`integerSqrt`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._integer-sqrt%29%29)
+- [`expt`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._expt%29%29)
+- [`exp`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._exp%29%29)
+- [`log`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._log%29%29)
+- [`numerator`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._numerator%29%29)
+- [`denominator`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._denominator%29%29)
+- [`gcd`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._gcd%29%29)
+- [`lcm`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._lcm%29%29)
+- [`abs`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._abs%29%29)
+- [`floor`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._floor%29%29)
+- [`ceiling`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._ceiling%29%29)
+- [`round`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._round%29%29)
+
+### [Comparison](https://docs.racket-lang.org/reference/generic-numbers.html#%28part._.Number_.Comparison%29) 
+
+- [`equals`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._~3d%29%29)
+- `eqv` (alias for `equals`)
+- [`greaterThan`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._~3e%29%29)
+- [`greaterThanOrEqual`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._~3e~3d%29%29)
+- [`lessThan`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._~3c%29%29)
+- [`lessThanOrEqual`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._~3c~3d%29%29)
+
+### [Predicates](https://docs.racket-lang.org/reference/number-types.html)
+
+- [`isNumber`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._number~3f%29%29)
+- [`isComplex`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._complex~3f%29%29)
+- [`isReal`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._real~3f%29%29)
+- [`isRational`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._rational~3f%29%29)
+- [`isInteger`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._integer~3f%29%29)
+- [`isExactInteger`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._exact-integer~3f%29%29)
+- [`isExactNonNegativeInteger`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._exact-nonnegative-integer~3f%29%29)
+- [`isExactPositiveInteger`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._exact-positive-integer~3f%29%29)
+- [`isInexactReal`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._inexact-real~3f%29%29)
+- [`isFlonum`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._flonum~3f%29%29) (whether something is an unboxed Javascript `number`)
+- [`isZero`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._zero~3f%29%29)
+- [`isPositive`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._positive~3f%29%29)
+- [`isNegative`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._negative~3f%29%29)
+- [`isEven`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._even~3f%29%29)
+- [`isOdd`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._odd~3f%29%29)
+- [`isExact`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._exact~3f%29%29)
+- [`isInexact`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._inexact~3f%29%29)
+- `isRacketNumber` (whether something is a Tower.js number)
+- `isFinite` (whether a `RackerNumber` is finite)
+- [`isNaN`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28lib._racket%2Fmath..rkt%29._nan~3f%29%29)
+- `isNegativeZero` (if an inexact number is `-0.0`)
+
+### [Trigonometry](https://docs.racket-lang.org/reference/generic-numbers.html#%28part._.Trigonometric_.Functions%29) 
+
+- [`sin`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._sin%29%29)
+- [`cos`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._cos%29%29)
+- [`tan`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._tan%29%29)
+- [`asin`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._asin%29%29)
+- [`acos`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._acos%29%29)
+- [`atan`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._atan%29%29)
+- [`sinh`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28lib._racket%2Fmath..rkt%29._sinh%29%29)
+- [`cosh`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28lib._racket%2Fmath..rkt%29._cosh%29%29)
+- [`tanh`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28lib._racket%2Fmath..rkt%29._tanh%29%29)
+
+### [Complex Numbers](https://docs.racket-lang.org/reference/generic-numbers.html#%28part._.Complex_.Numbers%29)
+
+- [`makeRectangular`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._make-rectangular%29%29)
+- [`makePolar`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._make-polar%29%29)
+- [`magnitude`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._magnitude%29%29)
+- [`angle`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._angle%29%29)
+- [`realPart`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._real-part%29%29)
+- [`imaginaryPart`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._imag-part%29%29)
+- [`conjugate`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28lib._racket%2Fmath..rkt%29._conjugate%29%29)
+
+### [Bitwise Operations](https://docs.racket-lang.org/reference/generic-numbers.html#%28part._.Bitwise_.Operations%29)
+
+- [`bitwiseOr`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._bitwise-ior%29%29)
+- [`bitwiseXor`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._bitwise-xor%29%29)
+- [`bitwiseAnd`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._bitwise-and%29%29)
+- [`bitwiseNot`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._bitwise-not%29%29)
+- [`arithmeticShift`](https://docs.racket-lang.org/reference/generic-numbers.html#%28def._%28%28quote._~23~25kernel%29._arithmetic-shift%29%29)
+
+### Misc.
+
+- `numberToString`
+- [`inexactToExact`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._inexact-~3eexact%29%29)
+- [`exactToInexact`](https://docs.racket-lang.org/reference/number-types.html#%28def._%28%28quote._~23~25kernel%29._exact-~3einexact%29%29)

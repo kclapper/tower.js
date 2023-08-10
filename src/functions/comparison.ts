@@ -2,9 +2,11 @@ import {
     RacketNumber,
     isBoxedNumber,
     BoxedNumber,
+} from '../numbers/index';
+import {
     subtract,
     abs
-} from '../tower';
+} from './index';
 import {
     makeCompatible
 } from './util';

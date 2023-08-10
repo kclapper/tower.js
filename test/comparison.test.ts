@@ -1,8 +1,7 @@
 import {
-    RacketNumber,
     InexactNumber,
     BigExactNumber,
-    fromString as parseString,
+    fromString,
     EXACT_I,
     EXACT_NEG_I,
     EXACT_ONE,
@@ -23,9 +22,6 @@ import {
     lessThanOrEqual,
     SmallExactNumber,
 } from '../src/tower';
-
-// Assume we only put in valid strings.
-const fromString = parseString as (str: string) => RacketNumber;
 
 describe('equals', () => {
     test('racket docs examples', () => {

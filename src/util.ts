@@ -1,7 +1,7 @@
 import {
     JSNumber,
     JSInteger
-} from './tower';
+} from './numbers/index';
 
 export function isJSNumber(n: any): n is JSNumber {
     return typeof n === 'number' || typeof n === 'bigint';

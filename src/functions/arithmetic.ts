@@ -13,19 +13,19 @@ import {
     EXACT_ONE,
     INEXACT_ZERO,
     EXACT_NEG_ONE,
+} from '../numbers/index';
+import {
     boxNumber,
-} from '../tower';
+    isNegative,
+    isPositive,
+    isExact,
+    isZero,
+} from './index';
 import {
     normalize,
     normalized,
     makeCompatible,
 } from './util';
-import {
-    isNegative,
-    isPositive,
-    isExact,
-    isZero,
-} from './predicates';
 
 type NumberBinop = (x: number, y: number) => RacketNumber;
 type BoxedNumberBinop = (x: BoxedNumber, y: BoxedNumber) => RacketNumber;
