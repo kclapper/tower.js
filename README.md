@@ -26,10 +26,16 @@ import {
     ONE,
 } from 'tower.js';
 
-// Numbers can be Javascript numbers or
-// tower.js boxed numbers. Javascript numbers
-// are treated as inexact real numbers.
-let inexactFive = 5;
+// Numbers can be Javascript numbers, bigints, or
+// tower.js boxed numbers. 
+
+// Javascript numbers are treated as 
+// inexact real numbers.
+let inexactTwo = 2;
+
+// Javascript bigints are treated as 
+// exact integers.
+let exactTwo = 2n;
 
 // Numbers can be parsed from strings.
 let inexactFive = fromString("5.0");
