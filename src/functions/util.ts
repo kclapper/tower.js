@@ -1,43 +1,58 @@
 import {
     RacketNumber,
     InexactNumber,
+    ComplexNumber,
+    SmallExactNumber,
+    BigExactNumber
 } from '../numbers/index';
+import {
+    boxNumber
+} from './index';
 
 type Normalizable = (...n: RacketNumber[]) => RacketNumber;
 type Normalized<F extends Normalizable> = (...n: Parameters<F>) => RacketNumber;
 export function normalized<Func extends Normalizable>(fn: Func): Normalized<Func> {
     return function(...nums: RacketNumber[]): RacketNumber {
         for (let i = 0; i < nums.length; i++) {
-            const n = nums[i];
-            if (n instanceof InexactNumber) {
-                nums[i] = n.num;
-            }
+            nums[i] = normalize(nums[i]);
         }
 
         const result = fn(...nums);
 
-        if (result instanceof InexactNumber) {
-            return result.num;
-        }
-        return result;
+        return normalize(result);
     }
 }
 
 export function normalize(x: RacketNumber): RacketNumber {
+    if (typeof x === 'number' || typeof x === 'bigint') {
+        return x;
+    }
     if (x instanceof InexactNumber) {
         return x.num;
+    }
+    if (x instanceof SmallExactNumber && x.den === 1) {
+        return BigInt(x.num);
+    }
+    if (x instanceof BigExactNumber && x.den === 1n) {
+        return x.num;
+    }
+    if (x instanceof ComplexNumber && x.isReal()) {
+        return normalize(x.realPart());
     }
     return x;
 }
 
 export function makeCompatible(x: RacketNumber, y: RacketNumber): [RacketNumber, RacketNumber] {
-    if (typeof x === 'number' && typeof y === 'object') {
-        x = new InexactNumber(x);
+    if (typeof x === typeof y) {
+        return [x, y];
     }
-    if (typeof y === 'number' && typeof x === 'object') {
-        y = new InexactNumber(y);
+    if (typeof x === 'object' && typeof y !== 'object') {
+        return [x, boxNumber(y)];
     }
-    return [x, y];
+    if (typeof x !== 'object' && typeof y === 'object') {
+        return [boxNumber(x), y];
+    }
+    return [Number(x), Number(y)];
 }
 
 export * from '../util';

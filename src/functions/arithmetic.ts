@@ -13,6 +13,8 @@ import {
     EXACT_ONE,
     INEXACT_ZERO,
     EXACT_NEG_ONE,
+    isSafeInteger,
+    bigExpt,
 } from '../numbers/index';
 import {
     boxNumber,
@@ -20,6 +22,14 @@ import {
     isPositive,
     isExact,
     isZero,
+    isReal,
+    equals,
+    isInexact,
+    isInteger,
+    isNaN,
+    isNegativeZero,
+    isEven,
+    isFinite,
 } from './index';
 import {
     normalize,
@@ -28,6 +38,7 @@ import {
 } from './util';
 
 type NumberBinop = (x: number, y: number) => RacketNumber;
+type BigIntBinop = (x: bigint, y: bigint) => RacketNumber;
 type BoxedNumberBinop = (x: BoxedNumber, y: BoxedNumber) => RacketNumber;
 
 /*
@@ -35,6 +46,7 @@ type BoxedNumberBinop = (x: BoxedNumber, y: BoxedNumber) => RacketNumber;
  * at least two arguments and folds the given binary operations from left to right.
  */
 function makeMultiArity(fnForNumbers: NumberBinop,
+                        fnForBigInt: BigIntBinop,
                         fnForBoxedNumbers: BoxedNumberBinop) {
     return function(args: RacketNumber[]): RacketNumber {
         let acc = args[0];
@@ -43,6 +55,8 @@ function makeMultiArity(fnForNumbers: NumberBinop,
 
             if (typeof x === 'number') {
                 acc = fnForNumbers(x, y as number);
+            } else if (typeof x === 'bigint') {
+                acc = fnForBigInt(x, y as bigint);
             } else {
                 acc = fnForBoxedNumbers(x, y as BoxedNumber);
             }
@@ -54,7 +68,7 @@ function makeMultiArity(fnForNumbers: NumberBinop,
 
 export const add = normalized((...nums: RacketNumber[]): RacketNumber => {
     if (nums.length === 0) {
-        return EXACT_ZERO;
+        return 0n;
     }
 
     if (nums.length === 1) {
@@ -66,29 +80,37 @@ export const add = normalized((...nums: RacketNumber[]): RacketNumber => {
 
 const adder = makeMultiArity(
     (x: number, y: number) => x + y,
+    (x: bigint, y: bigint) => x + y,
     (x: BoxedNumber, y: BoxedNumber) => x.add(y)
 );
 
 export const subtract = normalized((...nums: RacketNumber[]): RacketNumber => {
     if (nums.length === 1) {
-        return subtracter([EXACT_ZERO, nums[0]]);
-    } else {
-        return subtracter(nums);
+        return subtracter([0n, nums[0]]);
     }
+
+    return subtracter(nums);
 });
 
 const subtracter = makeMultiArity(
     (x: number, y: number) => x - y,
+    (x: bigint, y: bigint) => x - y,
     (x: BoxedNumber, y: BoxedNumber) => x.subtract(y)
 );
 
 export const multiply = normalized((...nums: RacketNumber[]): RacketNumber => {
     if (nums.length === 0) {
-        return EXACT_ONE;
+        return 1n;
     }
 
     if (nums.length === 1) {
         return nums[0];
+    }
+
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] === 0n) {
+            return 0n;
+        }
     }
 
     return multiplier(nums);
@@ -96,16 +118,13 @@ export const multiply = normalized((...nums: RacketNumber[]): RacketNumber => {
 
 const multiplier = makeMultiArity(
     (x: number, y: number) => x * y,
+    (x: bigint, y: bigint) => x * y,
     (x: BoxedNumber, y: BoxedNumber) => x.multiply(y)
 );
 
 export const divide = normalized((...nums: RacketNumber[]): RacketNumber => {
     if (nums.length === 1) {
-        const arg = nums[0];
-        if (typeof arg === 'number') {
-            return divider([1, arg]);
-        }
-        return divider([EXACT_ONE, arg]);
+        return divider([1n, nums[0]]);
     }
 
     return divider(nums);
@@ -113,6 +132,12 @@ export const divide = normalized((...nums: RacketNumber[]): RacketNumber => {
 
 const divider = makeMultiArity(
     (x: number, y: number) => x / y,
+    (x: bigint, y: bigint) => {
+        if (isSafeInteger(x) && isSafeInteger(y)) {
+            return new SmallExactNumber(Number(x), Number(y));
+        }
+        return new BigExactNumber(x, y);
+    },
     (x: BoxedNumber, y: BoxedNumber) => x.divide(y)
 );
 
@@ -122,6 +147,8 @@ export function quotient(n: RacketNumber, k: RacketNumber): RacketNumber {
     let result: RacketNumber;
     if (isBoxedNumber(n)) {
         result = n.divide(k as BoxedNumber).floor();
+    } else if (typeof n === 'bigint') {
+        result = n / (k as bigint);
     } else {
         result = Math.floor(n / (k as number));
     }
@@ -136,6 +163,8 @@ export function remainder(n: RacketNumber, k: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
         const quotient = n.divide(k as BoxedNumber).floor();
         result = n.subtract((k as BoxedNumber).multiply(quotient));
+    } else if (typeof n === 'bigint') {
+        result = n % (k as bigint);
     } else {
         result = n % (k as number);
     }
@@ -166,12 +195,14 @@ export function sqr(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
         return normalize(n.multiply(n));
     }
-
+    n = n as number; // HACK: Can be either number or bigint.
     return normalize(n * n);
 }
 
 export function sqrt(n: RacketNumber): RacketNumber {
-    n = normalize(n);
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
+    }
 
     if (isBoxedNumber(n)) {
         return normalize(n.sqrt());
@@ -185,7 +216,21 @@ export function sqrt(n: RacketNumber): RacketNumber {
 }
 
 export function integerSqrt(n: RacketNumber): RacketNumber {
-    n = normalize(n);
+    //let result = sqrt(n);
+
+    //if (!isReal(result)) {
+    //    return makeRectangular(realPart(result), floor(imaginaryPart(result)));
+    //}
+
+    //return floor(result);
+
+    if (!isInteger(n)) {
+        throw new TypeError("integer-sqrt expected an integer, received: " + n);
+    }
+
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
+    }
 
     if (isBoxedNumber(n)) {
         return normalize(n.integerSqrt());
@@ -199,76 +244,55 @@ export function integerSqrt(n: RacketNumber): RacketNumber {
 }
 
 export function expt(z: RacketNumber, w: RacketNumber): RacketNumber {
+    if (isExact(w) && isZero(w)) {
+        return 1n;
+    }
+    if (isInexact(w) && isZero(w)) {
+        return 1;
+    }
+    if (isExact(w) && equals(w, EXACT_HALF)) {
+        return sqrt(z);
+    }
+    if (isNaN(w)) {
+        return isReal(w) ? NaN : new ComplexNumber(NAN, NAN);
+    }
+    if (isNegativeZero(z) && isNegative(w)) {
+        return isEven(w) ? Infinity : -Infinity;
+    }
+    if (!isFinite(z) && !isNaN(z) && isNegative(z) && isInteger(w) && isNegative(w)) {
+        return isEven(w) ? 0 : -0;
+    }
+    if (!isFinite(z) && !isNaN(z) && isPositive(z) && isInteger(w) && isPositive(w)) {
+        return isEven(w) ? Infinity : -Infinity;
+    }
+    if (isExact(z) && isZero(z) && equals(w, EXACT_NEG_ONE)) {
+        throw new TypeError("expt not defined for 0 and -1");
+    }
+    if (isExact(z) && isZero(z)) {
+        return 0n;
+    }
+
     [z, w] = makeCompatible(normalize(z), normalize(w));
 
-    // Examine special cases for boxed numbers
     if (isBoxedNumber(z)) {
-        w = w as BoxedNumber;
-
-        if (w.isExact() && w.isZero()) {
-            return ONE;
-        }
-        if (w.isInexact() && w.isZero()) {
-            return 1;
-        }
-        if (w.isExact() && w.equals(EXACT_HALF)) {
-            return sqrt(z);
-        }
-        if (w.isNaN()) {
-            return w.isReal() ? NaN : new ComplexNumber(NAN, NAN);
-        }
-        if (z.isNegativeZero() && w.isNegative()) {
-            return w.isEven() ? Infinity : -Infinity;
-        }
-        if (!z.isFinite() && !z.isNaN() && z.isNegative() && w.isInteger() && w.isNegative()) {
-            return w.isEven() ? 0 : -0;
-        }
-        if (!z.isFinite() && !z.isNaN() && z.isPositive() && w.isInteger() && w.isPositive()) {
-            return w.isEven() ? Infinity : -Infinity;
-        }
-        if (z.isExact() && z.isZero() && w.equals(EXACT_NEG_ONE)) {
-            throw new TypeError("expt not defined for 0 and -1");
-        }
-
         return normalize(z.expt(w as BoxedNumber));
-
-    } else {
-        w = w as number;
-        z = z as number;
-
-        // Examine special cases for unboxed numbers.
-        if (w === 0) {
-            return 1;
-        }
-        if (Number.isNaN(w)) {
-            return NaN;
-        }
-        if (Object.is(z, -0)) {
-            if (w < 0) {
-                return w % 2 === 0 ? Infinity : -Infinity;
-            }
-        }
-        if (!Number.isFinite(z) && !Number.isNaN(z)) {
-            if (Number.isInteger(w)) {
-                if (z < 0 && w < 0) {
-                    return w % 2 === 0 ? 0 : -0;
-                }
-                if (z > 0 && w > 0) {
-                    return w % 2 === 0 ? Infinity : -Infinity;
-                }
-            }
-        }
-
-        return Math.pow(z as number, w as number);
     }
+
+    if (typeof z === 'bigint') {
+        return bigExpt(z, w as bigint);
+    }
+
+    return Math.pow(z, w as number);
 }
 
 export function exp(n: RacketNumber): RacketNumber {
-    n = normalize(n);
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
+    }
 
     if (isBoxedNumber(n)) {
         if (n.equals(EXACT_ZERO)) {
-            return EXACT_ONE;
+            return 1n;
         }
 
         return normalize(n.exp());
@@ -280,9 +304,16 @@ export function exp(n: RacketNumber): RacketNumber {
 export function log(z: RacketNumber, b?: RacketNumber): RacketNumber {
     let result: RacketNumber;
 
+    if (typeof z === 'bigint' || typeof b === 'bigint') {
+        z = boxNumber(z);
+        if (b) {
+            b = boxNumber(b);
+        }
+    }
+
     if (isBoxedNumber(z)) {
         if (z.isExact() && z.equals(EXACT_ONE)) {
-            return EXACT_ZERO;
+            return 0n;
         }
 
         result = z.log();
@@ -340,6 +371,15 @@ const gcder = makeMultiArity(
         }
         return x;
     },
+    (x: bigint, y: bigint) => {
+        let t;
+        while (y !== 0n) {
+            t = x;
+            x = y;
+            y = t % y;
+        }
+        return x;
+    },
     (x: BoxedNumber, y: BoxedNumber) => {
         const isExact = x.isExact() && y.isExact();
 
@@ -389,7 +429,7 @@ const gcder = makeMultiArity(
 
 export function lcm(...args: RacketNumber[]): RacketNumber {
     if (args.length === 0) {
-        return EXACT_ONE;
+        return 1n;
     }
 
     if (args.length === 1) {
@@ -419,29 +459,38 @@ export function abs(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
         return normalize(n.abs());
     }
+    if (typeof n === 'bigint') {
+        return n >= 0n ? n : -n;
+    }
     return Math.abs(n);
 }
 
 export function floor(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
         return normalize(n.floor());
-    } else {
+    }
+    if (typeof n === 'number') {
         return Math.floor(n);
     }
+    return n;
 }
 
 export function ceiling(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
         return normalize(n.ceiling());
-    } else {
+    }
+    if (typeof n === 'number') {
         return Math.ceil(n);
     }
+    return n;
 }
 
 export function round(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
         return normalize(n.round());
-    } else {
+    }
+    if (typeof n === 'number') {
         return Math.round(n);
     }
+    return n;
 }

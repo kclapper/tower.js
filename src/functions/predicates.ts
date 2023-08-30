@@ -4,41 +4,51 @@ import {
 } from "../numbers/index";
 
 export function isNumber(x: any): x is RacketNumber {
+    const isBigInt = typeof x === 'bigint';
     const isNumber = typeof x === 'number';
     const isBoxed = isBoxedNumber(x);
-    return isNumber || isBoxed;
+    return isBigInt || isNumber || isBoxed;
 }
 
 export const isComplex = isNumber;
 
 export function isReal(x: any): x is RacketNumber {
+    const isBigInt = typeof x === 'bigint';
     const isNumber = typeof x === 'number';
     const isBoxedReal = isBoxedNumber(x) && x.isReal();
-    return isNumber || isBoxedReal;
+    return isBigInt || isNumber || isBoxedReal;
 }
 
 export function isRational(x: any): x is RacketNumber {
+    const isBigInt = typeof x === 'bigint';
     const isNumber = typeof x === 'number' && Number.isFinite(x);
     const isBoxedRational = isBoxedNumber(x) && x.isRational();
-    return isNumber || isBoxedRational;
+    return isBigInt || isNumber || isBoxedRational;
 }
 
 export function isInteger(x: any): x is RacketNumber {
+    const isBigInt = typeof x === 'bigint';
     const isNumber = typeof x === 'number' && Number.isInteger(x);
     const isBoxedInteger = isBoxedNumber(x) && x.isInteger();
-    return isNumber || isBoxedInteger;
+    return isBigInt || isNumber || isBoxedInteger;
 }
 
 export function isExactInteger(x: any): x is RacketNumber {
-    return isBoxedNumber(x) && x.isInteger() && x.isExact();
+    const isBigInt = typeof x === 'bigint';
+    const isBoxedExact = isBoxedNumber(x) && x.isInteger() && x.isExact();
+    return isBigInt || isBoxedExact;
 }
 
 export function isExactNonNegativeInteger(x: any): x is RacketNumber {
-    return isBoxedNumber(x) && x.isInteger() && x.isExact() && !x.isNegative();
+    const forBigInt = typeof x === 'bigint' && x >= 0n;
+    const forBoxed = isBoxedNumber(x) && x.isInteger() && x.isExact() && !x.isNegative();
+    return forBigInt || forBoxed;
 }
 
 export function isExactPositiveInteger(x: any): x is RacketNumber {
-    return isBoxedNumber(x) && x.isInteger() && x.isExact() && x.isPositive();
+    const forBigInt = typeof x === 'bigint' && x > 0n;
+    const forBoxed = isBoxedNumber(x) && x.isInteger() && x.isExact() && x.isPositive();
+    return forBigInt || forBoxed;
 }
 
 export function isInexactReal(x: any): boolean {
@@ -51,21 +61,24 @@ export function isFlonum(x: any): x is number {
 }
 
 export function isZero(n: RacketNumber): boolean {
+    const forBigInt = typeof n === 'bigint' && n === 0n;
     const forNumber = typeof n === 'number' && n === 0;
     const forBoxed = isBoxedNumber(n) && n.isZero();
-    return forNumber || forBoxed;
+    return forBigInt || forNumber || forBoxed;
 }
 
 export function isPositive(n: RacketNumber): boolean {
+    const forBigInt = typeof n === 'bigint' && n > 0n;
     const forNumber = typeof n === 'number' && n > 0;
     const forBoxed = isBoxedNumber(n) && n.isPositive();
-    return forNumber || forBoxed;
+    return forBigInt || forNumber || forBoxed;
 }
 
 export function isNegative(n: RacketNumber): boolean {
+    const forBigInt = typeof n === 'bigint' && n < 0n;
     const forNumber = typeof n === 'number' && n < 0;
     const forBoxed = isBoxedNumber(n) && n.isNegative();
-    return forNumber || forBoxed;
+    return forBigInt || forNumber || forBoxed;
 }
 
 export function isEven(n: RacketNumber): boolean {
@@ -73,9 +86,10 @@ export function isEven(n: RacketNumber): boolean {
         throw new TypeError("'isEven' only defined for integers");
     }
 
+    const forBigInt = typeof n === 'bigint' && n % 2n === 0n;
     const forNumber = typeof n === 'number' && n % 2 === 0;
     const forBoxed = isBoxedNumber(n) && n.isEven();
-    return forNumber || forBoxed;
+    return forBigInt || forNumber || forBoxed;
 }
 
 export function isOdd(n: RacketNumber): boolean {
@@ -87,7 +101,9 @@ export function isOdd(n: RacketNumber): boolean {
 }
 
 export function isExact(n: RacketNumber): boolean {
-    return isBoxedNumber(n) && n.isExact();
+    const isBigInt = typeof n === 'bigint';
+    const isBoxedExact = isBoxedNumber(n) && n.isExact();
+    return isBigInt || isBoxedExact;
 }
 
 export function isInexact(n: RacketNumber): boolean {
@@ -96,8 +112,7 @@ export function isInexact(n: RacketNumber): boolean {
 }
 
 export function isRacketNumber(n: any): n is RacketNumber {
-    return typeof n === 'number'
-        || isBoxedNumber(n);
+    return typeof n === 'number' || typeof n === 'bigint' || isBoxedNumber(n);
 }
 export const isSchemeNumber = isRacketNumber; // For backwards compatibility
 
@@ -106,7 +121,7 @@ export function isFinite(n: RacketNumber): boolean {
         return n.isFinite();
     }
 
-    return Number.isFinite(n);
+    return Number.isFinite(n) || typeof n === 'bigint';
 }
 
 export function isNaN(n: RacketNumber): boolean {

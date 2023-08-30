@@ -3,24 +3,22 @@
 import {
     InexactNumber,
     SmallExactNumber,
-    ComplexNumber,
+    fromString
 } from '../src/tower';
 
 describe('string', () => {
     test('coercion', () => {
         expect(String(new InexactNumber(5)))
             .toBe("5.0");
-        expect(String(new SmallExactNumber(5, 1)))
+        expect(String(new SmallExactNumber(5)))
             .toBe("5");
         expect(String(new SmallExactNumber(5, 2)))
             .toBe("5/2");
-        expect(String(new ComplexNumber(new SmallExactNumber(5),
-                                        new SmallExactNumber(3))))
+        expect(String(fromString(`5+3i`)))
             .toBe("5+3i");
-        expect(String(new ComplexNumber(new SmallExactNumber(5, 2),
-                                        new SmallExactNumber(3, 2))))
+        expect(String(fromString(`5/2+3/2i`)))
             .toBe("5/2+3/2i");
-        expect(String(new ComplexNumber(new InexactNumber(5), new InexactNumber(3))))
+        expect(String(fromString("5.0+3.0i")))
             .toBe("5.0+3.0i");
     });
     test('concatenation', () => {
@@ -41,14 +39,13 @@ describe('addition', () => {
             .toBe(10.5);
     });
     test('exact', () => {
-        expect(5 + (new SmallExactNumber(5, 1) as unknown as number))
+        expect(5 + (new SmallExactNumber(5) as unknown as number))
             .toBe(10);
         expect(5 + (new SmallExactNumber(11, 2) as unknown as number))
             .toBe(10.5);
     });
     test('complex', () => {
-        expect(5 + (new ComplexNumber(new InexactNumber(5),
-                                     new InexactNumber(2)) as unknown as number))
+        expect(5 + (fromString("5.0+2.0i") as unknown as number))
             .toBe(NaN);
     });
 });
@@ -61,14 +58,13 @@ describe('subtraction', () => {
             .toBe(-0.5);
     });
     test('exact', () => {
-        expect(5 - (new SmallExactNumber(5, 1) as unknown as number))
+        expect(5 - (new SmallExactNumber(5) as unknown as number))
             .toBe(0);
         expect(5 - (new SmallExactNumber(11, 2) as unknown as number))
             .toBe(-0.5);
     });
     test('complex', () => {
-        expect(5 - (new ComplexNumber(new InexactNumber(5),
-                                      new InexactNumber(3)) as unknown as number))
+        expect(5 - (fromString("5.0+3.0i") as unknown as number))
             .toBe(NaN);
     });
 });
@@ -81,14 +77,13 @@ describe('multiplication', () => {
             .toBe(27.5);
     });
     test('exact', () => {
-        expect(5 * (new SmallExactNumber(5, 1) as unknown as number))
+        expect(5 * (new SmallExactNumber(5) as unknown as number))
             .toBe(25);
         expect(5 * (new SmallExactNumber(11, 2) as unknown as number))
             .toBe(27.5);
     });
     test('complex', () => {
-        expect(5 * (new ComplexNumber(new InexactNumber(5),
-                                      new InexactNumber(3)) as unknown as number))
+        expect(5 * (fromString("5.0+3.0i") as unknown as number))
             .toBe(NaN);
     });
 });
@@ -101,14 +96,13 @@ describe('division', () => {
             .toBe(0.9090909090909091);
     });
     test('exact', () => {
-        expect(5 / (new SmallExactNumber(5, 1) as unknown as number))
+        expect(5 / (new SmallExactNumber(5) as unknown as number))
             .toBe(1);
         expect(5 / (new SmallExactNumber(11, 2) as unknown as number))
             .toBe(0.9090909090909091);
     });
     test('complex', () => {
-        expect(5 / (new ComplexNumber(new InexactNumber(5),
-                                      new InexactNumber(3)) as unknown as number))
+        expect(5 / (fromString("5.0+3.0i") as unknown as number))
             .toBe(NaN);
     });
 });
@@ -123,16 +117,15 @@ describe('comparison', () => {
             .toBe(true);
     });
     test('exact', () => {
-        expect(5 > (new SmallExactNumber(5, 1) as unknown as number))
+        expect(5 > (new SmallExactNumber(5) as unknown as number))
             .toBe(false);
-        expect(5 >= (new SmallExactNumber(5, 1) as unknown as number))
+        expect(5 >= (new SmallExactNumber(5) as unknown as number))
             .toBe(true);
         expect(5 <= (new SmallExactNumber(11, 2) as unknown as number))
             .toBe(true);
     });
     test('complex', () => {
-        expect(5 < (new ComplexNumber(new InexactNumber(5),
-                                      new InexactNumber(3)) as unknown as number))
+        expect(5 < (fromString("5.0+3.0i") as unknown as number))
             .toBe(false);
     });
 });

@@ -2,10 +2,7 @@ import {
     RacketNumber,
     InexactNumber,
     isBoxedNumber,
-    EXACT_ZERO,
     EXACT_ONE,
-    EXACT_TWO,
-    EXACT_NEG_ONE,
     PI,
     INF,
     NEG_INF,
@@ -22,6 +19,7 @@ import {
     isNegative,
     isZero,
     equals,
+    boxNumber,
 } from './index';
 import {
     normalize
@@ -36,7 +34,11 @@ function isOne(n: RacketNumber): boolean {
 
 export function sin(n: RacketNumber): RacketNumber {
     if (isExact(n) && isZero(n)) {
-        return EXACT_ZERO;
+        return 0n;
+    }
+
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
     }
 
     if (isBoxedNumber(n)) {
@@ -48,7 +50,11 @@ export function sin(n: RacketNumber): RacketNumber {
 
 export function cos(n: RacketNumber): RacketNumber {
     if (isExact(n) && isZero(n)) {
-        return EXACT_ONE;
+        return 1n;
+    }
+
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
     }
 
     if (isBoxedNumber(n)) {
@@ -60,7 +66,11 @@ export function cos(n: RacketNumber): RacketNumber {
 
 export function tan(n: RacketNumber): RacketNumber {
     if (isExact(n) && isZero(n)) {
-        return EXACT_ZERO;
+        return 0n;
+    }
+
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
     }
 
     if (isBoxedNumber(n)) {
@@ -72,7 +82,11 @@ export function tan(n: RacketNumber): RacketNumber {
 
 export function asin(n: RacketNumber): RacketNumber {
     if (isExact(n) && isZero(n)) {
-        return EXACT_ZERO;
+        return 0n;
+    }
+
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
     }
 
     if (isBoxedNumber(n)) {
@@ -82,12 +96,17 @@ export function asin(n: RacketNumber): RacketNumber {
     if (-1 <= n && n <= 1) {
         return Math.asin(n);
     }
-    return (new InexactNumber(n)).asin();
+
+    return normalize((new InexactNumber(n)).asin());
 }
 
 export function acos(n: RacketNumber): RacketNumber {
     if (isExact(n) && isOne(n)) {
-        return EXACT_ZERO;
+        return 0n;
+    }
+
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
     }
 
     if (isBoxedNumber(n)) {
@@ -99,14 +118,14 @@ export function acos(n: RacketNumber): RacketNumber {
         return Math.acos(n);
     }
 
-    return (new InexactNumber(n)).acos();
+    return normalize((new InexactNumber(n)).acos());
 }
 
 export const atan2 = atan; // For backwards compatibility with js-numbers
 
 export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
     if (x === undefined && isExact(y) && isZero(y)) {
-        return EXACT_ZERO;
+        return 0n;
     }
 
     if (x === undefined) {
@@ -117,16 +136,16 @@ export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
     const arg = divide(y, x);
 
     if (isNaN(arg)) {
-        if (equals(y, INF) && equals(x, INF)) {
+        if (equals(y, INF) && equals(x, Infinity)) {
             return Math.PI / 4;
 
-        } else if (equals(y, INF) && equals(x, NEG_INF)) {
+        } else if (equals(y, INF) && equals(x, -Infinity)) {
             return 3 * (Math.PI / 4);
 
-        } else if (equals(y, NEG_INF) && equals(x, NEG_INF)) {
+        } else if (equals(y, NEG_INF) && equals(x, -Infinity)) {
             return -3 * (Math.PI / 4);
 
-        } else if (equals(y, NEG_INF) && equals(x, INF)) {
+        } else if (equals(y, NEG_INF) && equals(x, Infinity)) {
             return -1 * (Math.PI / 4);
         }
     }
@@ -141,10 +160,10 @@ export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
         return subtract(atan1(arg), PI);
 
     } else if (isZero(x) && isPositive(y)) {
-        return divide(PI, EXACT_TWO);
+        return divide(PI, 2n);
 
     } else if (isZero(x) && isNegative(y)) {
-        return subtract(EXACT_ZERO, divide(PI, EXACT_TWO));
+        return subtract(0n, divide(Math.PI, 2n));
 
     } else  {
         throw new Error("atan not defined for coordinates (0, 0)");
@@ -152,6 +171,10 @@ export function atan(y: RacketNumber, x?: RacketNumber): RacketNumber {
 }
 
 function atan1(n: RacketNumber): RacketNumber {
+    if (typeof n === 'bigint') {
+        n = boxNumber(n);
+    }
+
     if (isBoxedNumber(n)) {
         return normalize(n.atan());
 
@@ -166,16 +189,16 @@ function atan1(n: RacketNumber): RacketNumber {
 }
 
 export function sinh(n: RacketNumber): RacketNumber {
-    return divide(subtract(exp(n), exp(multiply(n, EXACT_NEG_ONE))), EXACT_TWO);
+    return divide(subtract(exp(n), exp(multiply(n, -1n))), 2n);
 }
 
 export function cosh(n: RacketNumber): RacketNumber {
     if (isZero(n)) {
         return 1; // Racket returns inexact 1 here.
     }
-    return divide(add(exp(n), exp(multiply(n, EXACT_NEG_ONE))), EXACT_TWO);
+    return divide(add(exp(n), exp(multiply(n, -1n))), 2n);
 }
 
 export function tanh(n: RacketNumber): RacketNumber {
-    return divide(subtract(exp(multiply(EXACT_TWO, n)), EXACT_ONE), add(exp(multiply(EXACT_TWO, n)), EXACT_ONE))
+    return divide(subtract(exp(multiply(2n, n)), 1n), add(exp(multiply(2n, n)), 1n))
 }

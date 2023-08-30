@@ -10,6 +10,10 @@ import {
 test('boxNumber', () => {
     expect(boxNumber(5))
         .toEqual(new InexactNumber(5));
+    expect(boxNumber(5n))
+        .toEqual(new SmallExactNumber(5));
+    expect(boxNumber(BigInt(Number.MAX_SAFE_INTEGER) + 5n))
+        .toEqual(new BigExactNumber(BigInt(Number.MAX_SAFE_INTEGER) + 5n));
     expect(boxNumber(new SmallExactNumber(1)))
         .toEqual(new SmallExactNumber(1));
 });
@@ -21,18 +25,33 @@ describe('fromString', () => {
     });
     test("integer", () => {
         expect(fromString("5"))
-            .toEqual(new SmallExactNumber(5));
+            .toEqual(5n);
+        expect(fromString("0"))
+            .toEqual(0n);
+        expect(fromString("-10"))
+            .toEqual(-10n);
         expect(fromString((BigInt(Number.MAX_SAFE_INTEGER) + 5n).toString()))
-            .toEqual(new BigExactNumber(BigInt(Number.MAX_SAFE_INTEGER) + 5n));
+            .toEqual(BigInt(Number.MAX_SAFE_INTEGER) + 5n);
     });
     test("fraction", () => {
         expect(fromString("9/7"))
             .toEqual(new SmallExactNumber(9, 7));
+        expect(fromString(`${BigInt(Number.MAX_SAFE_INTEGER) + 5n}/${BigInt(Number.MAX_SAFE_INTEGER) + 5n}`))
+            .toEqual(new BigExactNumber(BigInt(Number.MAX_SAFE_INTEGER) + 5n,
+                                        BigInt(Number.MAX_SAFE_INTEGER) + 5n));
     });
     test("decimal", () => {
         expect(fromString("5.5"))
             .toBe(5.5);
+        expect(fromString("5.0"))
+            .toBe(5);
     });
+    test('scientific', () => {
+        expect(fromString("1.5e+9"))
+            .toEqual(1.5e+9);
+        expect(fromString("1.5e-9"))
+            .toEqual(1.5e-9);
+    })
     test("exact complex", () => {
         expect(fromString("9+7i"))
             .toEqual(new ComplexNumber(new SmallExactNumber(9),
@@ -60,6 +79,9 @@ describe('fromString', () => {
         expect(fromString("6.7-10.7i"))
             .toEqual(new ComplexNumber(new InexactNumber(6.7),
                                        new InexactNumber(-10.7)));
+        expect(fromString(`8.256719834227923e-5+1.0000377833796006i`))
+            .toEqual(new ComplexNumber(new InexactNumber(8.256719834227923e-5),
+                                       new InexactNumber(1.0000377833796006)));
     });
     test("special values", () => {
         expect(fromString("+nan.0")).toEqual(NaN);
@@ -73,6 +95,36 @@ describe('fromString', () => {
         expect(fromString("-inf.0")).toEqual(-Infinity);
         expect(fromString("-inf.f")).toEqual(-Infinity);
 
+        expect(fromString("+inf.0-inf.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(Infinity),
+                                       new InexactNumber(-Infinity)));
+        expect(fromString("-inf.0+inf.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(-Infinity),
+                                       new InexactNumber(Infinity)));
+
+        expect(fromString("+nan.0-nan.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(NaN),
+                                       new InexactNumber(NaN)));
+        expect(fromString("-nan.0+nan.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(NaN),
+                                       new InexactNumber(NaN)));
+
+        expect(fromString("+nan.0-inf.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(NaN),
+                                       new InexactNumber(-Infinity)));
+        expect(fromString("+inf.0-nan.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(Infinity),
+                                       new InexactNumber(NaN)));
+        expect(fromString("+inf.f-nan.fi"))
+            .toEqual(new ComplexNumber(new InexactNumber(Infinity),
+                                       new InexactNumber(NaN)));
+        expect(fromString("+inf.f-inf.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(Infinity),
+                                       new InexactNumber(-Infinity)));
+        expect(fromString("+inf.f-inf.0i"))
+            .toEqual(new ComplexNumber(new InexactNumber(Infinity),
+                                       new InexactNumber(-Infinity)));
+
         expect(Object.is(-0.0, fromString("-0.0"))).toBe(true);
     });
     test("big numbers", () => {
@@ -80,7 +132,7 @@ describe('fromString', () => {
         const bignumberstr = bignumber.toString();
 
         expect(fromString(bignumberstr))
-            .toEqual(new BigExactNumber(bignumber));
+            .toEqual(bignumber);
         expect(fromString(`${bignumberstr}/${7}`))
             .toEqual(new BigExactNumber(bignumber, 7n));
         expect(fromString(`${bignumberstr}+${bignumberstr}i`))

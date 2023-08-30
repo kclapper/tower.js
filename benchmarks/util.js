@@ -26,10 +26,13 @@ export class Benchmark {
 
       let result = {};
 
-      result['value'] = current.thunk();
 
       result['times'] = [];
       for (let i = 0; i < trials; i++) {
+        if (i === 0) {
+          result['value'] = current.thunk();
+        }
+
         let start = performance.now();
         current.thunk();
         result.times.push(performance.now() - start);

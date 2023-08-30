@@ -12,9 +12,11 @@ import {
 } from './util';
 
 type NumberCompare = (x: number, y: number) => boolean;
+type BigIntCompare = (x: bigint, y: bigint) => boolean;
 type BoxedNumberCompare = (x: BoxedNumber, y: BoxedNumber) => boolean;
 
 const makeMultiArity = function (fnForNumbers: NumberCompare,
+                                 fnForBigInts: BigIntCompare,
                                  fnForBoxedNumbers: BoxedNumberCompare) {
     return function(...args: RacketNumber[]): boolean {
         if (args.length < 2) {
@@ -28,6 +30,8 @@ const makeMultiArity = function (fnForNumbers: NumberCompare,
             [x, y] = makeCompatible(x, y);
 
             if (typeof x === 'number' && !fnForNumbers(x, y as number)) {
+                return false;
+            } else if (typeof x === 'bigint' && !fnForBigInts(x, y as bigint)) {
                 return false;
             } else if (isBoxedNumber(x) && !fnForBoxedNumbers(x as BoxedNumber, y as BoxedNumber)) {
                 return false;
@@ -46,6 +50,7 @@ export function equals(...nums: RacketNumber[]): boolean {
 
 const equalComp = makeMultiArity(
     (x: number, y: number) => x === y,
+    (x: bigint, y: bigint) => x === y,
     (x: BoxedNumber, y: BoxedNumber) => x.equals(y)
 );
 
@@ -68,6 +73,7 @@ export function greaterThan(...nums: RacketNumber[]): boolean {
 
 const gtComp = makeMultiArity(
     (x: number, y: number) => x > y,
+    (x: bigint, y: bigint) => x > y,
     (x: BoxedNumber, y: BoxedNumber) => x.greaterThan(y)
 );
 
@@ -80,6 +86,7 @@ export function greaterThanOrEqual(...nums: RacketNumber[]): boolean {
 
 const gteComp = makeMultiArity(
     (x: number, y: number) => x >= y,
+    (x: bigint, y: bigint) => x >= y,
     (x: BoxedNumber, y: BoxedNumber) => x.greaterThanOrEqual(y)
 );
 
@@ -92,6 +99,7 @@ export function lessThan(...nums: RacketNumber[]): boolean {
 
 const ltComp = makeMultiArity(
     (x: number, y: number) => x < y,
+    (x: bigint, y: bigint) => x < y,
     (x: BoxedNumber, y: BoxedNumber) => x.lessThan(y)
 );
 
@@ -104,5 +112,6 @@ export function lessThanOrEqual(...nums: RacketNumber[]): boolean {
 
 const lteComp = makeMultiArity(
     (x: number, y: number) => x <= y,
+    (x: bigint, y: bigint) => x <= y,
     (x: BoxedNumber, y: BoxedNumber) => x.lessThanOrEqual(y)
 );

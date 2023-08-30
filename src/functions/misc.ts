@@ -10,10 +10,13 @@ import {
 } from './util';
 
 export function inexactToExact(n: RacketNumber): RacketNumber {
+    if (typeof n === 'bigint') {
+        return n;
+    }
     if (isBoxedNumber(n)) {
         return n.toExact();
     }
-    return boxNumber(n).toExact();
+    return normalize(boxNumber(n).toExact());
 }
 export const toExact = inexactToExact; // For backwards compatibility
 
@@ -21,7 +24,7 @@ export function exactToInexact(n: RacketNumber): RacketNumber {
     if (isBoxedNumber(n)) {
         return normalize(n.toInexact());
     }
-    return n;
+    return Number(n);
 }
 export const toInexact = exactToInexact; // For backwards compatibility
 

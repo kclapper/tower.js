@@ -387,7 +387,13 @@ export class BigExactNumber implements Number {
         if (this.den === 1n) {
             return this;
         } else {
-            return new BigExactNumber(this.num / this.den);
+            const floor = this.num / this.den;
+
+            if (isSafeInteger(floor)) {
+                return new SmallExactNumber(Number(floor));
+            }
+
+            return new BigExactNumber(floor);
         }
     }
     public ceiling(): RealNumber {

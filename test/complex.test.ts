@@ -1,17 +1,5 @@
 import {
-    InexactNumber,
-    SmallExactNumber,
-    BigExactNumber,
-    ComplexNumber,
-    EXACT_ONE,
-    EXACT_NEG_ONE,
-    EXACT_HALF,
-    EXACT_ZERO,
-    INEXACT_ONE,
-    INEXACT_ZERO,
-    PI,
-    INF,
-    NEG_INF,
+    fromString,
     makeRectangular,
     makePolar,
     multiply,
@@ -24,245 +12,214 @@ import {
 
 describe('makeRectangular', () => {
     test('racket docs examples', () => {
-        expect(makeRectangular(new SmallExactNumber(3), new InexactNumber(4)))
-            .toEqual(new ComplexNumber(new InexactNumber(3),
-                                       new InexactNumber(4)));
+        expect(makeRectangular(fromString(`3`), fromString(`4.0`)))
+            .toEqual(fromString("3.0+4.0i"));
     });
-    test('unboxed', () => {
-        expect(makeRectangular(3, 4))
-            .toEqual(new ComplexNumber(new InexactNumber(3),
-                                       new InexactNumber(4)));
-        expect(makeRectangular(3, -4))
-            .toEqual(new ComplexNumber(new InexactNumber(3),
-                                       new InexactNumber(-4)));
-        expect(makeRectangular(3, EXACT_ZERO))
-            .toEqual(3);
+    test('inexact numbers', () => {
+        expect(makeRectangular(fromString("3.0"), fromString(`4.0`)))
+            .toEqual(fromString("3.0+4.0i"));
+        expect(makeRectangular(fromString("3.0"), fromString(`-4.0`)))
+            .toEqual(fromString("3.0-4.0i"));
+        expect(makeRectangular(fromString("3.0"), fromString(`0`)))
+            .toEqual(fromString("3.0"));
+        expect(makeRectangular(fromString("1.0"), fromString("1.0")))
+            .toEqual(fromString("1.0+1.0i"));
+        expect(makeRectangular(fromString("1.0"), fromString("0.0")))
+            .toEqual(fromString("1.0+0.0i"));
 
-        const bignumber = new BigExactNumber(BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2));
+        const bignumber = fromString(`${BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2)}`);
         expect(makeRectangular(bignumber, bignumber))
-            .toEqual(new ComplexNumber(bignumber, bignumber));
+            .toEqual(fromString(`${bignumber}+${bignumber}i`));
     });
-    test('boxed numbers: inexact', () => {
-        expect(makeRectangular(INEXACT_ONE, INEXACT_ONE))
-            .toEqual(new ComplexNumber(INEXACT_ONE, INEXACT_ONE));
-        expect(makeRectangular(INEXACT_ONE, INEXACT_ZERO))
-            .toEqual(new ComplexNumber(INEXACT_ONE, INEXACT_ZERO));
-    });
-    test('boxed numbers: exact', () => {
-        expect(makeRectangular(EXACT_ONE, EXACT_ONE))
-            .toEqual(new ComplexNumber(EXACT_ONE, EXACT_ONE));
-        expect(makeRectangular(EXACT_ONE, EXACT_ZERO))
-            .toEqual(EXACT_ONE);
-    });
-    test('bigints', () => {
-        expect(makeRectangular(new BigExactNumber(BigInt(5), BigInt(1)), EXACT_ONE))
-            .toEqual(new ComplexNumber(new BigExactNumber(5n), EXACT_ONE));
+    test('exact numbers', () => {
+        expect(makeRectangular(fromString("1"), fromString("1")))
+            .toEqual(fromString("1+1i"));
+        expect(makeRectangular(fromString("1"), fromString("0")))
+            .toEqual(fromString("1"));
+        expect(makeRectangular(fromString(`5`), fromString("1")))
+            .toEqual(fromString("5+1i"));
     });
     test('mixed precision', () => {
-        expect(makeRectangular(INEXACT_ONE, EXACT_ONE))
-            .toEqual(new ComplexNumber(INEXACT_ONE, INEXACT_ONE));
-        expect(makeRectangular(EXACT_ONE, INEXACT_ONE))
-            .toEqual(new ComplexNumber(INEXACT_ONE, INEXACT_ONE));
+        expect(makeRectangular(fromString("1.0"), fromString("1")))
+            .toEqual(fromString("1.0+1.0i"));
+        expect(makeRectangular(fromString("1"), fromString("1.0")))
+            .toEqual(fromString("1.0+1.0i"));
     });
 });
 
 describe('makePolar', () => {
     test('racket docs examples', () => {
-        expect(makePolar(10, multiply(PI, EXACT_HALF)))
-            .toEqual(new ComplexNumber(new InexactNumber(6.123233995736766e-16),
-                                       new InexactNumber(10)));
-        expect(makePolar(10, multiply(PI, new SmallExactNumber(1, 4))))
-            .toEqual(new ComplexNumber(new InexactNumber(7.0710678118654755),
-                                       new InexactNumber(7.071067811865475)));
+        expect(makePolar(fromString(`10.0`), multiply(fromString(`${Math.PI}`), fromString("1/2"))))
+            .toEqual(fromString(`6.123233995736766e-16+10.0i`));
+        expect(makePolar(fromString(`10.0`), multiply(fromString(`${Math.PI}`), fromString(`1/4`))))
+            .toEqual(fromString(`7.0710678118654755+7.071067811865475i`));
     });
-    test('unboxed', () => {
-        expect(makePolar(3, 4))
-            .toEqual(new ComplexNumber(new InexactNumber(-1.960930862590836),
-                                       new InexactNumber(-2.2704074859237844)));
-        expect(makePolar(3, -4))
-            .toEqual(new ComplexNumber(new InexactNumber(-1.960930862590836),
-                                       new InexactNumber(2.2704074859237844)));
-        expect(makePolar(3, EXACT_ZERO))
-            .toEqual(3);
+    test('inexact numbers', () => {
+        expect(makePolar(fromString(`3.0`), fromString(`4.0`)))
+            .toEqual(fromString(`-1.960930862590836-2.2704074859237844i`));
+        expect(makePolar(fromString(`3.0`), fromString(`-4.0`)))
+            .toEqual(fromString(`-1.960930862590836+2.2704074859237844i`));
+        expect(makePolar(fromString(`3.0`), fromString("0")))
+            .toEqual(fromString(`3.0`));
+        expect(makePolar(fromString("1.0"), fromString("1.0")))
+            .toEqual(fromString(`0.5403023058681398+0.84147098480789651i`));
+        expect(makePolar(fromString("1.0"), fromString("0.0")))
+            .toEqual(fromString("1.0+0.0i"));
     });
     test('big numbers', () => {
-        const bignumber = new BigExactNumber(BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2));
+        const bignumber = fromString(`${BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2)}`);
         expect(makePolar(bignumber, bignumber))
-            .toEqual(new ComplexNumber(new InexactNumber(-4760410950687404.0),
-                                       new InexactNumber(-7646445317608838.0)));
-        expect(makePolar(new BigExactNumber(BigInt(5), BigInt(1)), EXACT_ONE))
-            .toEqual(new ComplexNumber(new InexactNumber(2.701511529340699),
-                                       new InexactNumber(4.207354924039483)));
+            .toEqual(fromString(`-4760410950687404.0-7646445317608838.0i`));
+        expect(makePolar(fromString(`5`), fromString("1")))
+            .toEqual(fromString(`2.701511529340699+4.207354924039483i`));
     })
-    test('boxed numbers: inexact', () => {
-        expect(makePolar(INEXACT_ONE, INEXACT_ONE))
-            .toEqual(new ComplexNumber(new InexactNumber(0.5403023058681398),
-                                       new InexactNumber(0.84147098480789651)));
-        expect(makePolar(INEXACT_ONE, INEXACT_ZERO))
-            .toEqual(new ComplexNumber(INEXACT_ONE, INEXACT_ZERO));
-    });
-    test('boxed numbers: exact', () => {
-        expect(makePolar(EXACT_ONE, EXACT_ONE))
-            .toEqual(new ComplexNumber(new InexactNumber(0.5403023058681398),
-                                       new InexactNumber(0.84147098480789651)));
-        expect(makePolar(EXACT_ONE, EXACT_ZERO))
-            .toEqual(EXACT_ONE);
+    test('exact numbers', () => {
+        expect(makePolar(fromString("1"), fromString("1")))
+            .toEqual(fromString(`0.5403023058681398+0.84147098480789651i`));
+        expect(makePolar(fromString("1"), fromString("0")))
+            .toEqual(fromString("1"));
     });
     test('mixed precision', () => {
-        expect(makePolar(INEXACT_ONE, EXACT_ONE))
-            .toEqual(new ComplexNumber(new InexactNumber(0.5403023058681398),
-                                       new InexactNumber(0.84147098480789651)));
-        expect(makePolar(EXACT_ONE, INEXACT_ONE))
-            .toEqual(new ComplexNumber(new InexactNumber(0.5403023058681398),
-                                       new InexactNumber(0.84147098480789651)));
+        expect(makePolar(fromString("1.0"), fromString("1")))
+            .toEqual(fromString(`0.5403023058681398+0.84147098480789651i`));
+        expect(makePolar(fromString("1"), fromString("1.0")))
+            .toEqual(fromString(`0.5403023058681398+0.84147098480789651i`));
     });
 });
 
 describe('magnitude', () => {
     test('racket docs examples', () => {
-        expect(magnitude(new SmallExactNumber(-3)))
-            .toEqual(new SmallExactNumber(3));
-        expect(magnitude(new InexactNumber(3)))
-            .toEqual(3);
-        expect(magnitude(new ComplexNumber(new SmallExactNumber(3),
-                                           new SmallExactNumber(4))))
-            .toEqual(new SmallExactNumber(5));
+        expect(magnitude(fromString(`-3`)))
+            .toEqual(fromString(`3`));
+        expect(magnitude(fromString(`3.0`)))
+            .toEqual(fromString(`3.0`));
+        expect(magnitude(fromString(`3+4i`)))
+            .toEqual(fromString(`5`));
     });
     test('infinity', () => {
-        expect(magnitude(new ComplexNumber(INF,
-                                           new SmallExactNumber(5))))
-            .toEqual(INF);
-        expect(magnitude(new ComplexNumber(new SmallExactNumber(5), INF)))
-            .toEqual(INF);
-        expect(magnitude(new ComplexNumber(NEG_INF,
-                                           new SmallExactNumber(5))))
-            .toEqual(INF);
-        expect(magnitude(new ComplexNumber(new SmallExactNumber(5), NEG_INF)))
-            .toEqual(INF);
+        expect(magnitude(fromString("+inf.0+5i")))
+            .toEqual(fromString("+inf.0"));
+        expect(magnitude(fromString("5+inf.0i")))
+            .toEqual(fromString("+inf.0"));
+        expect(magnitude(fromString("-inf.0+5i")))
+            .toEqual(fromString("+inf.0"));
+        expect(magnitude(fromString("5-inf.0i")))
+            .toEqual(fromString("+inf.0"));
     });
-    test('bigints', () => {
-        expect(magnitude(new BigExactNumber(BigInt(5))))
-            .toEqual(new BigExactNumber(BigInt(5)));
+    test('exact numbers', () => {
+        expect(magnitude(fromString(`5`)))
+            .toEqual(fromString(`5`));
     });
 });
 
 describe('angle', () => {
     test('racket docs examples', () => {
-        expect(angle(new SmallExactNumber(-3)))
-            .toEqual(Math.PI);
-        expect(angle(EXACT_NEG_ONE))
-            .toEqual(Math.PI);
-        expect(angle(new InexactNumber(3)))
-            .toEqual(EXACT_ZERO);
-        expect(angle(new ComplexNumber(new SmallExactNumber(3),
-                                       new SmallExactNumber(4))))
-            .toEqual(0.9272952180016122);
-        expect(angle(new ComplexNumber(INF, INF)))
-            .toEqual(0.7853981633974483);
+        expect(angle(fromString(`-3`)))
+            .toEqual(fromString(`${Math.PI}`));
+        expect(angle(fromString("-1")))
+            .toEqual(fromString(`${Math.PI}`));
+        expect(angle(fromString(`3.0`)))
+            .toEqual(fromString("0"));
+        expect(angle(fromString(`3+4i`)))
+            .toEqual(fromString(`0.9272952180016122`));
+        expect(angle(fromString("+inf.0+inf.0i")))
+            .toEqual(fromString(`0.7853981633974483`));
     });
     test('infinity', () => {
-        expect(angle(new ComplexNumber(INF, NEG_INF)))
-            .toEqual(-0.7853981633974483);
-        expect(angle(new ComplexNumber(NEG_INF, NEG_INF)))
-            .toEqual(-2.356194490192345);
-        expect(angle(new ComplexNumber(NEG_INF, INF)))
-            .toEqual(2.356194490192345);
+        expect(angle(fromString("+inf.0-inf.0i")))
+            .toEqual(fromString(`-0.7853981633974483`));
+        expect(angle(fromString("-inf.0-inf.0i")))
+            .toEqual(fromString(`-2.356194490192345`));
+        expect(angle(fromString("-inf.0+inf.0i")))
+            .toEqual(fromString(`2.356194490192345`));
 
-        expect(angle(new ComplexNumber(INF, new SmallExactNumber(5))))
-            .toEqual(0);
-        expect(angle(new ComplexNumber(INF, new SmallExactNumber(-5))))
-            .toEqual(-0);
-        expect(angle(new ComplexNumber(new SmallExactNumber(5), INF)))
-            .toEqual(1.5707963267948966);
-        expect(angle(new ComplexNumber(new SmallExactNumber(-5), INF)))
-            .toEqual(1.5707963267948966);
+        expect(angle(fromString("+inf.0+5i")))
+            .toEqual(fromString(`0.0`));
+        expect(angle(fromString("+inf.0-5i")))
+            .toEqual(fromString(`-0.0`));
+        expect(angle(fromString("5+inf.0i")))
+            .toEqual(fromString(`1.5707963267948966`));
+        expect(angle(fromString("-5+inf.0i")))
+            .toEqual(fromString(`1.5707963267948966`));
 
-        expect(angle(new ComplexNumber(NEG_INF,
-                                       new InexactNumber(5))))
-            .toEqual(Math.PI);
-        expect(angle(new ComplexNumber(NEG_INF,
-                                       new InexactNumber(-5))))
-            .toEqual(-Math.PI);
-        expect(angle(new ComplexNumber(new InexactNumber(5), NEG_INF)))
-            .toEqual(-1.5707963267948966);
-        expect(angle(new ComplexNumber(new InexactNumber(-5), NEG_INF)))
-            .toEqual(-1.5707963267948966);
+        expect(angle(fromString("-inf.0+5i")))
+            .toEqual(fromString(`${Math.PI}`));
+        expect(angle(fromString("-inf.0-5.0i")))
+            .toEqual(fromString(`${-Math.PI}`));
+        expect(angle(fromString("5.0-inf.0i")))
+            .toEqual(fromString(`-1.5707963267948966`));
+        expect(angle(fromString("-5.0-inf.0i")))
+            .toEqual(fromString(`-1.5707963267948966`));
     });
-    test('bigints', () => {
-        expect(angle(new BigExactNumber(5n)))
-            .toEqual(EXACT_ZERO);
+    test('exact numbers', () => {
+        expect(angle(fromString(`5`)))
+            .toEqual(fromString("0"));
     });
 });
 
 describe('realPart', () => {
     test('racket docs examples', () => {
-        expect(realPart(new ComplexNumber(new SmallExactNumber(3),
-                                          new SmallExactNumber(4))))
-            .toEqual(new SmallExactNumber(3));
-        expect(realPart(new ComplexNumber(new InexactNumber(3), new InexactNumber(4))))
-            .toEqual(3);
-        expect(realPart(new InexactNumber(5)))
-            .toEqual(5);
+        expect(realPart(fromString(`3+4i`)))
+            .toEqual(fromString(`3`));
+        expect(realPart(fromString(`3.0+4.0i`)))
+            .toEqual(fromString(`3.0`));
+        expect(realPart(fromString(`5.0`)))
+            .toEqual(fromString(`5.0`));
     });
     test('infinity', () => {
-        expect(realPart(new ComplexNumber(INF, NEG_INF)))
-            .toEqual(Infinity);
-        expect(realPart(new ComplexNumber(NEG_INF, NEG_INF)))
-            .toEqual(-Infinity);
-        expect(realPart(new ComplexNumber(NEG_INF, INF)))
-            .toEqual(-Infinity);
+        expect(realPart(fromString("+inf.0-inf.0i")))
+            .toEqual(fromString("+inf.0"));
+        expect(realPart(fromString("-inf.0-inf.0i")))
+            .toEqual(fromString("-inf.0"));
+        expect(realPart(fromString("-inf.0+inf.0i")))
+            .toEqual(fromString("-inf.0"));
     });
-    test('bigints', () => {
-        expect(realPart(new BigExactNumber(5n)))
-            .toEqual(new BigExactNumber(5n));
+    test('exact numbers', () => {
+        expect(realPart(fromString(`5`)))
+            .toEqual(fromString(`5`));
     });
 });
 
 describe('imaginaryPart', () => {
     test('racket docs examples', () => {
-        expect(imaginaryPart(new ComplexNumber(new SmallExactNumber(3),
-                                               new SmallExactNumber(4))))
-            .toEqual(new SmallExactNumber(4));
-        expect(imaginaryPart(new ComplexNumber(new InexactNumber(3), new InexactNumber(4))))
-            .toEqual(4);
-        expect(imaginaryPart(new InexactNumber(5)))
-            .toEqual(EXACT_ZERO);
-        expect(imaginaryPart(new ComplexNumber(new InexactNumber(5), INEXACT_ZERO)))
-            .toEqual(0);
+        expect(imaginaryPart(fromString(`3+4i`)))
+            .toEqual(fromString(`4`));
+        expect(imaginaryPart(fromString(`3.0+4.0i`)))
+            .toEqual(fromString(`4.0`));
+        expect(imaginaryPart(fromString(`5.0`)))
+            .toEqual(fromString("0"));
+        expect(imaginaryPart(fromString("5.0+0.0i")))
+            .toEqual(fromString(`0.0`));
     });
     test('infinity', () => {
-        expect(imaginaryPart(new ComplexNumber(INF, NEG_INF)))
-            .toEqual(-Infinity);
-        expect(imaginaryPart(new ComplexNumber(NEG_INF, INF)))
-            .toEqual(Infinity);
+        expect(imaginaryPart(fromString("+inf.0-inf.0i")))
+            .toEqual(fromString("-inf.0"));
+        expect(imaginaryPart(fromString("-inf.0+inf.0i")))
+            .toEqual(fromString("+inf.0"));
     });
-    test('bigints', () => {
-        expect(imaginaryPart(new BigExactNumber(BigInt(5), BigInt(1))))
-            .toEqual(EXACT_ZERO);
+    test('exact numbers', () => {
+        expect(imaginaryPart(fromString(`5`)))
+            .toEqual(fromString("0"));
     });
 });
 
 describe('conjugate', () => {
     test('racket docs examples', () => {
-        expect(conjugate(EXACT_ONE))
-            .toEqual(EXACT_ONE);
-        expect(conjugate(new ComplexNumber(new SmallExactNumber(3),
-                                           new SmallExactNumber(4))))
-            .toEqual(new ComplexNumber(new SmallExactNumber(3),
-                                       new SmallExactNumber(-4)));
-        expect(conjugate(new ComplexNumber(new InexactNumber(3),
-                                           new InexactNumber(4))))
-            .toEqual(new ComplexNumber(new InexactNumber(3),
-                                       new InexactNumber(-4)));
+        expect(conjugate(fromString("1")))
+            .toEqual(fromString("1"));
+        expect(conjugate(fromString(`3+4i`)))
+            .toEqual(fromString(`3-4i`));
+        expect(conjugate(fromString(`3.0+4.0i`)))
+            .toEqual(fromString(`3.0-4.0i`));
     });
     test('infinity', () => {
-        expect(conjugate(new ComplexNumber(INF, NEG_INF)))
-            .toEqual(new ComplexNumber(INF, INF));
-        expect(conjugate(new ComplexNumber(INF, INF)))
-            .toEqual(new ComplexNumber(INF, NEG_INF));
+        expect(conjugate(fromString("+inf.0-inf.0i")))
+            .toEqual(fromString("+inf.0+inf.0i"));
+        expect(conjugate(fromString("+inf.0+inf.0i")))
+            .toEqual(fromString("+inf.0-inf.0i"));
     });
-    test('bigints', () => {
-        expect(conjugate(new BigExactNumber(5n)))
-            .toEqual(new BigExactNumber(5n));
+    test('exact numbers', () => {
+        expect(conjugate(fromString(`5`)))
+            .toEqual(fromString(`5`));
     });
 });

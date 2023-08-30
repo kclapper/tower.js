@@ -1,16 +1,5 @@
 import {
-    InexactNumber,
-    SmallExactNumber,
-    ComplexNumber,
-    NEG_ONE,
-    ZERO,
-    ONE,
-    TWO,
-    I,
-    INF,
-    NEG_INF,
-    NAN,
-    INEXACT_ZERO,
+    fromString,
     isNumber,
     isComplex,
     isReal,
@@ -39,34 +28,32 @@ describe('isNumber()', () => {
         expect(isNumber("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isNumber(10))
-            .toBe(true);
-        expect(isNumber(10.5))
-            .toBe(true);
-        expect(isNumber(Infinity))
-            .toBe(true);
-        expect(isNumber(NaN))
+    test('Integer', () => {
+        expect(isNumber(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Integer', () => {
-        expect(isNumber(ZERO))
+    test('Rational', () => {
+        expect(isNumber(fromString(`1.5`)))
+            .toBe(true);
+        expect(isNumber(fromString(`10.0`)))
+            .toBe(true);
+        expect(isNumber(fromString(`10.5`)))
             .toBe(true);
     });
-    test('Boxed number: Rational', () => {
-        expect(isNumber(new InexactNumber(1.5)))
+    test('Real', () => {
+        expect(isNumber(fromString("+inf.0")))
+            .toBe(true);
+        expect(isNumber(fromString("+inf.0")))
             .toBe(true);
     });
-    test('Boxed number: Real', () => {
-        expect(isNumber(INF))
+    test('+nan.0', () => {
+        expect(isNumber(fromString("+nan.0")))
+            .toBe(true);
+        expect(isNumber(fromString("+nan.0")))
             .toBe(true);
     });
-    test('Boxed number: NAN', () => {
-        expect(isNumber(NAN))
-            .toBe(true);
-    });
-    test('Boxed number: Complex', () => {
-        expect(isNumber(I))
+    test('Complex', () => {
+        expect(isNumber(fromString("0+1i")))
             .toBe(true);
     });
 });
@@ -76,34 +63,24 @@ describe('isComplex()', () => {
         expect(isComplex("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isComplex(10))
-            .toBe(true);
-        expect(isComplex(10.5))
-            .toBe(true);
-        expect(isComplex(Infinity))
-            .toBe(true);
-        expect(isComplex(NaN))
+    test('Integer', () => {
+        expect(isComplex(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Integer', () => {
-        expect(isComplex(ZERO))
+    test('Rational', () => {
+        expect(isComplex(fromString(`1.5`)))
             .toBe(true);
     });
-    test('Boxed number: Rational', () => {
-        expect(isComplex(new InexactNumber(1.5)))
+    test('Real', () => {
+        expect(isComplex(fromString("+inf.0")))
             .toBe(true);
     });
-    test('Boxed number: Real', () => {
-        expect(isComplex(INF))
+    test('+nan.0', () => {
+        expect(isComplex(fromString("+nan.0")))
             .toBe(true);
     });
-    test('Boxed number: NAN', () => {
-        expect(isComplex(NAN))
-            .toBe(true);
-    });
-    test('Boxed number: Complex', () => {
-        expect(isComplex(I))
+    test('Complex', () => {
+        expect(isComplex(fromString("0+1i")))
             .toBe(true);
     });
 });
@@ -113,34 +90,24 @@ describe('isReal()', () => {
         expect(isReal("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isReal(10))
-            .toBe(true);
-        expect(isReal(10.5))
-            .toBe(true);
-        expect(isReal(Infinity))
-            .toBe(true);
-        expect(isReal(NaN))
+    test('Integer', () => {
+        expect(isReal(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Integer', () => {
-        expect(isReal(ZERO))
+    test('Rational', () => {
+        expect(isReal(fromString(`1.5`)))
             .toBe(true);
     });
-    test('Boxed number: Rational', () => {
-        expect(isReal(new InexactNumber(1.5)))
+    test('Real', () => {
+        expect(isReal(fromString("+inf.0")))
             .toBe(true);
     });
-    test('Boxed number: Real', () => {
-        expect(isReal(INF))
+    test('+nan.0', () => {
+        expect(isReal(fromString("+nan.0")))
             .toBe(true);
     });
-    test('Boxed number: NAN', () => {
-        expect(isReal(NAN))
-            .toBe(true);
-    });
-    test('Boxed number: Complex', () => {
-        expect(isReal(I))
+    test('Complex', () => {
+        expect(isReal(fromString("0+1i")))
             .toBe(false);
     });
 });
@@ -150,34 +117,24 @@ describe('isRational()', () => {
         expect(isRational("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isRational(10))
-            .toBe(true);
-        expect(isRational(10.5))
-            .toBe(true);
-        expect(isRational(Infinity))
-            .toBe(false);
-        expect(isRational(NaN))
-            .toBe(false);
-    });
-    test('Boxed number: Integer', () => {
-        expect(isRational(ZERO))
+    test('Integer', () => {
+        expect(isRational(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Rational', () => {
-        expect(isRational(new InexactNumber(1.5)))
+    test('Rational', () => {
+        expect(isRational(fromString(`1.5`)))
             .toBe(true);
     });
-    test('Boxed number: Real', () => {
-        expect(isRational(INF))
+    test('Real', () => {
+        expect(isRational(fromString("+inf.0")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isRational(NAN))
+    test('+nan.0', () => {
+        expect(isRational(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Complex', () => {
-        expect(isRational(I))
+    test('Complex', () => {
+        expect(isRational(fromString("0+1i")))
             .toBe(false);
     });
 });
@@ -187,34 +144,24 @@ describe('isInteger()', () => {
         expect(isInteger("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isInteger(10))
-            .toBe(true);
-        expect(isInteger(10.5))
-            .toBe(false);
-        expect(isInteger(Infinity))
-            .toBe(false);
-        expect(isInteger(NaN))
-            .toBe(false);
-    });
-    test('Boxed number: Integer', () => {
-        expect(isInteger(ZERO))
+    test('Integer', () => {
+        expect(isInteger(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Rational', () => {
-        expect(isInteger(new InexactNumber(1.5)))
+    test('Rational', () => {
+        expect(isInteger(fromString(`1.5`)))
             .toBe(false);
     });
-    test('Boxed number: Real', () => {
-        expect(isInteger(INF))
+    test('Real', () => {
+        expect(isInteger(fromString("+inf.0")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isInteger(NAN))
+    test('+nan.0', () => {
+        expect(isInteger(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Complex', () => {
-        expect(isInteger(I))
+    test('Complex', () => {
+        expect(isInteger(fromString("0+1i")))
             .toBe(false);
     });
 });
@@ -224,38 +171,28 @@ describe('isExactInteger()', () => {
         expect(isExactInteger("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isExactInteger(10))
-            .toBe(false);
-        expect(isExactInteger(10.5))
-            .toBe(false);
-        expect(isExactInteger(Infinity))
-            .toBe(false);
-        expect(isExactInteger(NaN))
-            .toBe(false);
-    });
-    test('Boxed number: Exact Integer', () => {
-        expect(isExactInteger(ZERO))
+    test('Exact Integer', () => {
+        expect(isExactInteger(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isExactInteger(new InexactNumber(0)))
+    test('Inexact Integer', () => {
+        expect(isExactInteger(fromString(`0.0`)))
             .toBe(false);
     });
-    test('Boxed number: Rational', () => {
-        expect(isExactInteger(new InexactNumber(1.5)))
+    test('Rational', () => {
+        expect(isExactInteger(fromString(`1.5`)))
             .toBe(false);
     });
-    test('Boxed number: Real', () => {
-        expect(isExactInteger(INF))
+    test('Real', () => {
+        expect(isExactInteger(fromString("+inf.0")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isExactInteger(NAN))
+    test('+nan.0', () => {
+        expect(isExactInteger(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Complex', () => {
-        expect(isExactInteger(I))
+    test('Complex', () => {
+        expect(isExactInteger(fromString("0+1i")))
             .toBe(false);
     });
 });
@@ -265,46 +202,40 @@ describe('isExactNonNegativeInteger()', () => {
         expect(isExactNonNegativeInteger("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isExactNonNegativeInteger(10))
-            .toBe(false);
-        expect(isExactNonNegativeInteger(10.5))
-            .toBe(false);
-        expect(isExactNonNegativeInteger(Infinity))
-            .toBe(false);
-        expect(isExactNonNegativeInteger(NaN))
-            .toBe(false);
-    });
-    test('Boxed number: Exact Positive Integer', () => {
-        expect(isExactNonNegativeInteger(ONE))
+    test('Exact Positive Integer', () => {
+        expect(isExactNonNegativeInteger(fromString("1")))
             .toBe(true);
     });
-    test('Boxed number: Exact Zero', () => {
-        expect(isExactNonNegativeInteger(ZERO))
+    test('Exact Zero', () => {
+        expect(isExactNonNegativeInteger(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Negative Exact Integer', () => {
-        expect(isExactNonNegativeInteger(NEG_ONE))
+    test('Negative Exact Integer', () => {
+        expect(isExactNonNegativeInteger(fromString("-1")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isExactNonNegativeInteger(new InexactNumber(0)))
+    test('Inexact Integer', () => {
+        expect(isExactNonNegativeInteger(fromString(`0.0`)))
             .toBe(false);
     });
-    test('Boxed number: Rational', () => {
-        expect(isExactNonNegativeInteger(new InexactNumber(1.5)))
+    test('Rational', () => {
+        expect(isExactNonNegativeInteger(fromString(`1.5`)))
+            .toBe(false);
+        expect(isExactNonNegativeInteger(fromString(`10.0`)))
+            .toBe(false);
+        expect(isExactNonNegativeInteger(fromString(`10.5`)))
             .toBe(false);
     });
-    test('Boxed number: Real', () => {
-        expect(isExactNonNegativeInteger(INF))
+    test('Real', () => {
+        expect(isExactNonNegativeInteger(fromString("+inf.0")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isExactNonNegativeInteger(NAN))
+    test('+nan.0', () => {
+        expect(isExactNonNegativeInteger(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Complex', () => {
-        expect(isExactNonNegativeInteger(I))
+    test('Complex', () => {
+        expect(isExactNonNegativeInteger(fromString("0+1i")))
             .toBe(false);
     });
 });
@@ -314,46 +245,36 @@ describe('isExactPositiveInteger()', () => {
         expect(isExactPositiveInteger("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isExactPositiveInteger(10))
-            .toBe(false);
-        expect(isExactPositiveInteger(10.5))
-            .toBe(false);
-        expect(isExactPositiveInteger(Infinity))
-            .toBe(false);
-        expect(isExactPositiveInteger(NaN))
-            .toBe(false);
-    });
-    test('Boxed number: Exact Positive Integer', () => {
-        expect(isExactPositiveInteger(ONE))
+    test('Exact Positive Integer', () => {
+        expect(isExactPositiveInteger(fromString("1")))
             .toBe(true);
     });
-    test('Boxed number: Exact Zero', () => {
-        expect(isExactPositiveInteger(ZERO))
+    test('Exact Zero', () => {
+        expect(isExactPositiveInteger(fromString("0")))
             .toBe(false);
     });
-    test('Boxed number: Negative Exact Integer', () => {
-        expect(isExactPositiveInteger(NEG_ONE))
+    test('Negative Exact Integer', () => {
+        expect(isExactPositiveInteger(fromString("-1")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isExactPositiveInteger(new InexactNumber(0)))
+    test('Inexact Integer', () => {
+        expect(isExactPositiveInteger(fromString(`0.0`)))
             .toBe(false);
     });
-    test('Boxed number: Rational', () => {
-        expect(isExactPositiveInteger(new InexactNumber(1.5)))
+    test('Rational', () => {
+        expect(isExactPositiveInteger(fromString(`1.5`)))
             .toBe(false);
     });
-    test('Boxed number: Real', () => {
-        expect(isExactPositiveInteger(INF))
+    test('Real', () => {
+        expect(isExactPositiveInteger(fromString("+inf.0")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isExactPositiveInteger(NAN))
+    test('+nan.0', () => {
+        expect(isExactPositiveInteger(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Complex', () => {
-        expect(isExactPositiveInteger(I))
+    test('Complex', () => {
+        expect(isExactPositiveInteger(fromString("0+1i")))
             .toBe(false);
     });
 });
@@ -363,42 +284,32 @@ describe('isInexactReal()', () => {
         expect(isInexactReal("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isInexactReal(10))
-            .toBe(true);
-        expect(isInexactReal(10.5))
-            .toBe(true);
-        expect(isInexactReal(Infinity))
-            .toBe(true);
-        expect(isInexactReal(NaN))
-            .toBe(true);
-    });
-    test('Boxed number: Exact Integer', () => {
-        expect(isInexactReal(ONE))
+    test('Exact Integer', () => {
+        expect(isInexactReal(fromString("1")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isInexactReal(new InexactNumber(0)))
+    test('Inexact Integer', () => {
+        expect(isInexactReal(fromString(`0.0`)))
             .toBe(true);
     });
-    test('Boxed number: Inexact Rational', () => {
-        expect(isInexactReal(new InexactNumber(1.5)))
+    test('Inexact Rational', () => {
+        expect(isInexactReal(fromString(`1.5`)))
             .toBe(true);
     });
-    test('Boxed number: Inexact Real', () => {
-        expect(isInexactReal(INF))
+    test('Inexact Real', () => {
+        expect(isInexactReal(fromString("+inf.0")))
             .toBe(true);
     });
-    test('Boxed number: Exact Real', () => {
-        expect(isInexactReal(new SmallExactNumber(3, 2)))
+    test('Exact Real', () => {
+        expect(isInexactReal(fromString(`3/2`)))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isInexactReal(NAN))
+    test('+nan.0', () => {
+        expect(isInexactReal(fromString("+nan.0")))
             .toBe(true);
     });
-    test('Boxed number: Complex', () => {
-        expect(isInexactReal(I))
+    test('Complex', () => {
+        expect(isInexactReal(fromString("0+1i")))
             .toBe(false);
     });
 });
@@ -408,475 +319,457 @@ describe('isFlonum()', () => {
         expect(isFlonum("Not a number"))
             .toBe(false);
     });
-    test('Unboxed', () => {
-        expect(isFlonum(10))
-            .toBe(true);
-        expect(isFlonum(10.5))
-            .toBe(true);
-        expect(isFlonum(Infinity))
-            .toBe(true);
-        expect(isFlonum(NaN))
+    test('Exact Integer', () => {
+        expect(isFlonum(fromString("1")))
+            .toBe(false);
+    });
+    test('Inexact Integer', () => {
+        expect(isFlonum(fromString("0.0")))
             .toBe(true);
     });
-    test('Boxed number: Exact Integer', () => {
-        expect(isFlonum(ONE))
+    test('Inexact Rational', () => {
+        expect(isFlonum(fromString("1.5")))
+            .toBe(true);
+    });
+    test('Inexact Real', () => {
+        expect(isFlonum(fromString("+inf.0")))
+            .toBe(true);
+    });
+    test('Exact Real', () => {
+        expect(isFlonum(fromString("3/2")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isFlonum(new InexactNumber(0)))
-            .toBe(false);
+    test('+nan.0', () => {
+        expect(isFlonum(fromString("+nan.0")))
+            .toBe(true);
     });
-    test('Boxed number: Inexact Rational', () => {
-        expect(isFlonum(new InexactNumber(1.5)))
-            .toBe(false);
-    });
-    test('Boxed number: Inexact Real', () => {
-        expect(isFlonum(INF))
-            .toBe(false);
-    });
-    test('Boxed number: Exact Real', () => {
-        expect(isFlonum(new SmallExactNumber(3, 2)))
-            .toBe(false);
-    });
-    test('Boxed number: NAN', () => {
-        expect(isFlonum(NAN))
-            .toBe(false);
-    });
-    test('Boxed number: Complex', () => {
-        expect(isFlonum(I))
+    test('Complex', () => {
+        expect(isFlonum(fromString("0+1i")))
             .toBe(false);
     });
 });
 
 describe('isZero()', () => {
-    test('Unboxed', () => {
-        expect(isZero(0))
-            .toBe(true);
-        expect(isZero(10))
-            .toBe(false);
-        expect(isZero(10.5))
-            .toBe(false);
-        expect(isZero(Infinity))
-            .toBe(false);
-        expect(isZero(NaN))
+    test('Exact Integer', () => {
+        expect(isZero(fromString("1")))
             .toBe(false);
     });
-    test('Boxed number: Exact Integer', () => {
-        expect(isZero(ONE))
-            .toBe(false);
-    });
-    test('Boxed number: Exact Zero', () => {
-        expect(isZero(ZERO))
+    test('Exact Zero', () => {
+        expect(isZero(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isZero(new InexactNumber(1)))
+    test('Inexact Integer', () => {
+        expect(isZero(fromString("1.0")))
             .toBe(false);
-    });
-    test('Boxed number: Inexact Zero', () => {
-        expect(isZero(new InexactNumber(0)))
+        expect(isZero(fromString("0.0")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Rational', () => {
-        expect(isZero(new InexactNumber(1.5)))
+    test('Inexact Zero', () => {
+        expect(isZero(fromString("0.0")))
+            .toBe(true);
+    });
+    test('Inexact Rational', () => {
+        expect(isZero(fromString("1.5")))
+            .toBe(false);
+        expect(isZero(fromString("10.0")))
+            .toBe(false);
+        expect(isZero(fromString("10.5")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Real', () => {
-        expect(isZero(INF))
+    test('Inexact Real', () => {
+        expect(isZero(fromString("+inf.0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Real', () => {
-        expect(isZero(new SmallExactNumber(3, 2)))
+    test('Exact Real', () => {
+        expect(isZero(fromString("3/2")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isZero(NAN))
+    test('+nan.0', () => {
+        expect(isZero(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Complex', () => {
-        expect(isZero(I))
+    test('Complex', () => {
+        expect(isZero(fromString("0+1i")))
             .toBe(false);
     });
-    test('Boxed number: Complex Zero', () => {
-        expect(isZero(new ComplexNumber(INEXACT_ZERO, INEXACT_ZERO)))
+    test('Complex Zero', () => {
+        expect(isZero(fromString("0.0+0.0i")))
             .toBe(true);
     });
 });
 
 describe('isPositive()', () => {
-    test('Unboxed', () => {
-        expect(isPositive(0))
+    test('Numbers', () => {
+        expect(isPositive(fromString("0.0")))
             .toBe(false);
-        expect(isPositive(1))
+        expect(isPositive(fromString("1.0")))
             .toBe(true);
-        expect(isPositive(-1))
+        expect(isPositive(fromString("-1.0")))
             .toBe(false);
-        expect(isPositive(10))
+        expect(isPositive(fromString("10.0")))
             .toBe(true);
-        expect(isPositive(10.5))
+        expect(isPositive(fromString("10.5")))
             .toBe(true);
-        expect(isPositive(Infinity))
+        expect(isPositive(fromString("+inf.0")))
             .toBe(true);
-        expect(isPositive(-Infinity))
+        expect(isPositive(fromString("-inf.0")))
             .toBe(false);
-        expect(isPositive(NaN))
+        expect(isPositive(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Positive Integer', () => {
-        expect(isPositive(ONE))
-            .toBe(true);
-    });
-    test('Boxed number: Exact Zero', () => {
-        expect(isPositive(ZERO))
-            .toBe(false);
-    });
-    test('Boxed number: Exact Negative Integer', () => {
-        expect(isPositive(NEG_ONE))
-            .toBe(false);
-    });
-    test('Boxed number: Inexact Positive Integer', () => {
-        expect(isPositive(new InexactNumber(1)))
+    test('Exact Positive Integer', () => {
+        expect(isPositive(fromString("1")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Zero', () => {
-        expect(isPositive(new InexactNumber(0)))
+    test('Exact Zero', () => {
+        expect(isPositive(fromString("0")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Negative Integer', () => {
-        expect(isPositive(new InexactNumber(-1)))
+    test('Exact Negative Integer', () => {
+        expect(isPositive(fromString("-1")))
             .toBe(false);
     });
-    test('Boxed number: Positive Infinity', () => {
-        expect(isPositive(INF))
+    test('Inexact Positive Integer', () => {
+        expect(isPositive(fromString("1.0")))
             .toBe(true);
     });
-    test('Boxed number: Negative Infinity', () => {
-        expect(isPositive(NEG_INF))
+    test('Inexact Zero', () => {
+        expect(isPositive(fromString("0.0")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isPositive(NAN))
+    test('Inexact Negative Integer', () => {
+        expect(isPositive(fromString("-1.0")))
+            .toBe(false);
+    });
+    test('Positive +inf.0', () => {
+        expect(isPositive(fromString("+inf.0")))
+            .toBe(true);
+    });
+    test('Negative +inf.0', () => {
+        expect(isPositive(fromString("-inf.0")))
+            .toBe(false);
+    });
+    test('+nan.0', () => {
+        expect(isPositive(fromString("+nan.0")))
             .toBe(false);
     });
 });
 
 describe('isNegative()', () => {
-    test('Unboxed', () => {
-        expect(isNegative(0))
+    test('Numbers', () => {
+        expect(isNegative(fromString("0.0")))
             .toBe(false);
-        expect(isNegative(1))
+        expect(isNegative(fromString("1.0")))
             .toBe(false);
-        expect(isNegative(-1))
+        expect(isNegative(fromString("-1.0")))
             .toBe(true);
-        expect(isNegative(10))
+        expect(isNegative(fromString("10.0")))
             .toBe(false);
-        expect(isNegative(10.5))
+        expect(isNegative(fromString("10.5")))
             .toBe(false);
-        expect(isNegative(Infinity))
+        expect(isNegative(fromString("+inf.0")))
             .toBe(false);
-        expect(isNegative(-Infinity))
+        expect(isNegative(fromString("-inf.0")))
             .toBe(true);
-        expect(isNegative(NaN))
+        expect(isNegative(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Positive Integer', () => {
-        expect(isNegative(ONE))
+    test('Exact Positive Integer', () => {
+        expect(isNegative(fromString("1")))
             .toBe(false);
     });
-    test('Boxed number: Exact Zero', () => {
-        expect(isNegative(ZERO))
+    test('Exact Zero', () => {
+        expect(isNegative(fromString("0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Negative Integer', () => {
-        expect(isNegative(NEG_ONE))
-            .toBe(true);
-    });
-    test('Boxed number: Inexact Positive Integer', () => {
-        expect(isNegative(new InexactNumber(1)))
-            .toBe(false);
-    });
-    test('Boxed number: Inexact Zero', () => {
-        expect(isNegative(new InexactNumber(0)))
-            .toBe(false);
-    });
-    test('Boxed number: Inexact Negative Integer', () => {
-        expect(isNegative(new InexactNumber(-1)))
+    test('Exact Negative Integer', () => {
+        expect(isNegative(fromString("-1")))
             .toBe(true);
     });
-    test('Boxed number: Positive Infinity', () => {
-        expect(isNegative(INF))
+    test('Inexact Positive Integer', () => {
+        expect(isNegative(fromString("1.0")))
             .toBe(false);
     });
-    test('Boxed number: Negative Infinity', () => {
-        expect(isNegative(NEG_INF))
+    test('Inexact Zero', () => {
+        expect(isNegative(fromString("0.0")))
+            .toBe(false);
+    });
+    test('Inexact Negative Integer', () => {
+        expect(isNegative(fromString("-1.0")))
             .toBe(true);
     });
-    test('Boxed number: NAN', () => {
-        expect(isNegative(NAN))
+    test('+inf.0', () => {
+        expect(isNegative(fromString("+inf.0")))
+            .toBe(false);
+    });
+    test('-inf.0', () => {
+        expect(isNegative(fromString("-inf.0")))
+            .toBe(true);
+    });
+    test('+nan.0', () => {
+        expect(isNegative(fromString("+nan.0")))
             .toBe(false);
     });
 });
 
 describe('isEven()', () => {
-    test('Unboxed', () => {
-        expect(isEven(0))
+    test('Numbers', () => {
+        expect(isEven(fromString("0.0")))
             .toBe(true);
-        expect(isEven(1))
+        expect(isEven(fromString("1.0")))
             .toBe(false);
-        expect(isEven(-1))
+        expect(isEven(fromString("-1.0")))
             .toBe(false);
-        expect(isEven(10))
+        expect(isEven(fromString("10.0")))
             .toBe(true);
-        expect(() => isEven(Infinity))
+        expect(() => isEven(fromString("+inf.0")))
             .toThrow();
-        expect(() => isEven(-Infinity))
+        expect(() => isEven(fromString("-inf.0")))
             .toThrow();
-        expect(() => isEven(NaN))
+        expect(() => isEven(fromString("+nan.0")))
             .toThrow();
-        expect(isEven(2))
+        expect(isEven(fromString(`2.0`)))
             .toBe(true);
-        expect(isEven(3))
+        expect(isEven(fromString(`3.0`)))
             .toBe(false);
     });
-    test('Boxed number: Exact Even Integer', () => {
-        expect(isEven(TWO))
+    test('Exact Even Integer', () => {
+        expect(isEven(fromString("2")))
             .toBe(true);
     });
-    test('Boxed number: Exact Zero', () => {
-        expect(isEven(ZERO))
+    test('Exact Zero', () => {
+        expect(isEven(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Exact Odd Integer', () => {
-        expect(isEven(ONE))
+    test('Exact Odd Integer', () => {
+        expect(isEven(fromString("1")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Even Integer', () => {
-        expect(isEven(new InexactNumber(2)))
+    test('Inexact Even Integer', () => {
+        expect(isEven(fromString(`2.0`)))
             .toBe(true);
     });
-    test('Boxed number: Inexact Zero', () => {
-        expect(isEven(new InexactNumber(0)))
+    test('Inexact Zero', () => {
+        expect(isEven(fromString("0.0")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Odd Integer', () => {
-        expect(isEven(new InexactNumber(3)))
+    test('Inexact Odd Integer', () => {
+        expect(isEven(fromString(`3.0`)))
             .toBe(false);
     });
 });
 
 describe('isOdd()', () => {
-    test('Unboxed', () => {
-        expect(isOdd(0))
+    test('Numbers', () => {
+        expect(isOdd(fromString("0.0")))
             .toBe(false);
-        expect(isOdd(1))
+        expect(isOdd(fromString("1.0")))
             .toBe(true);
-        expect(isOdd(-1))
+        expect(isOdd(fromString("-1.0")))
             .toBe(true);
-        expect(isOdd(10))
+        expect(isOdd(fromString("10.0")))
             .toBe(false);
-        expect(() => isOdd(Infinity))
+        expect(() => isOdd(fromString("+inf.0")))
             .toThrow();
-        expect(() => isOdd(-Infinity))
+        expect(() => isOdd(fromString("-inf.0")))
             .toThrow();
-        expect(() => isOdd(NaN))
+        expect(() => isOdd(fromString("+nan.0")))
             .toThrow();
-        expect(isOdd(2))
+        expect(isOdd(fromString("2.0")))
             .toBe(false);
-        expect(isOdd(3))
+        expect(isOdd(fromString("3.0")))
             .toBe(true);
     });
-    test('Boxed number: Exact Even Integer', () => {
-        expect(isOdd(TWO))
+    test('Exact Even Integer', () => {
+        expect(isOdd(fromString("2")))
             .toBe(false);
     });
-    test('Boxed number: Exact Zero', () => {
-        expect(isOdd(ZERO))
+    test('Exact Zero', () => {
+        expect(isOdd(fromString("0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Odd Integer', () => {
-        expect(isOdd(ONE))
+    test('Exact Odd Integer', () => {
+        expect(isOdd(fromString("1")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Even Integer', () => {
-        expect(isOdd(new InexactNumber(2)))
+    test('Inexact Even Integer', () => {
+        expect(isOdd(fromString("2.0")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Zero', () => {
-        expect(isOdd(new InexactNumber(0)))
+    test('Inexact Zero', () => {
+        expect(isOdd(fromString("0.0")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Odd Integer', () => {
-        expect(isOdd(new InexactNumber(3)))
+    test('Inexact Odd Integer', () => {
+        expect(isOdd(fromString("3.0")))
             .toBe(true);
     });
 });
 
 describe('isExact()', () => {
-    test('Unboxed', () => {
-        expect(isExact(0))
+    test('Numbers', () => {
+        expect(isExact(fromString("0.0")))
             .toBe(false);
-        expect(isExact(1))
+        expect(isExact(fromString("1.0")))
             .toBe(false);
-        expect(isExact(-1))
+        expect(isExact(fromString("-1.0")))
             .toBe(false);
-        expect(isExact(10))
+        expect(isExact(fromString("10.0")))
             .toBe(false);
-        expect(isExact(10.5))
+        expect(isExact(fromString("10.5")))
             .toBe(false);
-        expect(isExact(Infinity))
+        expect(isExact(fromString("+inf.0")))
             .toBe(false);
-        expect(isExact(-Infinity))
+        expect(isExact(fromString("-inf.0")))
             .toBe(false);
-        expect(isExact(NaN))
+        expect(isExact(fromString("+nan.0")))
             .toBe(false);
-        expect(isExact(2))
+        expect(isExact(fromString("2.0")))
             .toBe(false);
-        expect(isExact(3))
+        expect(isExact(fromString("3.0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Integer', () => {
-        expect(isExact(ZERO))
+    test('Exact Integer', () => {
+        expect(isExact(fromString("0")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isExact(new InexactNumber(0)))
+    test('Inexact Integer', () => {
+        expect(isExact(fromString("0.0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Rational', () => {
-        expect(isExact(new SmallExactNumber(3, 2)))
+    test('Exact Rational', () => {
+        expect(isExact(fromString("3/2")))
             .toBe(true);
     });
-    test('Boxed number: Inexact Rational', () => {
-        expect(isExact(new InexactNumber(1.5)))
+    test('Inexact Rational', () => {
+        expect(isExact(fromString("1.5")))
             .toBe(false);
     });
-    test('Boxed number: Infinity', () => {
-        expect(isExact(INF))
+    test('+inf.0', () => {
+        expect(isExact(fromString("+inf.0")))
             .toBe(false);
     });
-    test('Boxed number: NAN', () => {
-        expect(isExact(NAN))
+    test('+nan.0', () => {
+        expect(isExact(fromString("+nan.0")))
             .toBe(false);
     });
-    test('Boxed number: Exact Complex', () => {
-        expect(isExact(I))
+    test('Exact Complex', () => {
+        expect(isExact(fromString("0+1i")))
             .toBe(true);
     });
-    test('Boxed number: Inxact Complex', () => {
-        expect(isExact(new ComplexNumber(new InexactNumber(0), new InexactNumber(1))))
+    test('Inxact Complex', () => {
+        expect(isExact(fromString("0.0+1.0i")))
             .toBe(false);
     });
 });
 
 describe('isInexact()', () => {
-    test('Unboxed', () => {
-        expect(isInexact(0))
+    test('Numbers', () => {
+        expect(isInexact(fromString("0.0")))
             .toBe(true);
-        expect(isInexact(1))
+        expect(isInexact(fromString("1.0")))
             .toBe(true);
-        expect(isInexact(-1))
+        expect(isInexact(fromString("-1.0")))
             .toBe(true);
-        expect(isInexact(10))
+        expect(isInexact(fromString("10.0")))
             .toBe(true);
-        expect(isInexact(10.5))
+        expect(isInexact(fromString("10.5")))
             .toBe(true);
-        expect(isInexact(Infinity))
+        expect(isInexact(fromString("+inf.0")))
             .toBe(true);
-        expect(isInexact(-Infinity))
+        expect(isInexact(fromString("-inf.0")))
             .toBe(true);
-        expect(isInexact(NaN))
+        expect(isInexact(fromString("+nan.0")))
             .toBe(true);
-        expect(isInexact(2))
+        expect(isInexact(fromString("2.0")))
             .toBe(true);
-        expect(isInexact(3))
+        expect(isInexact(fromString("3.0")))
             .toBe(true);
     });
-    test('Boxed number: Exact Integer', () => {
-        expect(isInexact(ZERO))
+    test('Exact Integer', () => {
+        expect(isInexact(fromString("0")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Integer', () => {
-        expect(isInexact(new InexactNumber(0)))
+    test('Inexact Integer', () => {
+        expect(isInexact(fromString("0.0")))
             .toBe(true);
     });
-    test('Boxed number: Exact Rational', () => {
-        expect(isInexact(new SmallExactNumber(3, 2)))
+    test('Exact Rational', () => {
+        expect(isInexact(fromString("3/2")))
             .toBe(false);
     });
-    test('Boxed number: Inexact Rational', () => {
-        expect(isInexact(new InexactNumber(1.5)))
+    test('Inexact Rational', () => {
+        expect(isInexact(fromString("1.5")))
             .toBe(true);
     });
-    test('Boxed number: Infinity', () => {
-        expect(isInexact(INF))
+    test('+inf.0', () => {
+        expect(isInexact(fromString("+inf.0")))
             .toBe(true);
     });
-    test('Boxed number: NAN', () => {
-        expect(isInexact(NAN))
+    test('+nan.0', () => {
+        expect(isInexact(fromString("+nan.0")))
             .toBe(true);
     });
-    test('Boxed number: Exact Complex', () => {
-        expect(isInexact(I))
+    test('Exact Complex', () => {
+        expect(isInexact(fromString("0+1i")))
             .toBe(false);
     });
-    test('Boxed number: Inxact Complex', () => {
-        expect(isInexact(new ComplexNumber(new InexactNumber(0), new InexactNumber(1))))
+    test('Inxact Complex', () => {
+        expect(isInexact(fromString("0.0+1.0i")))
             .toBe(true);
     });
 });
 
 test('isRacketNumber', () => {
-    expect(isRacketNumber(5))
+    expect(isRacketNumber(fromString(`5.0`)))
         .toBe(true);
-    expect(isRacketNumber(ONE))
+    expect(isRacketNumber(fromString("1")))
         .toBe(true);
     expect(isRacketNumber(Math.PI))
         .toBe(true);
-    expect(isRacketNumber(5n as unknown as number))
-        .toBe(false);
+    expect(isRacketNumber(5n))
+        .toBe(true);
 });
 
 test('isFinite', () => {
-    expect(isFinite(5))
+    expect(isFinite(fromString(`5.0`)))
         .toBe(true);
-    expect(isFinite(Infinity))
+    expect(isFinite(fromString("+inf.0")))
         .toBe(false);
-    expect(isFinite(INF))
+    expect(isFinite(fromString("+inf.0")))
         .toBe(false);
-    expect(isFinite(NAN))
+    expect(isFinite(fromString("+nan.0")))
         .toBe(false);
-    expect(isFinite(ONE))
+    expect(isFinite(fromString("1")))
         .toBe(true);
 });
 
 test('isNaN', () => {
-    expect(isNaN(5))
+    expect(isNaN(fromString(`5.0`)))
         .toBe(false);
-    expect(isNaN(Infinity))
+    expect(isNaN(fromString("+inf.0")))
         .toBe(false);
-    expect(isNaN(INF))
+    expect(isNaN(fromString("+inf.0")))
         .toBe(false);
-    expect(isNaN(NAN))
+    expect(isNaN(fromString("+nan.0")))
         .toBe(true);
-    expect(isNaN(ONE))
+    expect(isNaN(fromString("1")))
         .toBe(false);
 });
 
 test('isNegativeZero', () => {
-    expect(isNegativeZero(5))
+    expect(isNegativeZero(fromString("5.0")))
         .toBe(false);
-    expect(isNegativeZero(Infinity))
+    expect(isNegativeZero(fromString("+inf.0")))
         .toBe(false);
-    expect(isNegativeZero(INF))
+    expect(isNegativeZero(fromString("+inf.0")))
         .toBe(false);
-    expect(isNegativeZero(NAN))
+    expect(isNegativeZero(fromString("+nan.0")))
         .toBe(false);
-    expect(isNegativeZero(ONE))
+    expect(isNegativeZero(fromString("1")))
         .toBe(false);
-    expect(isNegativeZero(-0))
+    expect(isNegativeZero(fromString(`-0.0`)))
         .toBe(true)
-    expect(isNegativeZero(new InexactNumber(-0)))
+    expect(isNegativeZero(fromString(`-0.0`)))
         .toBe(true)
-    expect(isNegativeZero(new ComplexNumber(new InexactNumber(-0))))
-        .toBe(true);
 });

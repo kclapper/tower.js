@@ -23,7 +23,6 @@ import {
     isExact,
     isInexact,
     exactToInexact,
-    isComplex,
 } from './index';
 import {
     normalize
@@ -61,11 +60,11 @@ export function makePolar(r: RacketNumber, theta: RacketNumber): RacketNumber {
 }
 
 export function magnitude(n: RacketNumber): RacketNumber {
-    if (isComplex(n)) {
+    if (!isReal(n)) {
         n = n as BoxedNumber;
 
         if (containsInfinity(n)) {
-            return INF;
+            return Infinity;
         }
 
         return normalize(n.magnitude());
@@ -88,7 +87,7 @@ export function angle(n: RacketNumber): RacketNumber {
     }
 
     if (isReal(n)) {
-        return isPositive(n) ? EXACT_ZERO : Math.PI;
+        return isPositive(n) ? 0n : Math.PI;
     }
 
     // We know n is a complex number if it's not real
@@ -131,7 +130,7 @@ export function realPart(n: RacketNumber): RacketNumber {
 
 export function imaginaryPart(n: RacketNumber): RacketNumber {
     if (isReal(n)) {
-        return EXACT_ZERO;
+        return 0n;
     }
     return normalize((n as ComplexNumber).imaginaryPart());
 }

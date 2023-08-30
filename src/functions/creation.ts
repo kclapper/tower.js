@@ -1,10 +1,11 @@
 import {
     RacketNumber,
+    Fixnum,
+    Flonum,
     JSInteger,
     BoxedNumber,
     SmallExactNumber,
     BigExactNumber,
-    ComplexNumber,
     InexactNumber,
     ExactNumber,
     isSafeInteger,
@@ -17,14 +18,30 @@ export function boxNumber(n: RacketNumber): BoxedNumber {
     if (typeof n === 'number') {
         return new InexactNumber(n);
     }
+
+    if (typeof n === 'bigint') {
+        if (isSafeInteger(n)) {
+            return new SmallExactNumber(Number(n));
+        }
+        return new BigExactNumber(n);
+    }
+
     return n;
 }
 
-const fractionRegexp = new RegExp("^([+-]?\\d+)/(\\d+)$");
-const complexRegexp = new RegExp("^([+-]?[\\d\\w/\\.]*)([+-])([\\d\\w/\\.]*)i$");
-const integerRegexp = new RegExp("^[+-]?\\d+$");
-const decimalRegexp = new RegExp("^([+-]?\\d*)\\.(\\d*)$");
-const scientificRegexp = new RegExp("^([+-]?\\d*\\.?\\d*)[Ee](\\+?\\d+)$");
+const fractionRegexp = /^([+-]?\d+)\/(\d+)$/;
+const integerRegexp = /^[+-]?\d+$/;
+const decimalRegexp = /^([+-]?\d*)\.(\d*)$/;
+const scientificRegexp = /^([+-]?\d*\.?\d*)[Ee]([+-]?\d+)$/;
+
+const nanRegexp = /^([+-]nan.[0f])$/;
+const infRegexp = /^([+-]inf.[0f])$/;
+
+const unsignedNumber = "((\\d+\\/\\d+)|(\\d*(\\.\\d*)?([Ee][+-]?\\d+)?))";
+const nonFinite = `(([+-]inf.[0f])|([+-]nan.[0f]))`;
+const realPart = `([+-]?${unsignedNumber})|${nonFinite}`;
+const imagPart = `([+-]${unsignedNumber})|${nonFinite}`;
+const complexRegexp = new RegExp(`^(${realPart})(${imagPart})i$`);
 
 export function fromString(str: string): RacketNumber {
     str = str.toString(); // For backwards compatibility with js-numbers
@@ -37,27 +54,23 @@ export function fromString(str: string): RacketNumber {
     const matchComplex = str.match(complexRegexp);
     if (matchComplex) {
         const realStr = matchComplex[1] || "0";
-        const imagStr = matchComplex[2] + (matchComplex[3] || "1");
+        const imagStr = matchComplex[11];
 
-        if (complexIsExact(matchComplex)) {
-            const real = parseExact(realStr);
-            const imag = parseExact(imagStr);
-            return makeRectangular(real, imag);
-        }
-
-        const real = new InexactNumber(Number(realStr));
-        const imag = new InexactNumber(Number(imagStr));
-
-        return new ComplexNumber(real, imag);
+        return makeRectangular(fromString(realStr), fromString(imagStr));
     }
 
-    if (str === '+nan.0' || str === '-nan.0' || str === '+nan.f' || str === '-nan.f' ) {
+    const nanMatch = str.match(nanRegexp);
+    if (nanMatch) {
         return NaN;
-    } else if (str === '+inf.0' || str === '+inf.f') {
-        return Infinity;
-    } else if (str === '-inf.0' || str === '-inf.f') {
-        return -Infinity;
-    } else if (str === '-0.0') {
+    }
+
+    const infMatch = str.match(infRegexp);
+    if (infMatch) {
+        const sign = infMatch[0].charAt(0);
+        return sign === '+' ? Infinity : -Infinity;
+    }
+
+    if (str === '-0.0') {
         return -0;
     }
 
@@ -72,12 +85,6 @@ export function fromString(str: string): RacketNumber {
     throw new Error(`Unable to parse a RacketNumber from ${str}`);
 }
 
-function complexIsExact(matched: string[]): boolean {
-    const real = matched[1].match(integerRegexp) !== null || matched[1].match(fractionRegexp) !== null;
-    const imag = matched[3].match(integerRegexp) !== null || matched[3].match(fractionRegexp) !== null;
-    return real && imag;
-}
-
 function parseExact(str: string): RacketNumber {
     const matchInteger = str.match(integerRegexp);
     if (matchInteger) {
@@ -86,35 +93,33 @@ function parseExact(str: string): RacketNumber {
     return parseFraction(str);
 }
 
-function parseInteger(str: string): ExactNumber {
-    const n = Number(str);
-    if (Number.isSafeInteger(n)) {
-        return new SmallExactNumber(n);
-    }
-    return new BigExactNumber(BigInt(str));
+function parseInteger(str: string): Fixnum {
+    return BigInt(str);
+    //const n = Number(str);
+    //if (Number.isSafeInteger(n)) {
+    //    return new SmallExactNumber(n);
+    //}
+    //return new BigExactNumber(BigInt(str));
 }
 
-function parseFraction(str: string): RacketNumber {
+function parseFraction(str: string): ExactNumber {
     const match = str.match(fractionRegexp);
     if (match) {
-        let num = parseInteger(match[1]).num;
-        let den = parseInteger(match[2]).num;
+        const num = parseInteger(match[1]);
+        const den = parseInteger(match[2]);
 
-        if (typeof num === 'bigint' || typeof den === 'bigint') {
-            num = BigInt(num);
-            den = BigInt(den);
-
-            return new BigExactNumber(num, den);
+        if (isSafeInteger(num) && isSafeInteger(den)) {
+            return new SmallExactNumber(Number(num), Number(den));
         }
 
-        return new SmallExactNumber(num, den);
+        return new BigExactNumber(num, den);
     }
     throw new Error(`Fraction not found in ${str}`);
 }
 
 // For backwards compatibility with js-numbers.
-export function makeFloat(n: number): RacketNumber {
-    return new InexactNumber(n);
+export function makeFloat(n: number): Flonum {
+    return n;
 }
 export function makeExact(n: JSInteger, d?: JSInteger): RacketNumber {
     if (d !== undefined) {

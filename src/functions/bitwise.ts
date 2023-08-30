@@ -1,88 +1,53 @@
 import {
     RacketNumber,
-    RealNumber,
-    ComplexNumber,
-    SmallExactNumber,
-    BigExactNumber,
 } from '../numbers/index';
 import {
     isExactInteger,
 } from './index';
 import {
-    isSafeInteger
+    normalize
 } from './util';
 
 export function bitwiseOr(...operands: RacketNumber[]): RacketNumber {
-    for (const param of operands) {
-        if (!isExactInteger(param)) {
+    let acc = 0n;
+    for (let i = 0; i < operands.length; i++) {
+        const n = operands[i];
+
+        if (!isExactInteger(n)) {
             throw new TypeError("bitwise operators only defined for exact integers.");
         }
-    }
 
-    let acc = 0n;
-    for (let param of operands) {
-        if (param instanceof ComplexNumber) {
-            param = param.toReal();
-        }
-        param = param as RealNumber;
-        acc |= BigInt(param.num);
+        acc |= normalize(n) as bigint;
     }
-
-    if (isSafeInteger(acc)) {
-        return new SmallExactNumber(Number(acc));
-    }
-
-    return new BigExactNumber(acc);
+    return acc;
 }
 
 export function bitwiseXor(...operands: RacketNumber[]): RacketNumber {
-    for (const param of operands) {
-        if (!isExactInteger(param)) {
+    let acc = 0n;
+    for (let i = 0; i < operands.length; i++) {
+        const n = operands[i];
+
+        if (!isExactInteger(n)) {
             throw new TypeError("bitwise operators only defined for exact integers.");
         }
+
+        acc ^= normalize(n) as bigint;
     }
-
-    let acc = 0n;
-    for (let param of operands) {
-        if (param instanceof ComplexNumber) {
-            param = param.toReal();
-        }
-
-        param = param as RealNumber;
-
-        acc ^= BigInt(param.num);
-    }
-
-    if (isSafeInteger(acc)) {
-        return new SmallExactNumber(Number(acc));
-    }
-
-    return new BigExactNumber(acc);
+    return acc;
 }
 
 export function bitwiseAnd(...operands: RacketNumber[]): RacketNumber {
-    for (const param of operands) {
-        if (!isExactInteger(param)) {
+    let acc = -1n;
+    for (let i = 0; i < operands.length; i++) {
+        const n = operands[i];
+
+        if (!isExactInteger(n)) {
             throw new TypeError("bitwise operators only defined for exact integers.");
         }
+
+        acc &= normalize(n) as bigint;
     }
-
-    let acc = -1n;
-    for (let param of operands) {
-        if (param instanceof ComplexNumber) {
-            param = param.toReal();
-        }
-
-        param = param as RealNumber;
-
-        acc &= BigInt(param.num);
-    }
-
-    if (isSafeInteger(acc)) {
-        return new SmallExactNumber(Number(acc));
-    }
-
-    return new BigExactNumber(acc);
+    return acc;
 }
 
 export function bitwiseNot(n: RacketNumber): RacketNumber {
@@ -90,19 +55,8 @@ export function bitwiseNot(n: RacketNumber): RacketNumber {
         throw new TypeError("bitwise operators only defined for exact integers.");
     }
 
-    if (n instanceof ComplexNumber) {
-        n = n.toReal();
-    }
-
-    n = n as RealNumber;
-
-    const result = ~BigInt(n.num);
-
-    if (isSafeInteger(result)) {
-        return new SmallExactNumber(Number(result));
-    }
-
-    return new BigExactNumber(result);
+    n = normalize(n) as bigint;
+    return ~n;
 }
 
 export function arithmeticShift(n: RacketNumber, m: RacketNumber): RacketNumber {
@@ -110,29 +64,12 @@ export function arithmeticShift(n: RacketNumber, m: RacketNumber): RacketNumber 
         throw new TypeError("bitwise operators only defined for integers.");
     }
 
-    if (n instanceof ComplexNumber) {
-        n = n.toReal();
-    }
-    n = n as RealNumber;
+    n = normalize(n) as bigint;
+    m = normalize(m) as bigint;
 
-    if (m instanceof ComplexNumber) {
-        m = m.toReal();
-    }
-    m = m as RealNumber;
-
-    let result;
-    const x = BigInt(n.num);
-    const y = BigInt(m.num);
-
-    if (y < 0n) {
-        result = x >> -y;
+    if (m < 0n) {
+        return n >> -m;
     } else {
-        result = x << y;
+        return n << m;
     }
-
-    if (isSafeInteger(result)) {
-        return new SmallExactNumber(Number(result));
-    }
-
-    return new BigExactNumber(result);
 }
