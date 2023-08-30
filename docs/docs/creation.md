@@ -17,17 +17,19 @@ Boxed numbers can also be created using their respective classes.
 
 ```typescript 
 import { 
-    SmallExactNumber,
     InexactNumber,
+    SmallExactNumber,
+    BigExactNumber,
     ComplexNumber
 } from 'tower.js';
 
-const exactFive = new SmallExactNumber(5);
-const exactHalf = new SmallExactNumber(1, 2);
-
 const inexactFive = new InexactNumber(5);
 
-const exactComplex = new ComplexNumber(exactFive, half); // 5+1/2i
+const exactFive = new SmallExactNumber(5);
+const exactHalf = new SmallExactNumber(1, 2);
+const alsoExactHalf = new BigExactNumber(1n, 2n);
+
+const exactComplex = new ComplexNumber(exactFive, exactHalf); // 5+1/2i
 ```
 
 ### InexactNumber

@@ -23,13 +23,13 @@ npm install tower.js@latest
 Tower.js functions operate on `RacketNumber`s.
 
 ```typescript
-type RacketNumber = number | BoxedNumber;
+type RacketNumber = number | bigint | BoxedNumber;
 ```
 
-It can either be an unboxed Javascript `number` or one of the boxed number classes. Boxed numbers are
+It can either be a `number`, `bigint`, or one of the number classes. Boxed numbers are
 either `InexactNumber`, `SmallExactNumber`, `BigExactNumber`, or `ComplexNumber`. The difference
 between `SmallExactNumber` and `BigExactNumber` is that `BigExactNumber` can be arbitrarily large and takes `bigint`s in 
-the constructor. Tower.js will use unboxed `number`s where possible
+the constructor. Tower.js will use unboxed `number`s or `bigint`s where possible
 to increase performance.
 
 ## Usage 
@@ -40,16 +40,17 @@ available functions and links to their corresponding Racket doc, go to the
 
 ```typescript
 import { 
-    ONE,
+    fromString,
     add,
     subtract,
     multiply,
     divide
 } from 'tower.js';
 
+const one = fromString("1");
 
-const two = add(ONE, ONE);
-const three = add(ONE, ONE, ONE);
+const two = add(one, one);
+const three = add(one, one, one);
 
 const one = subtract(three, two);
 
