@@ -1,6 +1,6 @@
 {
   "name": "tower.js",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "A JS implementation of the Racket numeric tower.",
   "type": "module",
   "files": [
@@ -8,13 +8,13 @@
   ],
   "types": "dist/tower.d.ts",
   "exports": {
-    ".": "./dist/tower.mjs",
+    ".": "./dist/tower.js",
     "./package.json": "./package.json"
   },
   "scripts": {
     "lint": "eslint --max-warnings=0 .",
     "test": "jest",
-    "build": "webpack"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",

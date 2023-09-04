@@ -1,3 +1,8 @@
+// This library used to distribute a bundled javascript file.
+// It now distributes a collection of ES2020 modules. This
+// was the webpack config for the bundle and is kept for
+// posterity.
+
 const path = require('path');
 
 module.exports = {
